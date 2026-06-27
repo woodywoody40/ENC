@@ -23,12 +23,13 @@ const handleRes = async <T>(res: Response): Promise<T | undefined> => {
 
 export const apiClient = {
   get: <T = any>(path: string): Promise<T> =>
-    fetch(`${BASE}${path}`).then((res) => handleRes<T>(res)) as Promise<T>,
+    fetch(`${BASE}${path}`, { credentials: 'include' }).then((res) => handleRes<T>(res)) as Promise<T>,
 
   post: <T = any>(path: string, body?: any): Promise<T> =>
     fetch(`${BASE}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: body === undefined ? undefined : JSON.stringify(body),
     }).then((res) => handleRes<T>(res)) as Promise<T>,
 
@@ -36,11 +37,12 @@ export const apiClient = {
     fetch(`${BASE}${path}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: body === undefined ? undefined : JSON.stringify(body),
     }).then((res) => handleRes<T>(res)) as Promise<T>,
 
   del: <T = any>(path: string): Promise<T> =>
-    fetch(`${BASE}${path}`, { method: 'DELETE' }).then((res) => handleRes<T>(res)) as Promise<T>,
+    fetch(`${BASE}${path}`, { method: 'DELETE', credentials: 'include' }).then((res) => handleRes<T>(res)) as Promise<T>,
 };
 
 // ===== 便利方法 =====
@@ -74,7 +76,7 @@ export const AuthAPI = {
 export async function uploadFile(file: File): Promise<string> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`${BASE}/upload`, { method: 'POST', body: form });
+  const res = await fetch(`${BASE}/upload`, { method: 'POST', body: form, credentials: 'include' });
   if (!res.ok) {
     let msg = `上傳失敗: HTTP ${res.status}`;
     try { const j = (await res.json()) as Record<string, unknown>; msg = (j.error as string) || msg; } catch { /* ignore */ }
