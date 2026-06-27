@@ -1,0 +1,33 @@
+{
+  // Cloudflare Pages 專案（dash 建立後已內建 build 設定）
+  // 本檔案主要用於 `wrangler pages dev` 本地開發綁定 D1 / R2
+  "name": "woody-portfolio",
+  "compatibility_date": "2024-01-01",
+
+  // Pages Functions 用的設定
+  "pages_build_output_dir": "dist",
+
+  // ===== D1 資料庫綁定 =====
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "woody-portfolio",
+      "database_id": "75f0cf14-d7b2-4181-a424-98e24d8018ef"
+    }
+  ],
+
+  // ===== R2 物件儲存綁定 =====
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "woody-media"
+    }
+  ],
+
+  // ===== Cloudflare Access 設定（取代 Supabase Auth）=====
+  // Cloudflare Zero Trust 建立 Application 後取得 AUD
+  "vars": {
+    "CF_ACCESS_TEAM": "your-team.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "REPLACE_WITH_APPLICATION_AUD"
+  }
+}

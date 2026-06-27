@@ -1,0 +1,206 @@
+
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, Variants } from 'framer-motion';
+import { ArrowRight, ChevronDown, Cpu, Shield, Database, Loader2, Sparkles, Terminal } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ConfigAPI } from '../services/apiClient';
+
+const HomePage: React.FC = () => {
+  const { scrollYProgress } = useScroll();
+  const [configs, setConfigs] = useState<any>({});
+  const [loading, setLoading] = useState(true);
+  
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.2], [1, 0.98]);
+
+  useEffect(() => {
+    const fetchConfigs = async () => {
+      try {
+        const data = await ConfigAPI.all();
+        setConfigs(data);
+      } catch (err) {
+        console.error('Fetch configs error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConfigs();
+  }, []);
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0, filter: 'blur(5px)' },
+    visible: { 
+      y: 0, 
+      opacity: 1, 
+      filter: 'blur(0px)',
+      transition: { 
+        duration: 0.8, 
+        ease: [0.16, 1, 0.3, 1] 
+      } 
+    }
+  };
+
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent">
+      <Loader2 className="animate-spin text-white/10 mb-4" size={48} strokeWidth={1} />
+      <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Init Node...</span>
+    </div>
+  );
+
+  return (
+    <div className="relative overflow-x-hidden">
+      <motion.section 
+        style={{ opacity, scale }}
+        className="min-h-[100dvh] flex flex-col items-center justify-center px-6 sm:px-12 text-center pt-[100px] pb-[80px] relative"
+      >
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="w-full max-w-7xl mx-auto flex flex-col items-center"
+        >
+          <motion.div
+            variants={itemVariants}
+            className="inline-flex items-center gap-2.5 px-4 py-2 glass-panel dark:border-white/10 border-black/5 dark:bg-white/5 bg-white/40 mb-10 shadow-xl"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse" />
+            <span className="dark:text-white text-morandi-slate text-[9px] font-black tracking-[0.3em] uppercase">SYSTEM ONLINE : WOODY_CORE_V4</span>
+          </motion.div>
+          
+          <motion.h1 
+            variants={itemVariants}
+            className="text-[3rem] sm:text-[4.5rem] md:text-[7rem] lg:text-[9rem] xl:text-[11rem] font-[900] mb-8 tracking-tighter leading-[0.9] uppercase heading-gradient text-glow w-full selection:bg-white selection:text-black whitespace-pre-line break-words"
+          >
+            {configs.hero_title || "Woody Wu\nInfrastructure"}
+          </motion.h1>
+          
+          <motion.div variants={itemVariants} className="relative mb-12 sm:mb-16 px-4 max-w-4xl">
+            <p className="dark:text-slate-300 text-morandi-stone text-lg sm:text-xl md:text-2xl lg:text-3xl leading-snug font-extralight tracking-tight">
+              {configs.hero_intro || "深耕教育體系網際網路，構築絕對穩定的數位動脈。"}
+            </p>
+          </motion.div>
+          
+          <motion.div 
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 w-full max-w-[280px] sm:max-w-none"
+          >
+            <Link 
+              to="/portfolio" 
+              className="group dark:bg-white dark:text-black bg-morandi-slate text-white px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-2xl"
+            >
+              部署實績 <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+            </Link>
+            <Link 
+              to="/blog"
+              className="glass-panel px-10 py-5 dark:text-white text-morandi-slate font-black uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 dark:border-white/10 border-black/5 hover:bg-white/5 transition-all rounded-2xl"
+            >
+              技術週記 <Terminal size={18} />
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        <motion.div 
+          animate={{ y: [0, 8, 0] }} 
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="absolute bottom-8 flex flex-col items-center gap-2 opacity-20 cursor-pointer hover:opacity-100 transition-opacity"
+          onClick={() => window.scrollTo({ top: window.innerHeight * 0.9, behavior: 'smooth' })}
+        >
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] dark:text-white">Scroll</span>
+          <ChevronDown size={14} />
+        </motion.div>
+      </motion.section>
+
+      <section className="py-20 sm:py-32 px-6 sm:px-12 max-w-7xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
+          <StatsCard 
+            icon={<Cpu size={24} />} 
+            title="Operational Scale" 
+            desc={configs.stat_vm || "151+ Nodes"} 
+            detail="Active Virtual Clusters"
+          />
+          <StatsCard 
+            icon={<Database size={24} />} 
+            title="Storage Core" 
+            desc="HPE 2050" 
+            detail="Multipath iSCSI SAN"
+          />
+          <StatsCard 
+            icon={<Shield size={24} />} 
+            title="Defense Mesh" 
+            desc={configs.stat_defense || "Forti HA"} 
+            detail="Network Edge Security"
+          />
+        </div>
+      </section>
+
+      <section className="py-20 sm:py-40 px-6 sm:px-12 max-w-6xl mx-auto text-center relative">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8 }}
+          className="glass-panel p-10 sm:p-24 relative overflow-hidden group dark:bg-white/[0.02] bg-white/40 shadow-3xl border-white/5 rounded-[3rem]"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          
+          <Sparkles className="mx-auto mb-10 text-emerald-500 opacity-40" size={36} />
+          
+          <h3 className="text-3xl sm:text-5xl md:text-6xl font-black dark:text-white text-morandi-slate mb-10 tracking-tighter uppercase leading-[1.1] text-glow selection:bg-white selection:text-black">
+            技術是手段<br /><span className="opacity-30 italic">穩定是信仰</span>
+          </h3>
+          
+          <p className="dark:text-slate-400 text-morandi-stone text-lg sm:text-xl md:text-2xl leading-relaxed max-w-2xl mx-auto mb-12 font-light tracking-tight">
+            每一行指令的敲擊，都是對極致穩定的莊嚴承諾。
+          </p>
+          
+          <div className="flex items-center justify-center gap-10 sm:gap-20">
+            <div className="flex flex-col items-center">
+               <span className="text-3xl sm:text-5xl font-black dark:text-white text-morandi-slate">{configs.stat_uptime || "99.9%"}</span>
+               <span className="text-[9px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-morandi-stone mt-4">Uptime</span>
+            </div>
+            <div className="w-px h-16 dark:bg-white/10 bg-black/5" />
+            <div className="flex flex-col items-center">
+               <span className="text-3xl sm:text-5xl font-black dark:text-white text-morandi-slate">24/7</span>
+               <span className="text-[9px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-morandi-stone mt-4">Response</span>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+      
+      <footer className="py-20 text-center border-t border-white/5 opacity-30">
+        <p className="text-[10px] font-black uppercase tracking-[0.8em] dark:text-white/40 text-morandi-stone px-4">
+          Infrastructure Managed with Precision © 2025
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+const StatsCard: React.FC<{ icon: React.ReactNode, title: string, desc: string, detail: string, className?: string }> = ({ icon, title, desc, detail, className = "" }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    className={`glass-panel p-10 sm:p-16 flex flex-col items-center text-center group dark:bg-white/[0.03] bg-white/60 transition-all duration-500 shadow-xl rounded-[3rem] ${className}`}
+  >
+    <div className="w-16 h-16 rounded-[1.8rem] dark:bg-white dark:text-black bg-morandi-slate text-white flex items-center justify-center mb-10 group-hover:rotate-[360deg] transition-all duration-700 shadow-xl">
+      {icon}
+    </div>
+    <h4 className="dark:text-slate-500 text-morandi-stone font-black text-[10px] uppercase tracking-[0.5em] mb-8">{title}</h4>
+    <p className="dark:text-white text-morandi-slate text-4xl sm:text-6xl font-[900] mb-4 tracking-tighter group-hover:text-glow transition-all">{desc}</p>
+    <p className="dark:text-slate-400 text-morandi-stone/60 text-[10px] font-bold uppercase tracking-[0.3em]">{detail}</p>
+  </motion.div>
+);
+
+export default HomePage;
