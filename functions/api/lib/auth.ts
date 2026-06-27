@@ -12,13 +12,13 @@ function extractTokens(request: Request): string[] {
   const headerToken = request.headers.get('Cf-Access-Jwt-Assertion');
   if (headerToken) tokens.push(headerToken);
 
-  // Access 登入後會在 domain 寫入 CF_AU cookie（JWT 內容），所有 fetch 皆會攜帶
+  // Access 登入後會在 domain 寫入 CF_Authorization cookie（JWT 內容），所有 fetch 皆會攜帶
   const cookieHeader = request.headers.get('Cookie') || '';
-  const cfAu = cookieHeader
+  const cfAuthCookie = cookieHeader
     .split(';')
     .map((c) => c.trim())
-    .find((c) => c.startsWith('CF_AU='));
-  if (cfAu) tokens.push(decodeURIComponent(cfAu.slice('CF_AU='.length)));
+    .find((c) => c.startsWith('CF_Authorization='));
+  if (cfAuthCookie) tokens.push(decodeURIComponent(cfAuthCookie.slice('CF_Authorization='.length)));
 
   return tokens;
 }
