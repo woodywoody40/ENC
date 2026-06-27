@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-morandi-sage: #B8C6C3;
+  --color-morandi-rose: #D8B4A6;
+  --color-morandi-slate: #2D3436;
+  --color-morandi-stone: #434C5E;
+  --color-morandi-cream: #E9E5E3;
+}
+
+:root {
+  --bg-base: #0a0b10;
+  --text-main: #ffffff;
+  --text-sub: #cbd5e1;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --accent-primary: #ffffff;
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.light {
+  --bg-base: #E9E5E3;
+  --text-main: #2D3436;
+  --text-sub: #434C5E;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(45, 52, 54, 0.2);
+  --accent-primary: #2D3436;
+  --card-shadow: 0 10px 40px -10px rgba(45, 52, 54, 0.15);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-base);
+  color: var(--text-sub);
+  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+  overflow-x: hidden;
+  /* 禁止手機端下拉重新整理（若需要 PWA 感更強烈） */
+  overscroll-behavior-y: contain;
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: 40px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.heading-gradient {
+  background: linear-gradient(180deg, var(--text-main) 0%, var(--text-sub) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-glow {
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
+}
+html.light .text-glow {
+  text-shadow: 0 0 20px rgba(45, 52, 54, 0.1);
+}

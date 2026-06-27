@@ -27,7 +27,7 @@
   // ===== Cloudflare Access 設定（取代 Supabase Auth）=====
   // Cloudflare Zero Trust 建立 Application 後取得 AUD
   "vars": {
-    "CF_ACCESS_TEAM": "your-team.cloudflareaccess.com",
-    "CF_ACCESS_AUD": "REPLACE_WITH_APPLICATION_AUD"
+    "CF_ACCESS_TEAM": "woody-admin.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "4c5f3b8bb0117d056bf2eed1255704babb788cd93de2ad67d88c84428ecab775"
   }
 }

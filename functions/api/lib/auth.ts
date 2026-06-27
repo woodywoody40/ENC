@@ -24,6 +24,12 @@ function extractTokens(request: Request): string[] {
 }
 
 export async function verifyAccess(request: Request, env: Env): Promise<{ email: string } | null> {
+  // 本地開發環境 (localhost) 自動放行，免去 CF Access 驗證
+  const url = new URL(request.url);
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname.endsWith('.localhost')) {
+    return { email: 'local-dev@example.com' };
+  }
+
   const tokens = extractTokens(request);
   if (tokens.length === 0) return null;
 
@@ -49,7 +55,7 @@ export async function verifyAccess(request: Request, env: Env): Promise<{ email:
       lastError = err;
     }
   }
-  console.error('Access verify failed:', lastError?.message);
+  console.error('Access verify failed:', lastError?.message, lastError?.code);
   return null;
 }
 
