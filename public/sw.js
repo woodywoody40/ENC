@@ -34,6 +34,8 @@ self.addEventListener('fetch', (event) => {
   // 只處理 GET 請求，且不處理 API 請求
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('/api/')) return;
+  // 忽略非 HTTP(S) 的請求 (例如 chrome-extension://)
+  if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
