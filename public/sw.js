@@ -36,6 +36,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('/api/')) return;
   // 忽略非 HTTP(S) 的請求 (例如 chrome-extension://)
   if (!event.request.url.startsWith('http')) return;
+  // 讓 /admin 的請求直接走網路，讓 Cloudflare Access 可以攔截
+  if (event.request.url.includes('/admin')) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
