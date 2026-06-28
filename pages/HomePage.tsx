@@ -53,8 +53,8 @@ const HomePage: React.FC = () => {
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent">
-      <Loader2 className="animate-spin text-white/10 mb-4" size={48} strokeWidth={1} />
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Init Node...</span>
+      <Loader2 className="animate-spin dark:text-white/10 text-morandi-slate/20 mb-4" size={48} strokeWidth={1} />
+      <span className="text-[10px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-morandi-stone/40">Init Node...</span>
     </div>
   );
 
@@ -116,7 +116,7 @@ const HomePage: React.FC = () => {
           className="absolute bottom-8 flex flex-col items-center gap-2 opacity-20 cursor-pointer hover:opacity-100 transition-opacity"
           onClick={() => window.scrollTo({ top: window.innerHeight * 0.9, behavior: 'smooth' })}
         >
-          <span className="text-[9px] font-black uppercase tracking-[0.4em] dark:text-white">Scroll</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] dark:text-white text-morandi-slate">Scroll</span>
           <ChevronDown size={14} />
         </motion.div>
       </motion.section>
@@ -150,7 +150,7 @@ const HomePage: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.8 }}
-          className="glass-panel p-8 sm:p-16 md:p-24 relative overflow-hidden group dark:bg-white/[0.02] bg-white/40 shadow-3xl border-white/5 rounded-3xl sm:rounded-[3rem]"
+          className="glass-panel p-8 sm:p-16 md:p-24 relative overflow-hidden group dark:bg-white/[0.02] bg-white/40 shadow-3xl dark:border-white/5 border-black/5 rounded-3xl sm:rounded-[3rem]"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
@@ -178,7 +178,7 @@ const HomePage: React.FC = () => {
         </motion.div>
       </section>
 
-      <footer className="py-20 text-center border-t border-white/5 opacity-30">
+      <footer className="py-20 text-center border-t dark:border-white/5 border-black/5 opacity-30">
         <p className="text-[10px] font-black uppercase tracking-[0.6em] sm:tracking-[0.8em] dark:text-white/40 text-morandi-stone px-4">
           Infrastructure Managed with Precision | 2025
         </p>

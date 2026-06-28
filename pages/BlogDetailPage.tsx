@@ -3,18 +3,54 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { BlogAPI } from '../services/apiClient';
 import { BLOG_POSTS } from '../constants';
-import { ArrowLeft, Terminal, Copy, Loader2, Calendar, Hash, Check, Cpu, Eye, Share2, Zap, Info } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  Cpu,
+  Eye,
+  Info,
+  Loader2,
+  Share2,
+  Terminal,
+} from 'lucide-react';
+
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+const renderInline = (text: string) =>
+  text.split(/(\*\*.*?\*\*)/g).map((part, idx) => (
+    part.startsWith('**') && part.endsWith('**')
+      ? <strong key={idx} className="font-semibold text-zinc-950 dark:text-white">{part.slice(2, -2)}</strong>
+      : <React.Fragment key={idx}>{part}</React.Fragment>
+  ));
+
+const getReadingMinutes = (content = '') => {
+  const clean = content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>-]/g, '');
+  const chineseChars = clean.match(/[\u4e00-\u9fff]/g)?.length || 0;
+  const latinWords = clean.match(/[A-Za-z0-9_]+/g)?.length || 0;
+  const units = chineseChars + latinWords;
+  return Math.max(3, Math.ceil(units / 420));
+};
 
 const BlogDetailPage: React.FC = () => {
   const { id } = useParams();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [copiedBlock, setCopiedBlock] = useState<number | null>(null);
+  const [shared, setShared] = useState(false);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
+    stiffness: 110,
+    damping: 28,
     restDelta: 0.001,
   });
 
@@ -45,13 +81,13 @@ const BlogDetailPage: React.FC = () => {
 
     return lines.map((line, idx) => {
       const tokens = [
-        { regex: /#.*$|\/\/.*$/g, cls: 'text-slate-500 italic' },
-        { regex: /(['"])(?:(?!\1|\\).|\\.)*\1/g, cls: 'text-emerald-400' },
-        { regex: /\b(sudo|apt|install|systemctl|mkdir|cd|rm|cp|mv|echo|grep|sed|awk|export|ssh|ip|ls|cat|nano|vi|vim|docker|git|pve|qm|pct|ufw|netplan|nmcli|ping|curl|wget)\b/g, cls: 'text-rose-400 font-bold' },
-        { regex: /\b-{1,2}[a-zA-Z0-9-]+\b/g, cls: 'text-slate-400' },
-        { regex: /\$[A-Z_a-z0-9]+/g, cls: 'text-sky-400' },
-        { regex: /\b\d+\b/g, cls: 'text-amber-400' },
-        { regex: /[|&><!]+/g, cls: 'text-white/30' },
+        { regex: /#.*$|\/\/.*$/g, cls: 'text-zinc-500 italic' },
+        { regex: /(['"])(?:(?!\1|\\).|\\.)*\1/g, cls: 'text-emerald-300' },
+        { regex: /\b(sudo|apt|install|systemctl|mkdir|cd|rm|cp|mv|echo|grep|sed|awk|export|ssh|ip|ls|cat|nano|vi|vim|docker|git|pve|qm|pct|ufw|netplan|nmcli|ping|curl|wget)\b/g, cls: 'text-rose-300 font-semibold' },
+        { regex: /\b-{1,2}[a-zA-Z0-9-]+\b/g, cls: 'text-zinc-300' },
+        { regex: /\$[A-Z_a-z0-9]+/g, cls: 'text-sky-300' },
+        { regex: /\b\d+\b/g, cls: 'text-amber-300' },
+        { regex: /[|&><!]+/g, cls: 'text-white/35' },
       ];
 
       let pos = 0;
@@ -71,255 +107,293 @@ const BlogDetailPage: React.FC = () => {
         }
 
         if (nearestMatch && nearestMatch.index === pos) {
-          highlighted += `<span class="${nearestToken.cls}">${nearestMatch[0]}</span>`;
+          highlighted += `<span class="${nearestToken.cls}">${escapeHtml(nearestMatch[0])}</span>`;
           pos += nearestMatch[0].length;
         } else {
-          highlighted += line[pos];
+          highlighted += escapeHtml(line[pos]);
           pos++;
         }
       }
 
       return (
-        <div key={idx} className="flex gap-4 sm:gap-5 group/line py-0.5">
-          <span className="w-8 sm:w-10 text-right text-white/10 select-none font-mono text-[10px] sm:text-xs pt-1.5 shrink-0">{idx + 1}</span>
-          <span className="flex-1 transition-colors group-hover/line:text-white/90 font-mono whitespace-pre" dangerouslySetInnerHTML={{ __html: highlighted || line }} />
+        <div key={idx} className="flex min-w-max gap-4 py-0.5">
+          <span className="w-8 shrink-0 select-none text-right font-mono text-[11px] leading-7 text-white/20">{idx + 1}</span>
+          <span className="font-mono text-[12px] leading-7 text-zinc-200 sm:text-[13px]" dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }} />
         </div>
       );
     });
   };
 
-  const handleCopy = (code: string) => {
+  const handleCopy = (code: string, index: number) => {
     navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedBlock(index);
+    window.setTimeout(() => setCopiedBlock(null), 2000);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: post?.title || 'Woody 技術筆記',
+      text: post?.excerpt || '',
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShared(true);
+        window.setTimeout(() => setShared(false), 1800);
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Share failed:', err);
+      }
+    }
+  };
+
+  const renderTextLines = (text: string, blockKey: string) => {
+    const lines = text.split('\n');
+    const nodes: React.ReactNode[] = [];
+    let listItems: React.ReactNode[] = [];
+
+    const flushList = () => {
+      if (!listItems.length) return;
+      nodes.push(
+        <ul key={`${blockKey}-list-${nodes.length}`} className="my-7 space-y-3 border-l border-zinc-200 pl-5 dark:border-white/10 sm:pl-6">
+          {listItems}
+        </ul>
+      );
+      listItems = [];
+    };
+
+    lines.forEach((line, index) => {
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        flushList();
+        return;
+      }
+
+      if (trimmed.startsWith('- ')) {
+        listItems.push(
+          <li key={`${blockKey}-li-${index}`} className="relative list-none text-[1rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-[1.0625rem]">
+            <span className="absolute -left-[1.35rem] top-3 h-2 w-2 rounded-full bg-emerald-500" />
+            {renderInline(trimmed.replace('- ', ''))}
+          </li>
+        );
+        return;
+      }
+
+      flushList();
+
+      if (trimmed.startsWith('## ')) {
+        nodes.push(
+          <h2 key={`${blockKey}-h2-${index}`} className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]">
+            {trimmed.replace('## ', '')}
+          </h2>
+        );
+        return;
+      }
+
+      if (trimmed.startsWith('### ')) {
+        nodes.push(
+          <h3 key={`${blockKey}-h3-${index}`} className="mt-10 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]">
+            {trimmed.replace('### ', '')}
+          </h3>
+        );
+        return;
+      }
+
+      const cleanLine = trimmed.startsWith('# ') ? trimmed.replace('# ', '') : trimmed;
+      nodes.push(
+        <p key={`${blockKey}-p-${index}`} className="my-6 text-[1rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-[1.0625rem] sm:leading-9">
+          {renderInline(cleanLine)}
+        </p>
+      );
+    });
+
+    flushList();
+    return nodes;
   };
 
   const renderContent = (content: string) => {
     if (!content) return null;
     const parts = content.split(/(```[\s\S]*?```)/g);
 
-    return parts.map((part, i) => {
-      if (part.startsWith('```')) {
-        const match = part.match(/```(\w+)?\n?([\s\S]*?)```/);
-        const lang = match?.[1] || 'bash';
-        const code = match?.[2] || '';
-
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            key={i}
-            className="my-10 sm:my-14 relative group"
-          >
-            <div className="glass-panel p-0 rounded-3xl sm:rounded-[2rem] overflow-hidden border-white/10 shadow-[0_30px_70px_-30px_rgba(0,0,0,0.9)] bg-[#0d1117] backdrop-blur-3xl transition-all duration-500 group-hover:border-white/20">
-              <div className="bg-[#161b22]/80 px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex gap-2 shrink-0">
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56]" />
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ffbd2e]" />
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#27c93f]" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.16em] text-white/35 flex items-center gap-2 truncate">
-                    <Terminal size={13} className="text-white/25 shrink-0" /> {lang}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleCopy(code)}
-                  className="px-3 sm:px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/45 hover:text-white transition-all flex items-center gap-2 border border-white/5 shrink-0"
-                >
-                  {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                  <span className="hidden xs:inline text-[10px] font-black uppercase tracking-widest">{copied ? 'Copied' : 'Copy'}</span>
-                </button>
-              </div>
-              <div className="p-4 sm:p-6 md:p-8 overflow-x-auto custom-scrollbar font-mono text-xs sm:text-sm md:text-[0.95rem] leading-[1.9] text-slate-300">
-                {highlightCode(code)}
-              </div>
-            </div>
-          </motion.div>
-        );
+    return parts.map((part, index) => {
+      if (!part.startsWith('```')) {
+        return <React.Fragment key={`text-${index}`}>{renderTextLines(part, `text-${index}`)}</React.Fragment>;
       }
 
-      return part.split('\n').map((line, j) => {
-        const trimmed = line.trim();
-        if (trimmed === '') return <div key={`${i}-${j}`} className="h-4 sm:h-6" />;
+      const match = part.match(/```(\w+)?\n?([\s\S]*?)```/);
+      const lang = match?.[1] || 'bash';
+      const code = match?.[2] || '';
+      const copied = copiedBlock === index;
 
-        if (trimmed.startsWith('## ')) {
-          return (
-            <h2 key={`${i}-${j}`} className="text-2xl sm:text-3xl md:text-5xl font-[900] text-white mt-16 sm:mt-24 mb-8 sm:mb-10 tracking-normal flex items-start gap-4 sm:gap-6 group leading-tight">
-              <div className="w-1.5 sm:w-2 h-9 sm:h-12 bg-gradient-to-b from-emerald-400 to-emerald-800 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.35)] shrink-0 mt-1" />
-              <span className="group-hover:text-glow transition-all">{trimmed.replace('## ', '')}</span>
-            </h2>
-          );
-        }
-
-        if (trimmed.startsWith('### ')) {
-          return (
-            <h3 key={`${i}-${j}`} className="text-xl sm:text-2xl md:text-3xl font-[900] text-white/90 mt-12 sm:mt-16 mb-6 sm:mb-8 tracking-normal flex items-center gap-3">
-              <Zap size={20} className="text-emerald-500 shrink-0" />
-              {trimmed.replace('### ', '')}
-            </h3>
-          );
-        }
-
-        if (trimmed.startsWith('- ')) {
-          return (
-            <li key={`${i}-${j}`} className="ml-0 mb-5 sm:mb-6 text-slate-400 text-base sm:text-lg font-light flex items-start gap-4 group list-none">
-              <div className="w-2 h-2 rounded-full bg-emerald-500/50 mt-3 group-hover:bg-emerald-500 transition-all shrink-0" />
-              <span className="group-hover:text-slate-200 transition-colors leading-[1.85]">
-                {trimmed.replace('- ', '').split(/(\*\*.*?\*\*)/g).map((s, idx) => (
-                  s.startsWith('**') ? <strong key={idx} className="text-white font-black">{s.slice(2, -2)}</strong> : s
-                ))}
-              </span>
-            </li>
-          );
-        }
-
-        const cleanLine = trimmed.startsWith('# ') ? trimmed.replace('# ', '') : trimmed;
-
-        return (
-          <p key={`${i}-${j}`} className="mb-6 sm:mb-8 text-slate-400 text-base sm:text-lg md:text-xl leading-[1.9] font-light tracking-normal">
-            {cleanLine.split(/(\*\*.*?\*\*)/g).map((s, idx) => (
-              s.startsWith('**') ? <strong key={idx} className="text-white font-black">{s.slice(2, -2)}</strong> : s
-            ))}
-          </p>
-        );
-      });
+      return (
+        <section key={`code-${index}`} className="my-10 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_24px_70px_-40px_rgba(0,0,0,0.9)] dark:bg-[#0f1117] sm:my-12">
+          <div className="flex min-h-12 items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 sm:px-5">
+            <div className="flex min-w-0 items-center gap-3">
+              <Terminal size={16} className="shrink-0 text-emerald-400" />
+              <span className="truncate text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">{lang}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleCopy(code, index)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-300 transition duration-200 hover:border-white/20 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/70 active:scale-[0.98]"
+              aria-label="複製程式碼"
+            >
+              {copied ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+          <pre className="overflow-x-auto px-3 py-5 sm:px-5">
+            <code>{highlightCode(code)}</code>
+          </pre>
+        </section>
+      );
     });
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0b10]">
-      <div className="flex flex-col items-center gap-6">
-        <Loader2 className="animate-spin text-white/10" size={56} strokeWidth={1} />
-        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Accessing Node...</span>
+    <div className="min-h-screen bg-zinc-950 px-6 pt-32 text-white">
+      <div className="mx-auto max-w-3xl animate-pulse space-y-8">
+        <div className="h-11 w-32 rounded-2xl bg-white/10" />
+        <div className="space-y-4">
+          <div className="h-6 w-44 rounded-full bg-white/10" />
+          <div className="h-12 w-full rounded-2xl bg-white/10" />
+          <div className="h-12 w-4/5 rounded-2xl bg-white/10" />
+        </div>
+        <div className="h-72 rounded-[2rem] bg-white/10" />
+        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">
+          <Loader2 className="animate-spin" size={16} /> Loading article
+        </div>
       </div>
     </div>
   );
 
   if (!post) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0b10] px-6 text-center">
-      <div>
-        <h2 className="text-3xl sm:text-5xl font-black text-white mb-8 tracking-normal">找不到文章</h2>
-        <Link to="/blog" className="inline-flex items-center gap-3 px-8 py-4 glass-panel border-white/10 text-white font-black tracking-widest text-[10px]">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 text-center text-white">
+      <div className="max-w-md">
+        <h2 className="mb-4 text-3xl font-black tracking-tight">找不到這篇文章</h2>
+        <p className="mb-8 text-sm leading-7 text-zinc-400">文章可能已經移除，或目前無法從資料庫讀取。</p>
+        <Link to="/blog" className="inline-flex min-h-11 items-center justify-center gap-3 rounded-2xl bg-white px-5 text-[12px] font-bold tracking-[0.16em] text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/70">
           <ArrowLeft size={16} /> 返回筆記
         </Link>
       </div>
     </div>
   );
 
+  const readingMinutes = getReadingMinutes(post.content);
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black">
+    <main className="min-h-screen overflow-x-hidden bg-[#f5f5f2] text-zinc-950 selection:bg-zinc-950 selection:text-white dark:bg-[#090a0f] dark:text-white">
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-white z-[200] origin-left shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+        className="fixed left-0 right-0 top-0 z-50 h-1 origin-left bg-emerald-500"
         style={{ scaleX }}
       />
 
-      <section className="relative min-h-[620px] h-[68svh] md:h-[78vh] w-full overflow-hidden flex flex-col justify-end">
-        <motion.img
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 2.2, ease: 'easeOut' }}
-          src={post.image}
-          className="absolute inset-0 w-full h-full object-cover opacity-45"
-          alt={post.title}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0b10] via-[#0a0b10]/55 to-[#0a0b10]/45" />
+      <header className="px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-32 lg:pb-16">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end lg:gap-12">
+          <div className="min-w-0">
+            <Link
+              to="/blog"
+              className="mb-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-4 text-[12px] font-bold tracking-[0.12em] text-zinc-700 shadow-sm transition duration-200 hover:border-zinc-950 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white"
+            >
+              <ArrowLeft size={16} /> 返回筆記
+            </Link>
 
-        <div className="relative px-5 sm:px-8 pb-12 sm:pb-16 max-w-7xl mx-auto w-full z-10">
-          <Link to="/blog" className="mb-10 sm:mb-12 inline-flex items-center gap-3 glass-panel px-4 py-3 text-white hover:bg-white hover:text-black transition-all font-black tracking-widest text-[10px] border-white/10 bg-black/35 rounded-2xl">
-            <ArrowLeft size={15} /> 返回筆記
-          </Link>
-
-          <motion.div
-            initial={{ y: 24, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex flex-wrap items-center gap-3 sm:gap-5 mb-5 sm:mb-7">
-              <span className="bg-white text-black px-4 py-1.5 font-black tracking-widest text-[10px] sm:text-[11px] rounded-sm">
-                {post.category}
-              </span>
-              <span className="text-white/45 font-black text-[10px] sm:text-[11px] tracking-widest">{post.date}</span>
+            <div className="mb-6 flex flex-wrap items-center gap-3 text-[12px] font-bold tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
+              <span className="rounded-full bg-zinc-950 px-3 py-1.5 text-white dark:bg-white dark:text-zinc-950">{post.category || '技術筆記'}</span>
+              <span>{post.date}</span>
             </div>
-            <h1 className="text-[clamp(2.35rem,11vw,4.5rem)] md:text-[clamp(4.5rem,6.5vw,5.75rem)] font-[900] text-white leading-[1.12] tracking-normal max-w-6xl text-glow break-words">
+
+            <h1 className="max-w-5xl break-all text-[clamp(1.75rem,8.2vw,4.35rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
               {post.title}
             </h1>
-          </motion.div>
+          </div>
+
+          <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-200 shadow-[0_24px_80px_-50px_rgba(24,24,27,0.75)] dark:border-white/10 dark:bg-white/5">
+            <img
+              src={post.image}
+              alt={post.title}
+              className="aspect-[16/11] h-full w-full object-cover"
+              loading="eager"
+            />
+          </div>
+        </div>
+      </header>
+
+      <section className="border-y border-zinc-200 bg-white/65 px-5 py-6 backdrop-blur dark:border-white/10 dark:bg-white/[0.035] sm:px-8">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
+          <div className="max-w-3xl border-l-2 border-emerald-500 pl-5">
+            <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
+              <Info size={16} className="text-emerald-500" /> Summary
+            </div>
+            <p className="text-[1.08rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-xl sm:leading-9">
+              {post.excerpt?.replace(/^# /, '')}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
+            <MetaItem icon={<Calendar size={16} />} label="發布" value={post.date} />
+            <MetaItem icon={<Clock size={16} />} label="閱讀" value={`${readingMinutes} 分鐘`} />
+            <MetaItem icon={<Cpu size={16} />} label="難度" value="Expert" />
+          </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-16 md:py-20 relative">
-        <div className="absolute top-0 right-0 p-24 opacity-[0.02] pointer-events-none -z-10 hidden md:block">
-          <Hash size={400} strokeWidth={1} />
-        </div>
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-20 lg:py-20">
+        <article className="min-w-0">
+          <div className="content-rendered">
+            {renderContent(post.content)}
+          </div>
+        </article>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-          <article className="lg:col-span-8 min-w-0">
-            <div className="text-white/45 text-lg sm:text-xl md:text-2xl font-light mb-14 sm:mb-20 italic leading-relaxed border-l border-white/10 pl-5 sm:pl-8 flex flex-col gap-4">
-              <div className="flex items-center gap-3 not-italic">
-                <Info size={18} className="text-emerald-500/60" />
-                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-white/25">Summary Protocol</span>
-              </div>
-              {post.excerpt?.replace(/^# /, '')}
+        <aside className="lg:sticky lg:top-28 lg:h-fit">
+          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]">
+            <div className="mb-5 flex items-center gap-3 border-b border-zinc-200 pb-5 dark:border-white/10">
+              <Eye size={17} className="text-emerald-500" />
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">Article Tools</p>
             </div>
 
-            <div className="content-rendered">
-              {renderContent(post.content)}
-            </div>
-          </article>
-
-          <aside className="lg:col-span-4 lg:sticky lg:top-40 h-fit space-y-6 sm:space-y-8">
-            <motion.div
-              initial={{ opacity: 0, x: 16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="glass-panel p-6 sm:p-8 md:p-10 bg-white/[0.03] border-white/10 rounded-3xl space-y-8 shadow-3xl"
+            <button
+              type="button"
+              onClick={handleShare}
+              className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950 px-4 text-[12px] font-bold tracking-[0.12em] text-white transition duration-200 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
             >
-              <div className="flex items-center gap-3 text-white/35 border-b border-white/5 pb-6">
-                <Terminal size={17} />
-                <span className="text-[11px] font-black uppercase tracking-[0.22em]">筆記資訊</span>
-              </div>
+              {shared ? <Check size={17} /> : <Share2 size={17} />}
+              {shared ? '已複製連結' : '分享文章'}
+            </button>
 
-              <div className="space-y-6">
-                <SideInfo icon={<Calendar size={17} />} label="發布時間" value={post.date} />
-                <SideInfo icon={<Cpu size={17} />} label="技術難度" value="EXPERT" color="text-emerald-500" />
-                <SideInfo icon={<Eye size={17} />} label="閱讀時間" value="約 5 分鐘" />
+            <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+              <div className="mb-2 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                <Terminal size={16} />
+                <span className="text-[11px] font-black uppercase tracking-[0.16em]">Verified Note</span>
               </div>
-
-              <div className="pt-6 border-t border-white/5">
-                <button className="w-full py-4 bg-white text-black font-black tracking-[0.18em] text-[11px] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_50px_-10px_rgba(255,255,255,0.2)] rounded-2xl">
-                  <Share2 size={17} /> 分享此文件
-                </button>
-              </div>
-            </motion.div>
-
-            <div className="glass-panel p-6 sm:p-8 bg-emerald-500/5 border-emerald-500/20 flex items-center sm:flex-col sm:text-center gap-5 rounded-3xl">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] shrink-0">
-                <Terminal size={22} />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500/70 leading-relaxed">
-                Environment Verified on <br className="hidden sm:block" />Ubuntu 24.04 LTS
+              <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                內容以實務部署與可重現步驟為核心，建議依照自己的環境變數與版本差異調整。
               </p>
             </div>
-          </aside>
-        </div>
+          </div>
+        </aside>
       </div>
 
-      <footer className="py-20 sm:py-28 text-center opacity-20 border-t border-white/5 px-5">
-        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em] sm:tracking-[0.8em] text-white">Knowledge Core v3.1</p>
+      <footer className="border-t border-zinc-200 px-5 py-14 text-center dark:border-white/10 sm:px-8">
+        <p className="text-[11px] font-black uppercase tracking-[0.35em] text-zinc-400 dark:text-zinc-600">Knowledge Core v3.1</p>
       </footer>
-    </motion.div>
+    </main>
   );
 };
 
-const SideInfo: React.FC<{ icon: React.ReactNode; label: string; value: string; color?: string }> = ({ icon, label, value, color = 'text-white' }) => (
-  <div className="flex items-center justify-between gap-5 group">
-    <div className="flex items-center gap-4 text-white/25 group-hover:text-emerald-500 transition-colors min-w-0">
-      <div className="opacity-70 shrink-0">{icon}</div>
-      <span className="text-[10px] font-black tracking-[0.18em] truncate">{label}</span>
+const MetaItem: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
+  <div className="rounded-2xl border border-zinc-200 bg-white px-3 py-4 dark:border-white/10 dark:bg-white/[0.04]">
+    <div className="mb-2 flex items-center justify-center gap-2 text-zinc-400 lg:justify-start">
+      {icon}
+      <span className="text-[10px] font-black tracking-[0.18em]">{label}</span>
     </div>
-    <span className={`text-[12px] font-black tracking-tight text-right shrink-0 ${color}`}>{value}</span>
+    <p className="truncate text-sm font-bold text-zinc-950 dark:text-white">{value}</p>
   </div>
 );
 

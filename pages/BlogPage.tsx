@@ -64,7 +64,7 @@ const BlogPage: React.FC = () => {
             <h2 className="text-[clamp(2.75rem,13vw,5rem)] md:text-[clamp(6rem,10vw,9rem)] font-[900] tracking-normal heading-gradient leading-[0.92] text-glow select-none">
               技術筆記
             </h2>
-            <div className="absolute -top-8 -left-4 sm:-left-8 text-[5rem] sm:text-[8rem] md:text-[11rem] font-black text-white/[0.02] -z-10 tracking-tight leading-none select-none pointer-events-none">
+            <div className="absolute -top-8 -left-4 sm:-left-8 text-[5rem] sm:text-[8rem] md:text-[11rem] font-black dark:text-white/[0.02] text-morandi-slate/[0.04] -z-10 tracking-tight leading-none select-none pointer-events-none">
               KNOWLEDGE
             </div>
           </div>
@@ -108,7 +108,7 @@ const BlogPage: React.FC = () => {
                     <img src={post.image} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out" alt={post.title} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-80" />
                     <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1.5 glass-panel bg-white/10 border-white/20 text-white text-[9px] font-black tracking-widest backdrop-blur-xl rounded-xl">
+                      <span className="px-3 py-1.5 glass-panel dark:bg-white/10 bg-black/40 dark:border-white/20 border-black/30 dark:text-white text-white text-[9px] font-black tracking-widest backdrop-blur-xl rounded-xl">
                         {post.category}
                       </span>
                     </div>
@@ -151,7 +151,7 @@ const BlogPage: React.FC = () => {
 
       <footer className="mt-24 sm:mt-36 text-center opacity-20">
         <div className="w-px h-20 sm:h-24 bg-gradient-to-b from-emerald-500 to-transparent mx-auto mb-8 sm:mb-10" />
-        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em] sm:tracking-[0.8em] dark:text-white">End of Feed</p>
+        <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em] sm:tracking-[0.8em] dark:text-white text-morandi-stone/40">End of Feed</p>
       </footer>
     </motion.div>
   );
