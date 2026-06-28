@@ -23,7 +23,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (!(file instanceof File)) return errorJson('file 欄位為必填', 400);
 
   const ext = EXT[file.type] || '.' + (file.name.split('.').pop() || 'bin');
-  const key = `uploads/${crypto.randomUUID()}${ext}`;
+  const key = `${crypto.randomUUID()}${ext}`;
 
   await context.env.MEDIA.put(key, file.stream(), {
     httpMetadata: { contentType: file.type || 'application/octet-stream' },

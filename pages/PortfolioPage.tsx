@@ -9,6 +9,7 @@ const PortfolioPage: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('全部');
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,6 +30,11 @@ const PortfolioPage: React.FC = () => {
   }, []);
 
   const allTags = ['全部', ...Array.from(new Set(projects.flatMap(p => p.tags || [])))];
+  // 確保選中的標籤始終在第一個，以便折疊時必定能顯示
+  const sortedTags = [
+    filter,
+    ...allTags.filter(t => t !== filter)
+  ];
   const filteredProjects = filter === '全部' ? projects : projects.filter(p => p.tags?.includes(filter));
 
   if (loading) return (
@@ -62,20 +68,40 @@ const PortfolioPage: React.FC = () => {
           維運<span className="opacity-20 italic font-light">實績</span>
         </motion.h2>
         
-        <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto overflow-x-auto no-scrollbar py-4 px-2">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setFilter(tag)}
-              className={`px-6 py-3 rounded-2xl text-[9px] md:text-[10px] font-black tracking-widest uppercase transition-all shrink-0 border ${
-                filter === tag 
-                  ? 'bg-morandi-slate text-white dark:bg-white dark:text-black border-transparent shadow-2xl scale-105' 
-                  : 'bg-white/5 dark:text-slate-500 text-morandi-stone border-black/5 dark:border-white/5 hover:border-morandi-slate/30'
-              }`}
+        <div className="flex flex-col items-center">
+          <div className={`relative max-w-4xl mx-auto overflow-hidden transition-[max-height] duration-500 ease-in-out ${isTagsExpanded ? 'max-h-[1000px]' : 'max-h-[56px] md:max-h-[60px]'}`}>
+            <div className="flex flex-wrap justify-center gap-3 py-1 px-2">
+              {sortedTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => {
+                    setFilter(tag);
+                    setIsTagsExpanded(false); // Optionally close when a new filter is selected
+                  }}
+                  className={`px-6 py-3 rounded-2xl text-[9px] md:text-[10px] font-black tracking-widest uppercase transition-all shrink-0 border ${
+                    filter === tag 
+                      ? 'bg-morandi-slate text-white dark:bg-white dark:text-black border-transparent shadow-2xl scale-105' 
+                      : 'bg-white/5 dark:text-slate-500 text-morandi-stone border-black/5 dark:border-white/5 hover:border-morandi-slate/30'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            {/* Fade overlay when collapsed */}
+            {!isTagsExpanded && sortedTags.length > 5 && (
+              <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-[#f8fafc] dark:from-[#0a0b10] to-transparent pointer-events-none" />
+            )}
+          </div>
+          
+          {sortedTags.length > 5 && (
+            <button 
+              onClick={() => setIsTagsExpanded(!isTagsExpanded)}
+              className="mt-4 flex items-center justify-center gap-2 text-[10px] font-black tracking-[0.2em] uppercase dark:text-white/40 text-morandi-stone/60 hover:text-morandi-slate dark:hover:text-white transition-colors border border-black/5 dark:border-white/10 rounded-full px-6 py-2"
             >
-              {tag}
+              {isTagsExpanded ? '收起分類' : '展開更多分類'}
             </button>
-          ))}
+          )}
         </div>
       </header>
 
