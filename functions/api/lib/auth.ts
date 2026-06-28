@@ -59,13 +59,25 @@ export async function verifyAccess(request: Request, env: Env): Promise<{ email:
   return null;
 }
 
-export function requireAuth(request: Request, env: Env): Promise<Response | { email: string }> {
-  return verifyAccess(request, env).then((r) => {
-    if (!r) {
-      return Promise.reject(errorJsonResponse('Unauthorized: Cloudflare Access 驗證失敗', 401));
-    }
-    return r;
-  });
+export async function requireAuth(request: Request, env: Env): Promise<Response | { email: string }> {
+  // 1. API Key 認證（給 CLI 發文腳本使用）
+  const apiKey = request.headers.get('X-API-Key');
+  if (apiKey && env.API_KEY && apiKey === env.API_KEY) {
+    return { email: 'api-cli@system' };
+  }
+
+  // 2. Service Token 認證（Cloudflare Access 驗證通過後會注入此 header）
+  const serviceAuthEmail = request.headers.get('Cf-Access-Authenticated-User-Email');
+  if (serviceAuthEmail) {
+    return { email: serviceAuthEmail };
+  }
+
+  // 3. Cloudflare Access JWT 驗證（瀏覽器登入後使用）
+  const result = await verifyAccess(request, env);
+  if (!result) {
+    return errorJsonResponse('Unauthorized: Cloudflare Access 驗證失敗', 401);
+  }
+  return result;
 }
 
 function errorJsonResponse(message: string, status: number): Response {

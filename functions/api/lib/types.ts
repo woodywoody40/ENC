@@ -3,8 +3,9 @@
 export interface Env {
   DB: D1Database;
   MEDIA: R2Bucket;
-  CF_ACCESS_TEAM: string;
-  CF_ACCESS_AUD: string;
+  CF_ACCESS_TEAM?: string;
+  CF_ACCESS_AUD?: string;
+  API_KEY?: string; // CLI 發文腳本專用 API Key
 }
 
 export interface ProjectRow {
