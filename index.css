@@ -1,4 +1,24 @@
-@import "tailwindcss";
+/* ==============================
+   Layer order: CSS cascade control
+   ============================== */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+/* ----- Tailwind layers ----- */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+
+/* ----- Astryx design system ----- */
+@import '@astryxdesign/core/reset.css' layer(reset);
+@import '@astryxdesign/core/astryx.css' layer(astryx-base);
+@import '@astryxdesign/theme-neutral/theme.css' layer(astryx-theme);
+@import '@astryxdesign/core/tailwind-theme.css' layer(components);
+
+/* ----- Tailwind utilities (lowest priority) ----- */
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* ==============================
+   Custom theme tokens & variants
+   ============================== */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

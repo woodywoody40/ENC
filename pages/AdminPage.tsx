@@ -5,10 +5,15 @@ import {
   LayoutDashboard, BookOpen, Briefcase, Plus, Trash2, Edit3, 
   Activity, LogOut, Loader2, X, Save, 
   Lock, Image as ImageIcon, CheckCircle2,
-  Upload, CheckCircle, Globe, Settings, Tablet, Monitor, Image, Video, Film, PlusCircle,
-  Bold, Heading2, Heading3, List, Code, Link as LinkIcon, Minus, Eye, Type, Layout, Info,
-  Zap, Sparkles, Wand2
+  Upload, Settings, PlusCircle,
+  Bold, Heading2, Heading3, List, Code, Link as LinkIcon, Minus, Type, Info,
+  Zap, Sparkles
 } from 'lucide-react';
+import { Card } from '@astryxdesign/core/Card';
+import { Section } from '@astryxdesign/core/Section';
+import { Grid } from '@astryxdesign/core/Grid';
+import { HStack, VStack, StackItem } from '@astryxdesign/core/Stack';
+import { Text, Heading } from '@astryxdesign/core/Text';
 import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
 import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/geminiService';
 
@@ -306,64 +311,80 @@ const AdminPage: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 space-y-10 min-w-0">
+      <main className="flex-1 min-w-0">
+        <Section>
         {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Stats icon={<Briefcase />} label="部署專案" value={projects.length} />
-            <Stats icon={<BookOpen />} label="技術文章" value={posts.length} />
-            <Stats icon={<Activity />} label="核心狀態" value="ONLINE" color="text-emerald-400" />
-          </div>
+          <Grid gap="xl" columns={{ base: 1, md: 3 }}>
+            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
+              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><Briefcase size={32} /></div>
+              <Text size="display-2" className="!text-white font-[900] tracking-tighter">{projects.length}</Text>
+              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">部署專案</Text>
+            </Card>
+            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
+              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><BookOpen size={32} /></div>
+              <Text size="display-2" className="!text-white font-[900] tracking-tighter">{posts.length}</Text>
+              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">技術文章</Text>
+            </Card>
+            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
+              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-emerald-400"><Activity size={32} /></div>
+              <Text size="display-2" className="!text-emerald-400 font-[900] tracking-tighter">ONLINE</Text>
+              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">核心狀態</Text>
+            </Card>
+          </Grid>
         )}
 
         {(activeTab === 'projects' || activeTab === 'blog') && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center px-2">
-              <h3 className="text-2xl font-black text-white uppercase tracking-widest">{activeTab === 'projects' ? '部署資產清單' : '技術文章清單'}</h3>
+          <VStack gap="lg">
+            <HStack justify="between" align="center" className="px-2">
+              <Text size="display-1" className="!text-white font-black uppercase tracking-widest !text-2xl">{activeTab === 'projects' ? '部署資產清單' : '技術文章清單'}</Text>
               <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog')} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl">
                 <Plus size={18} /> 新增內容
               </button>
-            </div>
-            <div className="space-y-4">
+            </HStack>
+            <VStack gap="sm">
               {(activeTab === 'projects' ? projects : posts).map(item => (
-                <div key={item.id} className="glass-panel p-6 flex items-center justify-between group hover:bg-white/[0.05] transition-all bg-black/40 border-white/5 shadow-lg">
-                  <div className="flex items-center gap-8">
-                    <img src={item.image} className="w-20 h-20 rounded-2xl object-cover bg-black shadow-inner border border-white/5" />
-                    <div>
-                      <h4 className="text-white font-black uppercase tracking-tight text-xl">{item.title}</h4>
-                      <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-2">{activeTab === 'projects' ? item.tags?.join(' • ') : `${item.category} • ${item.date}`}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)} className="p-4 rounded-xl bg-white/5 text-white hover:text-emerald-400 hover:bg-white/10 transition-all border border-white/5"><Edit3 size={20} /></button>
-                    <button onClick={async () => { if(confirm('確定移除？')) { const api = activeTab === 'projects' ? ProjectsAPI : BlogAPI; await api.remove(item.id); fetchAllData(); } }} className="p-4 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/20"><Trash2 size={20} /></button>
-                  </div>
-                </div>
+                <Card key={item.id} padding="lg" className="bg-black/40 !border-white/5 shadow-lg group hover:bg-white/[0.05] transition-all">
+                  <HStack justify="between" align="center">
+                    <HStack gap="lg" align="center">
+                      <img src={item.image} className="w-20 h-20 rounded-2xl object-cover bg-black shadow-inner border border-white/5 shrink-0" />
+                      <VStack gap="xs">
+                        <Text size="large" className="!text-white font-black uppercase tracking-tight">{item.title}</Text>
+                        <Text size="sm" className="!text-white/40 font-bold uppercase tracking-widest">{activeTab === 'projects' ? item.tags?.join(' • ') : `${item.category} • ${item.date}`}</Text>
+                      </VStack>
+                    </HStack>
+                    <HStack gap="sm">
+                      <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)} className="p-4 rounded-xl bg-white/5 text-white hover:text-emerald-400 hover:bg-white/10 transition-all border border-white/5"><Edit3 size={20} /></button>
+                      <button onClick={async () => { if(confirm('確定移除？')) { const api = activeTab === 'projects' ? ProjectsAPI : BlogAPI; await api.remove(item.id); fetchAllData(); } }} className="p-4 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/20"><Trash2 size={20} /></button>
+                    </HStack>
+                  </HStack>
+                </Card>
               ))}
-            </div>
-          </div>
+            </VStack>
+          </VStack>
         )}
 
         {activeTab === 'site_config' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Grid gap="xl" columns={{ base: 1, md: 2 }}>
              {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => {
                const config = siteConfigs.find(c => c.key === key);
                return (
-                 <div key={key} className="glass-panel p-10 space-y-6 bg-black/60 border-white/10 shadow-2xl">
-                    <div className="flex items-center gap-4">
+                 <Card key={key} padding="xl" className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
+                    <HStack gap="md" align="center">
                       <div className="w-1.5 h-5 bg-emerald-500 rounded-full" />
-                      <label className="text-[11px] font-black text-white uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</label>
-                    </div>
+                      <Text size="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
+                    </HStack>
                     <textarea 
                       defaultValue={config?.value || ''} 
                       onBlur={(e) => handleSaveConfig(key, e.target.value)}
                       placeholder={`輸入 ${key} 內容...`}
                       className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-emerald-500/40 transition-all font-light leading-relaxed h-[120px]"
                     />
-                 </div>
+                 </Card>
                );
              })}
-          </div>
+          </Grid>
         )}
+        </Section>
       </main>
 
       <AnimatePresence>
@@ -532,14 +553,6 @@ const NavBtn = ({ active, icon, label, onClick }: any) => (
   <button onClick={onClick} className={`flex items-center gap-5 px-8 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shrink-0 ${active ? 'bg-white text-black shadow-2xl scale-105' : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
     <span className={active ? 'text-black' : 'text-white/40 group-hover:text-white'}>{icon}</span> {label}
   </button>
-);
-
-const Stats = ({ icon, label, value, color='text-white' }: any) => (
-  <div className="glass-panel p-12 flex flex-col items-center justify-center gap-6 bg-black/60 border-white/10 group hover:border-white/30 transition-all shadow-2xl">
-    <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white">{icon}</div>
-    <p className={`text-6xl font-[900] ${color} tracking-tighter`}>{value}</p>
-    <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">{label}</p>
-  </div>
 );
 
 const Inp = ({ label, value, onChange }: any) => (

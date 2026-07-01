@@ -4,6 +4,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import Navbar from './components/Navbar';
+import { AstryxProvider } from './components/AstryxProvider';
 
 // Lazy-loaded pages（改為懶載入，縮小首包體積）
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -105,6 +106,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
+      <AstryxProvider>
       <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f8fafc]'}`}>
         {/* 2D 莫蘭迪科技背景 */}
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
@@ -135,6 +137,7 @@ const App: React.FC = () => {
           </AnimatePresence>
         </Suspense>
       </div>
+      </AstryxProvider>
     </ErrorBoundary>
   );
 };
