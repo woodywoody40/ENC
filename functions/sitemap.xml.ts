@@ -2,7 +2,26 @@
 import type { Env, BlogRow, ProjectRow } from './api/lib/types';
 
 const SITE_URL = 'https://enc.woodywoody40.com';
-const LASTMOD = new Date().toISOString().split('T')[0];
+
+/** 今天日期 YYYY-MM-DD (fallback) */
+const today = (): string => new Date().toISOString().split('T')[0];
+
+/** ISO 8601 日期正規表示 (YYYY-MM-DD) */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** 驗證字串是否為有效 ISO 日期，否則 fallback 到 today */
+const safeDate = (d: string | null | undefined, fallback?: string): string | undefined => {
+  if (d && ISO_DATE_RE.test(d)) return d;
+  return fallback ?? today();
+};
+
+/** 確保 image URL 是絕對路徑 */
+const absoluteUrl = (path: string | null | undefined): string | undefined => {
+  if (!path) return undefined;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  // 相對路徑補上站點網域
+  return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 const STATIC_PAGES: { loc: string; priority: string; changefreq: string }[] = [
   { loc: '/',            priority: '1.0', changefreq: 'weekly'   },
@@ -45,44 +64,61 @@ function urlTag(
 }
 
 export const onRequest: PagesFunction<Env> = async ({ env }) => {
-  // 並行查詢部落格文章與專案
-  const [blogResult, projectResult] = await Promise.all([
-    env.DB.prepare('SELECT id, title, date, image FROM blog_posts ORDER BY date DESC').all<Pick<BlogRow, 'id' | 'title' | 'date' | 'image'>>(),
-    env.DB.prepare('SELECT id, title, image, created_at FROM projects ORDER BY created_at DESC').all<Pick<ProjectRow, 'id' | 'title' | 'image' | 'created_at'>>(),
-  ]);
+  try {
+    // 並行查詢部落格文章與專案
+    const [blogResult, projectResult] = await Promise.all([
+      env.DB.prepare('SELECT id, title, date, image FROM blog_posts ORDER BY date DESC').all<Pick<BlogRow, 'id' | 'title' | 'date' | 'image'>>(),
+      env.DB.prepare('SELECT id, title, image, created_at FROM projects ORDER BY created_at DESC').all<Pick<ProjectRow, 'id' | 'title' | 'image' | 'created_at'>>(),
+    ]);
 
-  const blogPosts = blogResult.results || [];
-  const projects = projectResult.results || [];
+    const blogPosts = blogResult.results || [];
+    const projects = projectResult.results || [];
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    const now = today();
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
   xmlns:xhtml="http://www.w3.org/1999/xhtml"
 >
-${STATIC_PAGES.map(p => urlTag(p.loc, p.priority, p.changefreq, LASTMOD)).join('')}
+${STATIC_PAGES.map(p => urlTag(p.loc, p.priority, p.changefreq, now)).join('')}
 ${blogPosts.map(p => urlTag(
   `/blog/${p.id}`,
   '0.8',
   'monthly',
-  p.date || LASTMOD,
-  p.image || undefined,
+  safeDate(p.date),
+  absoluteUrl(p.image),
   p.title,
 )).join('')}
 ${projects.map(p => urlTag(
   `/projects/${p.id}`,
   '0.8',
   'monthly',
-  p.created_at?.split('T')[0] || LASTMOD,
-  p.image || undefined,
+  safeDate(p.created_at?.split(' ')[0]),
+  absoluteUrl(p.image),
   p.title,
 )).join('')}
 </urlset>`;
 
-  return new Response(xml, {
-    headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=7200',
-    },
-  });
+    return new Response(xml, {
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600, s-maxage=7200',
+      },
+    });
+  } catch (err) {
+    // 若資料庫查詢失敗，改用靜態備份清單
+    const now = today();
+    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${STATIC_PAGES.map(p => urlTag(p.loc, p.priority, p.changefreq, now)).join('')}
+</urlset>`;
+    return new Response(fallbackXml, {
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  }
 };
