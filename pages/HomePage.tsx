@@ -7,16 +7,13 @@ import { Section } from '@astryxdesign/core/Section';
 import { Divider } from '@astryxdesign/core/Divider';
 
 /* ------------------------------------------------------------------ */
-/*  Premium infrastructure portfolio — editorial, refined,             */
-/*  atmospheric. Inspired by high-end brand sites that prioritize      */
-/*  restraint, texture, and quiet confidence over flashy effects.      */
-/*                                                                     */
+/*  Premium infrastructure portfolio — amber/warm tone, editorial,     */
+/*  atmospheric. Inspired by high-end brand sites.                     */
 /*  CSS transitions only — no JS animation libraries.                  */
-/*  Every animation serves clarity, not decoration.                    */
 /* ------------------------------------------------------------------ */
 
 /* ---------- Scroll-reveal hook ---------- */
-function useScrollReveal<T extends HTMLElement>(threshold = 0.15): [React.RefCallback<T>, boolean] {
+function useScrollReveal<T extends HTMLElement>(threshold = 0.12): [React.RefCallback<T>, boolean] {
   const [revealed, setRevealed] = useState(false);
   const ref = useCallback(
     (node: T | null) => {
@@ -37,29 +34,30 @@ function useScrollReveal<T extends HTMLElement>(threshold = 0.15): [React.RefCal
   return [ref, revealed];
 }
 
-/* ---------- Floating accent component ---------- */
+/* ---------- Floating accent — amber glow + orbital rings ---------- */
 function FloatingAccent() {
   return (
-    <div className="relative w-[300px] h-[300px] xl:w-[380px] xl:h-[380px]">
-      {/* Ambient glow */}
-      <div className="absolute inset-0 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(52,211,153,0.06)_0%,transparent_60%)] animate-pulse-slow" />
+    <div className="relative w-[360px] h-[360px] xl:w-[460px] xl:h-[460px]">
+      {/* Large ambient amber glow */}
+      <div className="absolute inset-0 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.10)_0%,rgba(245,158,11,0.03)_35%,transparent_65%)] animate-pulse-slow" />
 
       {/* Outer ring */}
-      <div className="absolute inset-[5%] rounded-full border border-white/[0.04] animate-float" />
+      <div className="absolute inset-[5%] rounded-full border border-amber-500/10 animate-float" />
 
-      {/* Middle ring */}
-      <div className="absolute inset-[28%] rounded-full border border-white/[0.03] animate-float" style={{ animationDelay: '-2s' }} />
+      {/* Mid ring */}
+      <div className="absolute inset-[22%] rounded-full border border-amber-400/6 animate-float" style={{ animationDelay: '-1.5s' }} />
 
       {/* Inner ring */}
-      <div className="absolute inset-[48%] rounded-full border border-white/[0.025] animate-float" style={{ animationDelay: '-4s' }} />
+      <div className="absolute inset-[40%] rounded-full border border-amber-300/5 animate-float" style={{ animationDelay: '-3s' }} />
 
-      {/* Core dot */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse-slow" />
+      {/* Core amber dot */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-400/60 animate-pulse-slow shadow-[0_0_20px_rgba(245,158,11,0.3)]" />
 
-      {/* Orbital dots */}
-      <div className="absolute top-[18%] left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400/20 animate-float" style={{ animationDelay: '-1s' }} />
-      <div className="absolute bottom-[18%] right-[15%] w-1 h-1 rounded-full bg-emerald-400/15 animate-float" style={{ animationDelay: '-3s' }} />
-      <div className="absolute top-[35%] right-[12%] w-1 h-1 rounded-full bg-white/[0.08] animate-float" style={{ animationDelay: '-5s' }} />
+      {/* Orbital amber dots */}
+      <div className="absolute top-[12%] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-amber-400/30 animate-float shadow-[0_0_8px_rgba(245,158,11,0.2)]" style={{ animationDelay: '-0.5s' }} />
+      <div className="absolute bottom-[12%] right-[12%] w-1.5 h-1.5 rounded-full bg-amber-300/25 animate-float" style={{ animationDelay: '-2.5s' }} />
+      <div className="absolute top-[30%] right-[8%] w-1.5 h-1.5 rounded-full bg-white/[0.10] animate-float" style={{ animationDelay: '-4s' }} />
+      <div className="absolute bottom-[35%] left-[8%] w-1 h-1 rounded-full bg-amber-400/20 animate-float" style={{ animationDelay: '-1s' }} />
     </div>
   );
 }
@@ -70,15 +68,15 @@ function ProcessStep({ num, title, desc }: { num: string; title: string; desc: s
   return (
     <div
       ref={ref}
-      className={`flex gap-6 sm:gap-8 transition-all duration-[900ms] ease-out will-change-[opacity,transform] ${
-        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      className={`flex gap-6 sm:gap-8 transition-all duration-[1000ms] ease-out will-change-[opacity,transform] ${
+        revealed ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'
       }`}
     >
-      <span className="text-4xl sm:text-5xl font-[250] text-white/[0.07] leading-none tracking-tight select-none">
+      <span className="text-5xl sm:text-6xl font-[200] text-amber-400/15 leading-none tracking-tight select-none">
         {num}
       </span>
-      <div className="pt-2">
-        <h3 className="text-base sm:text-lg font-semibold text-white/90 tracking-tight mb-2">{title}</h3>
+      <div className="pt-2 border-t border-amber-400/10">
+        <h3 className="text-base sm:text-lg font-semibold text-white/90 tracking-tight mb-2 mt-3">{title}</h3>
         <p className="text-sm text-slate-500 font-light leading-relaxed max-w-sm">{desc}</p>
       </div>
     </div>
@@ -99,11 +97,11 @@ function CompetencyCard({
   return (
     <div
       ref={ref}
-      className={`group rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[800ms] ease-out will-change-[opacity,transform] hover:border-white/[0.12] hover:bg-white/[0.025] ${
-        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      className={`group rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[900ms] ease-out will-change-[opacity,transform] hover:border-amber-500/20 hover:bg-amber-500/[0.03] hover:shadow-[0_0_30px_rgba(245,158,11,0.05)] ${
+        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
     >
-      <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex items-center justify-center text-emerald-400/70 group-hover:bg-emerald-500/10 group-hover:text-emerald-300 transition-all duration-500 mb-5">
+      <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex items-center justify-center text-amber-400/60 group-hover:bg-amber-500/12 group-hover:text-amber-300 transition-all duration-500 mb-5">
         {icon}
       </div>
       <h3 className="text-base sm:text-lg font-semibold text-white/90 tracking-tight mb-2">{title}</h3>
@@ -128,12 +126,12 @@ function StatCard({
   return (
     <div
       ref={ref}
-      className={`${span ? 'md:col-span-2' : ''} rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[900ms] ease-out will-change-[opacity] ${
-        revealed ? 'opacity-100' : 'opacity-0'
+      className={`${span ? 'md:col-span-2' : ''} group rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[1000ms] ease-out will-change-[opacity,transform] hover:border-amber-500/15 hover:bg-amber-500/[0.02] ${
+        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
       }`}
     >
-      <p className="text-white/25 uppercase tracking-[0.25em] text-[10px] font-[300] mb-3">{label}</p>
-      <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-white/95 tracking-tight mb-2 leading-none">{value}</p>
+      <p className="text-white/25 uppercase tracking-[0.25em] text-[10px] font-[300] mb-3 group-hover:text-amber-400/40 transition-colors duration-500">{label}</p>
+      <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-white/95 tracking-tight mb-2 leading-none group-hover:text-amber-100/90 transition-colors duration-500">{value}</p>
       <p className="text-sm text-slate-500 font-light leading-relaxed">{desc}</p>
     </div>
   );
@@ -187,10 +185,11 @@ const HomePage: React.FC = () => {
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }]} />
       <div className="relative overflow-x-hidden bg-[#0a0b10]">
 
-        {/* ----- Ambient background gradient ----- */}
+        {/* ----- Warm ambient background glow ----- */}
         <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(52,211,153,0.025)_0%,transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_100%,rgba(52,211,153,0.015)_0%,transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(245,158,11,0.04)_0%,transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_100%,rgba(245,158,11,0.025)_0%,transparent_50%)]" />
+          <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.02)_0%,transparent_60%)]" />
         </div>
 
         {/* ===== HERO ===== */}
@@ -205,14 +204,14 @@ const HomePage: React.FC = () => {
                 transform: heroRevealed ? 'translateY(0)' : 'translateY(24px)',
               }}
             >
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-emerald-500/15 bg-emerald-500/[0.04] text-[9px] font-[300] uppercase tracking-[0.3em] text-emerald-400/70 mb-10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
+              {/* Badge - amber */}
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.06] text-[9px] font-[300] uppercase tracking-[0.3em] text-amber-400/80 mb-10">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70" />
                 Infrastructure &amp; Operations
               </div>
 
               {/* Heading */}
-              <h1 className="text-[clamp(2.2rem,6vw,5rem)] font-black text-white/95 mb-5 tracking-tight leading-[1.05]">
+              <h1 className="text-[clamp(2.5rem,7vw,5.5rem)] font-black text-white/95 mb-5 tracking-tight leading-[1.05]">
                 {heroTitle}
               </h1>
 
@@ -232,7 +231,7 @@ const HomePage: React.FC = () => {
                 </Link>
                 <Link
                   to="/blog"
-                  className="group inline-flex items-center justify-center gap-2.5 border border-white/[0.08] text-white/80 px-7 py-3.5 rounded-xl text-sm font-semibold tracking-wide hover:bg-white/[0.04] hover:border-white/[0.15] transition-all duration-300 active:scale-[0.97]"
+                  className="group inline-flex items-center justify-center gap-2.5 border border-amber-500/15 text-white/80 px-7 py-3.5 rounded-xl text-sm font-semibold tracking-wide hover:bg-amber-500/[0.06] hover:border-amber-400/30 transition-all duration-300 active:scale-[0.97]"
                 >
                   閱讀筆記
                   <Terminal size={14} className="opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
@@ -240,7 +239,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right: floating accent */}
+            {/* Right: floating amber accent */}
             <div className="hidden lg:flex items-center justify-center relative">
               <FloatingAccent />
             </div>
@@ -282,7 +281,7 @@ const HomePage: React.FC = () => {
                   從維運現場出發<br />
                   <span className="text-slate-400/70 font-[250] italic">打造穩定的基礎架構</span>
                 </h2>
-                <div className="w-12 h-px bg-emerald-500/30 mb-5" />
+                <div className="w-12 h-px bg-amber-400/30 mb-5" />
                 <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed font-[300] max-w-md">
                   把網路、虛擬化、儲存與安全整合成清楚的流程，讓日常維運更快、更穩，也更容易交接。
                   每個節點、每條規則、每份備份，都經過實際部署驗證，不是紙上談兵的架構。
@@ -290,7 +289,7 @@ const HomePage: React.FC = () => {
                 <div className="mt-8">
                   <Link
                     to="/about"
-                    className="group inline-flex items-center gap-2 text-emerald-400/80 text-sm font-semibold tracking-wide hover:text-emerald-300 transition-colors duration-300"
+                    className="group inline-flex items-center gap-2 text-amber-400/70 text-sm font-semibold tracking-wide hover:text-amber-300 transition-colors duration-300"
                   >
                     了解更多
                     <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
@@ -364,8 +363,8 @@ const HomePage: React.FC = () => {
         {/* ===== CTA ===== */}
         <Section variant="transparent" padding={10}>
           <div className="max-w-2xl mx-auto text-center">
-            <div className="w-12 h-12 mx-auto mb-8 rounded-full border border-white/[0.06] bg-white/[0.02] flex items-center justify-center">
-              <CircuitBoard size={18} className="text-white/30" />
+            <div className="w-14 h-14 mx-auto mb-8 rounded-full border border-amber-500/15 bg-amber-500/[0.05] flex items-center justify-center">
+              <CircuitBoard size={20} className="text-amber-400/60" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white/95 tracking-tight mb-4">
               Want to see the infrastructure in action?
@@ -395,3 +394,4 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+
