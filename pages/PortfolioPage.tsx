@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ProjectsAPI } from '../services/apiClient';
@@ -48,19 +47,11 @@ const PortfolioPage: React.FC = () => {
   );
 
   return (
-    <>
-      <SEOMeta
-        title="維運實績"
-        description="Woody 的基礎架構與資安專案實績 — 151+ VM 叢集管理、Fortinet HA 部署、HPE 儲存架構。"
-        path="/portfolio"
-        keywords="維運專案,基礎架構,VMware,Fortinet,HPE 儲存"
-      />
-      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '維運實績', path: '/portfolio' }]} />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen pt-[120px] md:pt-[180px] pb-32 px-6 max-w-7xl mx-auto overflow-x-hidden"
-      >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen pt-[120px] md:pt-[180px] pb-32 px-6 max-w-7xl mx-auto"
+    >
       <header className="mb-16 md:mb-24 text-center px-4">
         <motion.p 
           initial={{ opacity: 0, y: 10 }}
@@ -72,7 +63,7 @@ const PortfolioPage: React.FC = () => {
         <motion.h2 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 tracking-tighter heading-gradient leading-[0.95] text-glow uppercase"
+          className="text-[2.5rem] xs:text-[3rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] font-black mb-12 tracking-tighter heading-gradient leading-[0.9] text-glow uppercase"
         >
           維運<span className="opacity-20 italic font-light">實績</span>
         </motion.h2>
@@ -150,8 +141,8 @@ const PortfolioPage: React.FC = () => {
                 <Link to={`/portfolio/${project.id}`} className="block h-full">
                   <div className="glass-panel p-6 h-full flex flex-col transition-all duration-700 hover:-translate-y-4 dark:hover:border-white/20 hover:border-morandi-slate/40 dark:bg-black/40 bg-white/60 dark:border-white/5 border-black/5 shadow-xl">
                      <div className="aspect-[16/10] rounded-[2rem] overflow-hidden mb-8 bg-black relative">
-                       <img src={project.image} alt={project.title} loading="lazy" className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1s]" />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                       <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1s]" />
+                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40" />
                      </div>
                      
                      <div className="flex-1 flex flex-col px-2">
@@ -181,7 +172,6 @@ const PortfolioPage: React.FC = () => {
         </AnimatePresence>
       </div>
     </motion.div>
-    </>
   );
 };
 

@@ -14,7 +14,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = 'Woody 維運實踐';
-const SITE_URL = 'https://enc.woodywoody40.com';
+const SITE_URL = 'https://xn--hrrs16bo6z.com';
 const DEFAULT_OG_IMAGE = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=1200&h=630';
 const DEFAULT_DESC = '網管與資安維運實踐 | Ubuntu、VMware vSphere、Fortinet 網路安全、HPE 儲存架構 — 從底層基礎設施到高可用架構的技術筆記與實戰記錄。';
 

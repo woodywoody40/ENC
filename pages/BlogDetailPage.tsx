@@ -1,21 +1,17 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { BlogAPI } from '../services/apiClient';
 import { BLOG_POSTS } from '../constants';
-import { SEOMeta, BlogPostSchema, BreadcrumbSchema } from '../lib/seo';
 import {
   ArrowLeft,
-  ArrowRight,
   Calendar,
   Check,
-  ChevronUp,
   Clock,
   Copy,
   Cpu,
   Eye,
   Info,
-  ListTree,
   Loader2,
   Share2,
   Terminal,
@@ -44,43 +40,12 @@ const getReadingMinutes = (content = '') => {
   return Math.max(3, Math.ceil(units / 420));
 };
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fff]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
-interface Heading {
-  level: number;
-  text: string;
-  id: string;
-}
-
-const getHeadings = (content: string): Heading[] => {
-  const headings: Heading[] = [];
-  const lines = content.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith('## ')) {
-      const text = trimmed.replace('## ', '');
-      headings.push({ level: 2, text, id: slugify(text) });
-    } else if (trimmed.startsWith('### ')) {
-      const text = trimmed.replace('### ', '');
-      headings.push({ level: 3, text, id: slugify(text) });
-    }
-  }
-  return headings;
-};
-
 const BlogDetailPage: React.FC = () => {
   const { id } = useParams();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copiedBlock, setCopiedBlock] = useState<number | null>(null);
   const [shared, setShared] = useState(false);
-  const [allPosts, setAllPosts] = useState<any[]>([]);
-  const [activeHeading, setActiveHeading] = useState<string>('');
-  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -108,66 +73,8 @@ const BlogDetailPage: React.FC = () => {
       }
     };
 
-    const fetchAllPosts = async () => {
-      try {
-        const data = await BlogAPI.list();
-        if (data) setAllPosts(data);
-      } catch { /* silent */ }
-    };
-
     fetchPost();
-    fetchAllPosts();
   }, [id]);
-
-  // Scroll spy for TOC and back-to-top
-  useEffect(() => {
-    if (!post?.content) return;
-    const headings = getHeadings(post.content);
-
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 600);
-
-      for (let i = headings.length - 1; i >= 0; i--) {
-        const el = document.getElementById(headings[i].id);
-        if (el && el.getBoundingClientRect().top <= 120) {
-          setActiveHeading(headings[i].id);
-          return;
-        }
-      }
-      setActiveHeading('');
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [post?.content]);
-
-  const headings = useMemo(() => post?.content ? getHeadings(post.content) : [], [post?.content]);
-
-  const handleHeadingClick = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
-  const prevPost = useMemo(() => {
-    if (!allPosts.length || !post) return null;
-    const idx = allPosts.findIndex((p) => p.id === post.id);
-    if (idx > 0) return allPosts[idx - 1];
-    return null;
-  }, [allPosts, post]);
-
-  const nextPost = useMemo(() => {
-    if (!allPosts.length || !post) return null;
-    const idx = allPosts.findIndex((p) => p.id === post.id);
-    if (idx < allPosts.length - 1) return allPosts[idx + 1];
-    return null;
-  }, [allPosts, post]);
-
-  const relatedPosts = useMemo(() => {
-    if (!allPosts.length || !post) return [];
-    return allPosts
-      .filter((p) => p.id !== post.id && p.category === post.category)
-      .slice(0, 3);
-  }, [allPosts, post]);
 
   const highlightCode = (code: string) => {
     const lines = code.trim().split('\n');
@@ -249,8 +156,6 @@ const BlogDetailPage: React.FC = () => {
     const lines = text.split('\n');
     const nodes: React.ReactNode[] = [];
     let listItems: React.ReactNode[] = [];
-    let tableRows: string[] = [];
-    let inTable = false;
 
     const flushList = () => {
       if (!listItems.length) return;
@@ -262,76 +167,12 @@ const BlogDetailPage: React.FC = () => {
       listItems = [];
     };
 
-    const flushTable = () => {
-      if (!tableRows.length) return;
-      const headerLine = tableRows[0];
-      const alignLine = tableRows[1];
-      const dataLines = tableRows.slice(2);
-
-      if (!headerLine || !alignLine) {
-        tableRows = [];
-        return;
-      }
-
-      const headers = headerLine.split('|').filter((c) => c.trim()).map((c) => c.trim());
-      const aligns = alignLine.split('|').filter((c) => c.trim()).map((c) => {
-        if (c.startsWith(':') && c.endsWith(':')) return 'center' as const;
-        if (c.endsWith(':')) return 'right' as const;
-        return 'left' as const;
-      });
-
-      nodes.push(
-        <div key={`${blockKey}-table-${nodes.length}`} className="my-8 overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10">
-          <table className="w-full border-collapse text-sm sm:text-base">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-100 dark:border-white/10 dark:bg-white/[0.04]">
-                {headers.map((h, i) => (
-                  <th key={i} className={`px-4 py-3 sm:px-6 sm:py-4 text-left font-black text-[11px] uppercase tracking-[0.12em] text-zinc-600 dark:text-zinc-300 ${aligns[i] === 'center' ? 'text-center' : aligns[i] === 'right' ? 'text-right' : ''}`}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {dataLines.map((row, ri) => {
-                const cols = row.split('|').filter((c) => c.trim()).map((c) => c.trim());
-                return (
-                  <tr key={ri} className="border-b border-zinc-100 last:border-0 dark:border-white/5">
-                    {cols.map((col, ci) => (
-                      <td key={ci} className={`px-4 py-3 sm:px-6 sm:py-4 text-[0.95rem] leading-7 text-zinc-700 dark:text-zinc-300 ${aligns[ci] === 'center' ? 'text-center' : aligns[ci] === 'right' ? 'text-right' : ''}`}>
-                        {renderInline(col)}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      );
-      tableRows = [];
-    };
-
     lines.forEach((line, index) => {
       const trimmed = line.trim();
 
       if (!trimmed) {
         flushList();
-        flushTable();
         return;
-      }
-
-      // Detect table rows
-      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-        flushList();
-        tableRows.push(trimmed);
-        inTable = true;
-        return;
-      }
-
-      if (inTable) {
-        flushTable();
-        inTable = false;
       }
 
       if (trimmed.startsWith('- ')) {
@@ -346,23 +187,46 @@ const BlogDetailPage: React.FC = () => {
 
       flushList();
 
-      if (trimmed.startsWith('## ')) {
-        const hText = trimmed.replace('## ', '');
-        const hId = slugify(hText);
+      if (trimmed.match(/^!\[.*\]\(.*\)/)) {
+        const match = trimmed.match(/^!\[(.*)\]\((.*?)(?:\s+"(.*)")?\)/);
+        if (match) {
+          const alt = match[1] || '';
+          const src = match[2] || '';
+          const caption = match[3] || alt;
+          nodes.push(
+            <figure key={`${blockKey}-fig-${index}`} className="my-12 sm:my-16">
+              <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-100 shadow-[0_24px_60px_-40px_rgba(24,24,27,0.6)] dark:border-white/10 dark:bg-white/[0.04]">
+                <img
+                  src={src}
+                  alt={alt}
+                  className="w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+              {caption && (
+                <figcaption className="mt-4 text-center text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                  {caption}
+                </figcaption>
+              )}
+            </figure>
+          );
+          return;
+        }
+      }
+
+      if (trimmed.match(/^##\s+/)) {
         nodes.push(
-          <h2 key={`${blockKey}-h2-${index}`} id={hId} className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]">
-            {hText}
+          <h2 key={`${blockKey}-h2-${index}`} className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]">
+            {trimmed.replace('## ', '')}
           </h2>
         );
         return;
       }
 
       if (trimmed.startsWith('### ')) {
-        const hText = trimmed.replace('### ', '');
-        const hId = slugify(hText);
         nodes.push(
-          <h3 key={`${blockKey}-h3-${index}`} id={hId} className="mt-10 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]">
-            {hText}
+          <h3 key={`${blockKey}-h3-${index}`} className="mt-10 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]">
+            {trimmed.replace('### ', '')}
           </h3>
         );
         return;
@@ -376,7 +240,6 @@ const BlogDetailPage: React.FC = () => {
       );
     });
 
-    flushTable();
     flushList();
     return nodes;
   };
@@ -452,32 +315,7 @@ const BlogDetailPage: React.FC = () => {
   const readingMinutes = getReadingMinutes(post.content);
 
   return (
-    <>
-      <SEOMeta
-        title={post?.title || '技術筆記'}
-        description={post?.excerpt?.replace(/^# /, '').slice(0, 160) || '技術筆記'}
-        path={`/blog/${post?.id}`}
-        ogImage={post?.image}
-        ogType="article"
-        publishedTime={post?.date}
-        tags={post?.category ? [post.category] : undefined}
-        keywords={`${post?.category || '技術'},Linux,Ubuntu,Netplan,基礎架構,資安`}
-      />
-      <BlogPostSchema
-        title={post?.title || ''}
-        description={post?.excerpt?.replace(/^# /, '') || ''}
-        path={`/blog/${post?.id}`}
-        image={post?.image}
-        datePublished={post?.date}
-        dateModified={post?.date}
-        tags={post?.category ? [post.category] : undefined}
-      />
-      <BreadcrumbSchema items={[
-        { name: '首頁', path: '/' },
-        { name: '技術筆記', path: '/blog' },
-        { name: post?.title || '文章', path: `/blog/${post?.id}` },
-      ]} />
-      <main className="min-h-screen overflow-x-hidden bg-[#f5f5f2] text-zinc-950 selection:bg-zinc-950 selection:text-white dark:bg-[#090a0f] dark:text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#f5f5f2] text-zinc-950 selection:bg-zinc-950 selection:text-white dark:bg-[#090a0f] dark:text-white">
       <motion.div
         className="fixed left-0 right-0 top-0 z-50 h-1 origin-left bg-emerald-500"
         style={{ scaleX }}
@@ -498,7 +336,7 @@ const BlogDetailPage: React.FC = () => {
               <span>{post.date}</span>
             </div>
 
-            <h1 className="max-w-5xl break-all text-[clamp(1.5rem,5vw,2.75rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
+            <h1 className="max-w-5xl break-all text-[clamp(1.75rem,8.2vw,4.35rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
               {post.title}
             </h1>
           </div>
@@ -533,108 +371,14 @@ const BlogDetailPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1fr_300px] lg:gap-20 lg:py-20">
-        <div className="min-w-0">
-          <article className="min-w-0">
-            <div className="content-rendered">
-              {renderContent(post.content)}
-            </div>
-          </article>
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-20 lg:py-20">
+        <article className="min-w-0">
+          <div className="content-rendered">
+            {renderContent(post.content)}
+          </div>
+        </article>
 
-          {/* Previous / Next Navigation */}
-          {(prevPost || nextPost) && (
-            <nav className="mt-16 border-t border-zinc-200 pt-10 dark:border-white/10 sm:mt-20">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {prevPost ? (
-                  <Link
-                    to={`/blog/${prevPost.id}`}
-                    className="group flex flex-col rounded-2xl border border-zinc-200 bg-white/60 p-5 transition-all hover:border-emerald-500/40 hover:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
-                  >
-                    <span className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-                      <ArrowLeft size={13} /> 上一篇
-                    </span>
-                    <span className="text-sm font-bold leading-snug text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                      {prevPost.title}
-                    </span>
-                  </Link>
-                ) : <div />}
-
-                {nextPost ? (
-                  <Link
-                    to={`/blog/${nextPost.id}`}
-                    className="group flex flex-col rounded-2xl border border-zinc-200 bg-white/60 p-5 transition-all hover:border-emerald-500/40 hover:bg-white sm:text-right dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
-                  >
-                    <span className="mb-2 flex items-center gap-2 justify-end text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-                      下一篇 <ArrowRight size={13} />
-                    </span>
-                    <span className="text-sm font-bold leading-snug text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                      {nextPost.title}
-                    </span>
-                  </Link>
-                ) : <div />}
-              </div>
-            </nav>
-          )}
-
-          {/* Related Posts */}
-          {relatedPosts.length > 0 && (
-            <section className="mt-16 border-t border-zinc-200 pt-10 dark:border-white/10 sm:mt-20">
-              <h3 className="mb-8 flex items-center gap-3 text-[13px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
-                <Eye size={16} className="text-emerald-500" /> 相關文章
-              </h3>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedPosts.map((rp) => (
-                  <Link
-                    key={rp.id}
-                    to={`/blog/${rp.id}`}
-                    className="group block rounded-2xl border border-zinc-200 bg-white/60 p-4 transition-all hover:border-emerald-500/40 dark:border-white/10 dark:bg-white/[0.03]"
-                  >
-                    <div className="mb-3 aspect-[16/9] overflow-hidden rounded-xl bg-zinc-100 dark:bg-white/5">
-                      <img
-                        src={rp.image}
-                        alt={rp.title}
-                        loading="lazy"
-                        className="h-full w-full object-cover opacity-70 transition-all group-hover:scale-105 group-hover:opacity-100"
-                      />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">{rp.category}</span>
-                    <h4 className="mt-2 text-sm font-bold leading-snug text-zinc-800 dark:text-zinc-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
-                      {rp.title}
-                    </h4>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <aside className="lg:sticky lg:top-28 lg:h-fit space-y-6">
-          {/* Table of Contents */}
-          {headings.length > 0 && (
-            <div className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]">
-              <div className="mb-4 flex items-center gap-3 border-b border-zinc-200 pb-4 dark:border-white/10">
-                <ListTree size={17} className="text-emerald-500" />
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">目錄大綱</p>
-              </div>
-              <nav className="space-y-1">
-                {headings.map((h, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleHeadingClick(h.id)}
-                    className={`block w-full text-left transition-all duration-200 rounded-xl px-3 py-2 text-sm leading-snug ${
-                      activeHeading === h.id
-                        ? 'bg-emerald-500/10 text-emerald-700 font-bold dark:text-emerald-400 dark:bg-emerald-500/10'
-                        : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
-                    } ${h.level === 3 ? 'pl-7 text-[13px]' : ''}`}
-                  >
-                    {h.text}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          )}
-
-          {/* Article Tools */}
+        <aside className="lg:sticky lg:top-28 lg:h-fit">
           <div className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]">
             <div className="mb-5 flex items-center gap-3 border-b border-zinc-200 pb-5 dark:border-white/10">
               <Eye size={17} className="text-emerald-500" />
@@ -663,22 +407,10 @@ const BlogDetailPage: React.FC = () => {
         </aside>
       </div>
 
-      {/* Back to Top */}
-      <motion.button
-        type="button"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        initial={false}
-        animate={showBackToTop ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-        className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-lg transition-colors hover:border-emerald-500/40 hover:bg-emerald-50 dark:border-white/10 dark:bg-zinc-900 dark:hover:bg-emerald-950/30"
-      >
-        <ChevronUp size={20} className="text-zinc-500 dark:text-zinc-400" />
-      </motion.button>
-
       <footer className="border-t border-zinc-200 px-5 py-14 text-center dark:border-white/10 sm:px-8">
         <p className="text-[11px] font-black uppercase tracking-[0.35em] text-zinc-400 dark:text-zinc-600">Knowledge Core v3.1</p>
       </footer>
     </main>
-    </>
   );
 };
 

@@ -1,7 +1,7 @@
 /// <reference types="@cloudflare/workers-types" />
 import type { Env, BlogRow, ProjectRow } from './api/lib/types';
 
-const SITE_URL = 'https://enc.woodywoody40.com';
+const SITE_URL = 'https://xn--hrrs16bo6z.com';
 
 /** 今天日期 YYYY-MM-DD (fallback) */
 const today = (): string => new Date().toISOString().split('T')[0];

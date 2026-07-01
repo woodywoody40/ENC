@@ -176,6 +176,28 @@ const ProjectDetailPage: React.FC = () => {
         let trimmed = line.trim();
         if (trimmed === '') return <div key={`${i}-${j}`} className="h-6 sm:h-8" />;
         
+        // Inline image: ![alt](url) or ![alt](url "caption")
+        if (trimmed.match(/^!\[.*\]\(.*\)/)) {
+          const match = trimmed.match(/^!\[(.*)\]\((.*?)(?:\s+"(.*)")?\)/);
+          if (match) {
+            const alt = match[1] || '';
+            const src = match[2] || '';
+            const caption = match[3] || alt;
+            return (
+              <figure key={`${i}-${j}`} className="my-12 sm:my-16">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-900 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.8)]">
+                  <img src={src} alt={alt} className="w-full object-cover" loading="lazy" />
+                </div>
+                {caption && (
+                  <figcaption className="mt-4 text-center text-sm leading-relaxed text-slate-400">
+                    {caption}
+                  </figcaption>
+                )}
+              </figure>
+            );
+          }
+        }
+        
         if (trimmed.match(/^##\s+/)) {
           return (
             <h2 key={`${i}-${j}`} className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mt-24 mb-10 tracking-tighter flex items-center gap-6">
@@ -244,7 +266,7 @@ const ProjectDetailPage: React.FC = () => {
           animate={{ scale: 1 }}
           transition={{ duration: 1.5 }}
           src={project.image} 
-          className="absolute inset-0 w-full h-full object-cover opacity-50" 
+          className="absolute inset-0 w-full h-full object-cover opacity-70" 
           alt={project.title} 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0b10] via-transparent to-transparent" />
