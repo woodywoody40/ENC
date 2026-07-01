@@ -1,139 +1,130 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
-import { ArrowRight, Shield, Database, Server, Globe, Terminal, ChevronRight, CircuitBoard } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Server, Shield, Database, Globe, Terminal, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ConfigAPI } from '../services/apiClient';
-import { Section } from '@astryxdesign/core/Section';
-import { Divider } from '@astryxdesign/core/Divider';
 
-/* ------------------------------------------------------------------ */
-/*  Premium infrastructure portfolio — amber/warm tone, editorial,     */
-/*  atmospheric. Inspired by high-end brand sites.                     */
-/*  CSS transitions only — no JS animation libraries.                  */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/*  Editorial infrastructure portfolio — magazine-grade, atmospheric    */
+/*  Large serif display, technical grid, asymmetric editorial blocks.  */
+/*  Pure CSS motion — no JS animation libraries.                       */
+/* ================================================================== */
 
-/* ---------- Scroll-reveal hook ---------- */
-function useScrollReveal<T extends HTMLElement>(threshold = 0.12): [React.RefCallback<T>, boolean] {
-  const [revealed, setRevealed] = useState(false);
-  const ref = useCallback(
-    (node: T | null) => {
-      if (!node || revealed) return;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setRevealed(true);
-            observer.disconnect();
-          }
-        },
-        { threshold }
-      );
-      observer.observe(node);
-    },
-    [threshold, revealed]
-  );
-  return [ref, revealed];
+/* ---------- Scroll reveal ---------- */
+function useReveal<T extends HTMLElement = HTMLDivElement>(threshold = 0.15) {
+  const ref = useRef<T>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect(); } },
+      { threshold }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [threshold]);
+  return { ref, shown };
 }
 
-/* ---------- Floating accent — amber glow + orbital rings ---------- */
-function FloatingAccent() {
+/* ---------- Reveal wrapper ---------- */
+function Reveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { ref, shown } = useReveal();
   return (
-    <div className="relative w-[360px] h-[360px] xl:w-[460px] xl:h-[460px]">
-      {/* Large ambient amber glow */}
-      <div className="absolute inset-0 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.10)_0%,rgba(245,158,11,0.03)_35%,transparent_65%)] animate-pulse-slow" />
-
-      {/* Outer ring */}
-      <div className="absolute inset-[5%] rounded-full border border-amber-500/10 animate-float" />
-
-      {/* Mid ring */}
-      <div className="absolute inset-[22%] rounded-full border border-amber-400/6 animate-float" style={{ animationDelay: '-1.5s' }} />
-
-      {/* Inner ring */}
-      <div className="absolute inset-[40%] rounded-full border border-amber-300/5 animate-float" style={{ animationDelay: '-3s' }} />
-
-      {/* Core amber dot */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-400/60 animate-pulse-slow shadow-[0_0_20px_rgba(245,158,11,0.3)]" />
-
-      {/* Orbital amber dots */}
-      <div className="absolute top-[12%] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-amber-400/30 animate-float shadow-[0_0_8px_rgba(245,158,11,0.2)]" style={{ animationDelay: '-0.5s' }} />
-      <div className="absolute bottom-[12%] right-[12%] w-1.5 h-1.5 rounded-full bg-amber-300/25 animate-float" style={{ animationDelay: '-2.5s' }} />
-      <div className="absolute top-[30%] right-[8%] w-1.5 h-1.5 rounded-full bg-white/[0.10] animate-float" style={{ animationDelay: '-4s' }} />
-      <div className="absolute bottom-[35%] left-[8%] w-1 h-1 rounded-full bg-amber-400/20 animate-float" style={{ animationDelay: '-1s' }} />
+    <div
+      ref={ref}
+      className={`transition-all duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${className}`}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? 'translateY(0)' : 'translateY(36px)',
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      {children}
     </div>
   );
 }
 
-/* ---------- Process step ---------- */
-function ProcessStep({ num, title, desc }: { num: string; title: string; desc: string }) {
-  const [ref, revealed] = useScrollReveal<HTMLDivElement>();
+/* ---------- Tech marquee strip ---------- */
+function TechMarquee() {
+  const items = [
+    'VMware vSphere', 'Fortinet HA', 'HPE MSA 2050', 'iSCSI Multipath', 'Ubuntu 24.04',
+    'Ansible', 'Cloudflare R2', 'D1 SQLite', 'VLAN Segmentation', 'VPN Gateway',
+    'BGP Routing', 'Nginx Reverse Proxy', 'Docker', 'GitLab CI/CD', 'Prometheus',
+    'Grafana', 'Zabbix', 'Restic Backup', 'WireGuard', 'NetFlow',
+  ];
+  const doubled = [...items, ...items];
   return (
-    <div
-      ref={ref}
-      className={`flex gap-6 sm:gap-8 transition-all duration-[1000ms] ease-out will-change-[opacity,transform] ${
-        revealed ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'
-      }`}
-    >
-      <span className="text-5xl sm:text-6xl font-[200] text-amber-400/15 leading-none tracking-tight select-none">
-        {num}
-      </span>
-      <div className="pt-2 border-t border-amber-400/10">
-        <h3 className="text-base sm:text-lg font-semibold text-white/90 tracking-tight mb-2 mt-3">{title}</h3>
-        <p className="text-sm text-slate-500 font-light leading-relaxed max-w-sm">{desc}</p>
+    <div className="relative overflow-hidden border-y border-white/[0.06] py-5 bg-white/[0.008]">
+      <div className="flex animate-marquee whitespace-nowrap">
+        {doubled.map((item, i) => (
+          <span key={i} className="mx-8 inline-flex items-center gap-3 text-[11px] font-mono-tech uppercase tracking-[0.2em] text-white/25">
+            {item}
+            <span className="w-1 h-1 rounded-full bg-amber-400/30" />
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-/* ---------- Competency card ---------- */
-function CompetencyCard({
-  icon,
-  title,
-  desc,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-}) {
-  const [ref, revealed] = useScrollReveal<HTMLDivElement>();
+/* ---------- Stat block (editorial, no card) ---------- */
+function StatBlock({ label, value, desc, index }: { label: string; value: string; desc: string; index: number }) {
   return (
-    <div
-      ref={ref}
-      className={`group rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[900ms] ease-out will-change-[opacity,transform] hover:border-amber-500/20 hover:bg-amber-500/[0.03] hover:shadow-[0_0_30px_rgba(245,158,11,0.05)] ${
-        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}
-    >
-      <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex items-center justify-center text-amber-400/60 group-hover:bg-amber-500/12 group-hover:text-amber-300 transition-all duration-500 mb-5">
-        {icon}
+    <Reveal delay={index * 80}>
+      <div className="group py-8 border-t border-white/[0.06] hover:border-amber-400/20 transition-colors duration-700">
+        <div className="flex items-baseline justify-between mb-4">
+          <span className="text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/20">{label}</span>
+          <span className="text-[10px] font-mono-tech text-white/10">0{index + 1}</span>
+        </div>
+        <p className="font-serif-editorial text-4xl sm:text-5xl lg:text-6xl text-white/90 leading-none mb-3 group-hover:text-amber-100/90 transition-colors duration-700">
+          {value}
+        </p>
+        <p className="text-xs text-slate-500 font-light leading-relaxed max-w-[16rem]">{desc}</p>
       </div>
-      <h3 className="text-base sm:text-lg font-semibold text-white/90 tracking-tight mb-2">{title}</h3>
-      <p className="text-sm text-slate-500 font-light leading-relaxed">{desc}</p>
-    </div>
+    </Reveal>
   );
 }
 
-/* ---------- Stat card ---------- */
-function StatCard({
-  label,
-  value,
-  desc,
-  span = false,
-}: {
-  label: string;
-  value: string;
-  desc: string;
-  span?: boolean;
-}) {
-  const [ref, revealed] = useScrollReveal<HTMLDivElement>();
+/* ---------- Process step (editorial) ---------- */
+function ProcessStep({ num, title, desc, index }: { num: string; title: string; desc: string; index: number }) {
   return (
-    <div
-      ref={ref}
-      className={`${span ? 'md:col-span-2' : ''} group rounded-2xl border border-white/[0.06] bg-white/[0.015] p-7 sm:p-9 transition-all duration-[1000ms] ease-out will-change-[opacity,transform] hover:border-amber-500/15 hover:bg-amber-500/[0.02] ${
-        revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      }`}
-    >
-      <p className="text-white/25 uppercase tracking-[0.25em] text-[10px] font-[300] mb-3 group-hover:text-amber-400/40 transition-colors duration-500">{label}</p>
-      <p className="text-3xl sm:text-4xl lg:text-5xl font-black text-white/95 tracking-tight mb-2 leading-none group-hover:text-amber-100/90 transition-colors duration-500">{value}</p>
-      <p className="text-sm text-slate-500 font-light leading-relaxed">{desc}</p>
-    </div>
+    <Reveal delay={index * 120}>
+      <div className="group flex gap-8 sm:gap-12 py-10 border-t border-white/[0.06] hover:border-amber-400/15 transition-colors duration-700">
+        <span className="font-mono-tech text-sm text-amber-400/40 tracking-widest pt-1 select-none">{num}</span>
+        <div className="flex-1">
+          <h3 className="font-serif-editorial text-2xl sm:text-3xl text-white/90 mb-3 leading-tight group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
+          <p className="text-sm text-slate-500 font-light leading-relaxed max-w-md">{desc}</p>
+        </div>
+        <ArrowUpRight size={18} className="text-white/10 group-hover:text-amber-400/50 group-hover:rotate-45 transition-all duration-500 pt-1" />
+      </div>
+    </Reveal>
+  );
+}
+
+/* ---------- Competency row (editorial list, not grid cards) ---------- */
+function CompetencyRow({ icon, title, desc, tags, index }: { icon: React.ReactNode; title: string; desc: string; tags: string[]; index: number }) {
+  return (
+    <Reveal delay={index * 100}>
+      <div className="group grid grid-cols-12 gap-4 sm:gap-8 py-10 border-t border-white/[0.06] hover:border-amber-400/15 transition-colors duration-700 cursor-default">
+        <div className="col-span-2 sm:col-span-1 flex items-start pt-1">
+          <div className="w-9 h-9 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 group-hover:border-amber-400/25 group-hover:text-amber-300/70 transition-all duration-500">
+            {icon}
+          </div>
+        </div>
+        <div className="col-span-10 sm:col-span-4">
+          <h3 className="font-serif-editorial text-xl sm:text-2xl text-white/90 group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
+        </div>
+        <div className="col-span-12 sm:col-span-5">
+          <p className="text-sm text-slate-500 font-light leading-relaxed">{desc}</p>
+        </div>
+        <div className="col-span-12 sm:col-span-2 flex sm:flex-col flex-wrap gap-1.5 pt-1">
+          {tags.map((t) => (
+            <span key={t} className="text-[9px] font-mono-tech uppercase tracking-[0.15em] text-white/20 border border-white/[0.06] px-2 py-1 rounded">{t}</span>
+          ))}
+        </div>
+      </div>
+    </Reveal>
   );
 }
 
@@ -158,13 +149,11 @@ const HomePage: React.FC = () => {
     fetchConfigs();
   }, []);
 
-  const [heroRef, heroRevealed] = useScrollReveal<HTMLDivElement>(0.05);
-
   if (loading) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#0a0b10]">
-        <div className="w-5 h-5 rounded-full border border-white/[0.08] border-t-white/30 animate-spin mb-4" />
-        <span className="text-[9px] font-[300] uppercase tracking-[0.5em] text-white/[0.12]">Loading</span>
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#08090c]">
+        <div className="w-4 h-4 rounded-full border border-white/[0.08] border-t-amber-400/50 animate-spin mb-4" />
+        <span className="text-[9px] font-mono-tech uppercase tracking-[0.5em] text-white/15">Loading</span>
       </div>
     );
   }
@@ -183,210 +172,245 @@ const HomePage: React.FC = () => {
         keywords="網管,資安,維運,Linux,VMware,Fortinet,HPE,Ubuntu"
       />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }]} />
-      <div className="relative overflow-x-hidden bg-[#0a0b10]">
 
-        {/* ----- Warm ambient background glow ----- */}
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(245,158,11,0.04)_0%,transparent_50%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_100%,rgba(245,158,11,0.025)_0%,transparent_50%)]" />
-          <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.02)_0%,transparent_60%)]" />
+      <div className="relative overflow-x-hidden bg-[#08090c] text-white">
+
+        {/* ===== Fixed atmospheric background ===== */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute inset-0 bg-grid" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_0%,rgba(245,158,11,0.06)_0%,transparent_45%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_90%,rgba(56,189,248,0.03)_0%,transparent_45%)]" />
+          <div className="absolute inset-0 bg-noise opacity-[0.015] mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)]" />
         </div>
 
         {/* ===== HERO ===== */}
-        <Section variant="transparent" padding={0}>
-          <section className="min-h-[100dvh] grid grid-cols-1 lg:grid-cols-2 pt-28 relative">
-            {/* Left: text */}
-            <div
-              ref={heroRef}
-              className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 pb-16 lg:pb-0 transition-all duration-[1200ms] ease-out will-change-[opacity,transform]"
-              style={{
-                opacity: heroRevealed ? 1 : 0,
-                transform: heroRevealed ? 'translateY(0)' : 'translateY(24px)',
-              }}
-            >
-              {/* Badge - amber */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-amber-500/20 bg-amber-500/[0.06] text-[9px] font-[300] uppercase tracking-[0.3em] text-amber-400/80 mb-10">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70" />
-                Infrastructure &amp; Operations
-              </div>
+        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-28 pb-12 px-6 sm:px-12 lg:px-20">
 
-              {/* Heading */}
-              <h1 className="text-[clamp(2.5rem,7vw,5.5rem)] font-black text-white/95 mb-5 tracking-tight leading-[1.05]">
+          <Reveal>
+            <div className="flex items-center justify-between text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/20">
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60 animate-pulse" />
+                System Operational
+              </span>
+              <span className="hidden sm:block">N 24.0° / E 121.5°</span>
+              <span>v2.0</span>
+            </div>
+          </Reveal>
+
+          <div className="flex-1 flex flex-col justify-center max-w-6xl">
+            <Reveal delay={100}>
+              <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/50 mb-8">
+                Infrastructure · Security · Operations
+              </p>
+            </Reveal>
+            <Reveal delay={200}>
+              <h1 className="font-serif-editorial text-[clamp(3rem,11vw,9rem)] leading-[0.92] tracking-[-0.02em] text-white/95 mb-2">
                 {heroTitle}
               </h1>
-
-              {/* Tagline */}
-              <p className="text-sm sm:text-base text-slate-400/90 leading-relaxed max-w-md mb-10 font-[300] tracking-wide">
-                Infrastructure &amp; DevOps Engineer — {heroIntro}
+            </Reveal>
+            <Reveal delay={300}>
+              <h2 className="font-serif-editorial italic text-[clamp(1.5rem,5vw,3.5rem)] leading-[1] tracking-[-0.01em] text-white/30 mb-10">
+                Architecture of Reliability
+              </h2>
+            </Reveal>
+            <Reveal delay={400}>
+              <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed max-w-xl font-light mb-12">
+                {heroIntro}
               </p>
-
-              {/* CTA */}
-              <div className="flex flex-col sm:flex-row gap-3">
+            </Reveal>
+            <Reveal delay={500}>
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/portfolio"
-                  className="group inline-flex items-center justify-center gap-2.5 bg-white text-[#0a0b10] px-7 py-3.5 rounded-xl text-sm font-semibold tracking-wide hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97]"
+                  className="group inline-flex items-center gap-3 bg-white text-[#08090c] px-8 py-4 text-sm font-semibold tracking-wide hover:bg-amber-50 transition-all duration-300 active:scale-[0.97]"
                 >
-                  查看作品
-                  <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                  查看維運實績
+                  <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
                 <Link
                   to="/blog"
-                  className="group inline-flex items-center justify-center gap-2.5 border border-amber-500/15 text-white/80 px-7 py-3.5 rounded-xl text-sm font-semibold tracking-wide hover:bg-amber-500/[0.06] hover:border-amber-400/30 transition-all duration-300 active:scale-[0.97]"
+                  className="group inline-flex items-center gap-3 border border-white/[0.1] text-white/70 px-8 py-4 text-sm font-semibold tracking-wide hover:border-amber-400/30 hover:text-white hover:bg-white/[0.02] transition-all duration-300 active:scale-[0.97]"
                 >
-                  閱讀筆記
-                  <Terminal size={14} className="opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Terminal size={15} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+                  閱讀技術筆記
                 </Link>
               </div>
-            </div>
+            </Reveal>
+          </div>
 
-            {/* Right: floating amber accent */}
-            <div className="hidden lg:flex items-center justify-center relative">
-              <FloatingAccent />
+          <Reveal delay={600}>
+            <div className="flex items-end justify-between">
+              <div className="flex items-center gap-3 text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/15">
+                <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                Scroll
+              </div>
+              <div className="hidden sm:flex items-center gap-8 text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/15">
+                <span>UPTIME <span className="text-emerald-400/60">{configs.stat_uptime || '99.9%'}</span></span>
+                <span>VMs <span className="text-amber-400/60">{statVm}</span></span>
+                <span>MONITORING <span className="text-emerald-400/60">24/7</span></span>
+              </div>
             </div>
-          </section>
-        </Section>
+          </Reveal>
+        </section>
 
-        {/* ===== DIVIDER ===== */}
-        <Divider variant="subtle" />
+        {/* ===== TECH MARQUEE ===== */}
+        <div className="relative z-10">
+          <TechMarquee />
+        </div>
 
         {/* ===== STATS ===== */}
-        <Section variant="transparent" padding={10}>
-          <div className="max-w-6xl mx-auto w-full">
-            <p className="text-white/15 uppercase tracking-[0.35em] text-[9px] font-[300] mb-10 sm:mb-14">
-              Operational Metrics
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-              <StatCard label="Virtual Machines" value={statVm} desc="Active virtual clusters managed across multiple hypervisors and datacenters." span />
-              <StatCard label="Storage" value="HPE 2050" desc="Multipath iSCSI SAN with redundant fabric topology." />
-              <StatCard label="Defense" value={statDefense} desc="High-availability network edge security cluster." />
-              <StatCard label="Uptime" value={configs.stat_uptime || '99.9%'} desc="Measured SLA across all managed infrastructure." />
-              <StatCard label="Response" value="24/7" desc="Continuous monitoring and incident response with automated alerting and escalation." span />
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32">
+          <div className="max-w-6xl mx-auto">
+            <Reveal>
+              <div className="flex items-baseline justify-between mb-16">
+                <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40">
+                  § 01 — Operational Metrics
+                </p>
+                <p className="text-[10px] font-mono-tech text-white/15 hidden sm:block">Live Data</p>
+              </div>
+            </Reveal>
+            <Reveal delay={100}>
+              <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4rem)] leading-[1] text-white/90 mb-16 max-w-3xl">
+                Numbers from the<br />
+                <span className="italic text-white/30">operations floor.</span>
+              </h2>
+            </Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12">
+              <StatBlock index={0} label="Virtual Machines" value={statVm} desc="Active virtual clusters managed across multiple hypervisors and datacenters." />
+              <StatBlock index={1} label="Storage Array" value="HPE 2050" desc="Multipath iSCSI SAN with redundant fabric topology." />
+              <StatBlock index={2} label="Network Edge" value={statDefense} desc="High-availability Fortinet security cluster." />
+              <StatBlock index={3} label="Measured SLA" value={configs.stat_uptime || '99.9%'} desc="Uptime across all managed infrastructure." />
+              <StatBlock index={4} label="Incident Response" value="24/7" desc="Continuous monitoring with automated alerting and escalation." />
+              <StatBlock index={5} label="Years in Production" value="8+" desc="Hands-on infrastructure engineering across enterprise environments." />
             </div>
           </div>
-        </Section>
-
-        {/* ===== DIVIDER ===== */}
-        <Divider variant="subtle" />
+        </section>
 
         {/* ===== APPROACH + PROCESS ===== */}
-        <Section variant="transparent" padding={10}>
-          <div className="max-w-5xl mx-auto w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-              {/* Left: editorial */}
-              <div>
-                <p className="text-white/15 uppercase tracking-[0.35em] text-[9px] font-[300] mb-6">
-                  Approach
-                </p>
-                <h2 className="text-2xl sm:text-3xl font-black text-white/95 tracking-tight leading-[1.15] mb-5">
-                  從維運現場出發<br />
-                  <span className="text-slate-400/70 font-[250] italic">打造穩定的基礎架構</span>
-                </h2>
-                <div className="w-12 h-px bg-amber-400/30 mb-5" />
-                <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed font-[300] max-w-md">
-                  把網路、虛擬化、儲存與安全整合成清楚的流程，讓日常維運更快、更穩，也更容易交接。
-                  每個節點、每條規則、每份備份，都經過實際部署驗證，不是紙上談兵的架構。
-                </p>
-                <div className="mt-8">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+              <div className="lg:col-span-5">
+                <Reveal>
+                  <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40 mb-8">
+                    § 02 — Approach
+                  </p>
+                  <h2 className="font-serif-editorial text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] text-white/90 mb-8">
+                    From the<br />
+                    <span className="italic text-white/30">operations floor.</span>
+                  </h2>
+                  <div className="w-16 h-px bg-amber-400/30 mb-8" />
+                  <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed font-light max-w-md mb-8">
+                    把網路、虛擬化、儲存與安全整合成清楚的流程，讓日常維運更快、更穩，也更容易交接。
+                    每個節點、每條規則、每份備份，都經過實際部署驗證，不是紙上談兵的架構。
+                  </p>
                   <Link
                     to="/about"
                     className="group inline-flex items-center gap-2 text-amber-400/70 text-sm font-semibold tracking-wide hover:text-amber-300 transition-colors duration-300"
                   >
                     了解更多
-                    <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                    <ArrowUpRight size={14} className="group-hover:rotate-45 transition-transform duration-300" />
                   </Link>
-                </div>
+                </Reveal>
               </div>
 
-              {/* Right: numbered process */}
-              <div className="space-y-10 sm:space-y-12">
-                <ProcessStep
-                  num="01"
-                  title="基礎架構設計與部署"
-                  desc="從實體網路拓樸到虛擬化叢集，規劃可擴充、高可用的基礎設施，並導入自動化部署工具。"
-                />
-                <ProcessStep
-                  num="02"
-                  title="資安防護與監控"
-                  desc="建構多層次安全防禦，涵蓋防火牆規則調校、VPN 閘道管理、入侵偵測與即時告警。"
-                />
-                <ProcessStep
-                  num="03"
-                  title="持續優化與維運"
-                  desc="定期效能評估、備份演練、版本升級，確保系統在演化過程中保持穩定與安全。"
-                />
+              <div className="lg:col-span-7">
+                <ProcessStep index={0} num="01" title="基礎架構設計與部署" desc="從實體網路拓樸到虛擬化叢集，規劃可擴充、高可用的基礎設施，並導入自動化部署工具。" />
+                <ProcessStep index={1} num="02" title="資安防護與監控" desc="建構多層次安全防禦，涵蓋防火牆規則調校、VPN 閘道管理、入侵偵測與即時告警。" />
+                <ProcessStep index={2} num="03" title="持續優化與維運" desc="定期效能評估、備份演練、版本升級，確保系統在演化過程中保持穩定與安全。" />
+                <div className="border-t border-white/[0.06]" />
               </div>
             </div>
           </div>
-        </Section>
-
-        {/* ===== DIVIDER ===== */}
-        <Divider variant="subtle" />
+        </section>
 
         {/* ===== COMPETENCIES ===== */}
-        <Section variant="transparent" padding={10}>
-          <div className="max-w-5xl mx-auto w-full">
-            <p className="text-white/15 uppercase tracking-[0.35em] text-[9px] font-[300] mb-3">
-              Expertise
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-black text-white/95 tracking-tight leading-[1.15] mb-10 sm:mb-14">
-              Core Competencies
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <CompetencyCard
-                icon={<Server size={20} />}
-                title="Virtualization"
-                desc="VMware vSphere cluster management, VM lifecycle automation, resource optimisation across 151+ nodes."
-              />
-              <CompetencyCard
-                icon={<Shield size={20} />}
-                title="Network Security"
-                desc="Fortinet HA pair deployment, VLAN segmentation, firewall policy auditing, VPN gateway operations."
-              />
-              <CompetencyCard
-                icon={<Database size={20} />}
-                title="Storage"
-                desc="HPE 2050 SAN architecture, multipath iSCSI configuration, backup strategy and disaster recovery planning."
-              />
-              <CompetencyCard
-                icon={<Globe size={20} />}
-                title="Cloud & DevOps"
-                desc="Cloudflare Pages, R2, D1; automated CI/CD pipelines; Ubuntu 24.04 server provisioning with Ansible."
-              />
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+          <div className="max-w-6xl mx-auto">
+            <Reveal>
+              <div className="flex items-baseline justify-between mb-16">
+                <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40">
+                  § 03 — Core Competencies
+                </p>
+                <p className="text-[10px] font-mono-tech text-white/15 hidden sm:block">04 Disciplines</p>
+              </div>
+            </Reveal>
+            <Reveal delay={100}>
+              <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4rem)] leading-[1] text-white/90 mb-4">
+                Four disciplines.<br />
+                <span className="italic text-white/30">One engineering ethos.</span>
+              </h2>
+            </Reveal>
+            <div className="mt-12">
+              <CompetencyRow index={0} icon={<Server size={18} />} title="Virtualization" desc="VMware vSphere cluster management, VM lifecycle automation, resource optimisation across 151+ nodes." tags={['vSphere', 'HA', 'DRS']} />
+              <CompetencyRow index={1} icon={<Shield size={18} />} title="Network Security" desc="Fortinet HA pair deployment, VLAN segmentation, firewall policy auditing, VPN gateway operations." tags={['FortiOS', 'IPSec', 'IDS']} />
+              <CompetencyRow index={2} icon={<Database size={18} />} title="Storage" desc="HPE MSA 2050 SAN architecture, multipath iSCSI configuration, backup strategy and disaster recovery." tags={['iSCSI', 'SAN', 'Restic']} />
+              <CompetencyRow index={3} icon={<Globe size={18} />} title="Cloud & DevOps" desc="Cloudflare Pages, R2, D1; automated CI/CD pipelines; Ubuntu 24.04 provisioning with Ansible." tags={['CF R2', 'Ansible', 'CI/CD']} />
+              <div className="border-t border-white/[0.06]" />
             </div>
           </div>
-        </Section>
+        </section>
 
-        {/* ===== DIVIDER ===== */}
-        <Divider variant="subtle" />
+        {/* ===== PULL QUOTE ===== */}
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32 sm:py-40 border-t border-white/[0.04]">
+          <div className="max-w-4xl mx-auto text-center">
+            <Reveal>
+              <Cpu size={28} className="mx-auto text-amber-400/30 mb-10" />
+              <blockquote className="font-serif-editorial text-[clamp(1.5rem,4.5vw,3rem)] leading-[1.2] text-white/80 italic">
+                "可靠不是運氣，是每一次部署、每一條規則、每一份備份累積出來的紀律。"
+              </blockquote>
+              <p className="mt-10 text-[10px] font-mono-tech uppercase tracking-[0.4em] text-white/20">
+                — Engineering Manifesto
+              </p>
+            </Reveal>
+          </div>
+        </section>
 
         {/* ===== CTA ===== */}
-        <Section variant="transparent" padding={10}>
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-14 h-14 mx-auto mb-8 rounded-full border border-amber-500/15 bg-amber-500/[0.05] flex items-center justify-center">
-              <CircuitBoard size={20} className="text-amber-400/60" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white/95 tracking-tight mb-4">
-              Want to see the infrastructure in action?
-            </h2>
-            <p className="text-sm sm:text-base text-slate-400/80 max-w-md mx-auto font-[300] leading-relaxed mb-10">
-              Browse real deployment cases, network topology diagrams, and the full technology stack powering this environment.
-            </p>
-            <Link
-              to="/portfolio"
-              className="group inline-flex items-center gap-2.5 bg-white text-[#0a0b10] px-8 py-4 rounded-xl text-sm font-semibold tracking-wide hover:bg-zinc-200 transition-all duration-300 active:scale-[0.97]"
-            >
-              瀏覽維運實績
-              <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-300" />
-            </Link>
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+          <div className="max-w-5xl mx-auto">
+            <Reveal>
+              <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-12">
+                <div>
+                  <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40 mb-6">
+                    § 04 — Explore
+                  </p>
+                  <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4.5rem)] leading-[1] text-white/90 mb-6">
+                    See the<br />
+                    <span className="italic text-white/30">infrastructure in action.</span>
+                  </h2>
+                  <p className="text-sm text-slate-400/70 max-w-md font-light leading-relaxed">
+                    Browse real deployment cases, network topology diagrams, and the full technology stack powering this environment.
+                  </p>
+                </div>
+                <Link
+                  to="/portfolio"
+                  className="group inline-flex items-center gap-3 bg-white text-[#08090c] px-10 py-5 text-sm font-semibold tracking-wide hover:bg-amber-50 transition-all duration-300 active:scale-[0.97] whitespace-nowrap"
+                >
+                  瀏覽維運實績
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+              </div>
+            </Reveal>
           </div>
-        </Section>
+        </section>
 
         {/* ===== FOOTER ===== */}
-        <footer className="py-14 text-center">
-          <p className="text-white/[0.07] text-[9px] font-[300] uppercase tracking-[0.5em]">
-            Infrastructure Managed with Precision
-          </p>
+        <footer className="relative z-10 px-6 sm:px-12 lg:px-20 py-16 border-t border-white/[0.04]">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/50 animate-pulse" />
+              <p className="text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/15">
+                Infrastructure Managed with Precision
+              </p>
+            </div>
+            <div className="flex items-center gap-6 text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/15">
+              <Link to="/portfolio" className="hover:text-amber-400/50 transition-colors">Portfolio</Link>
+              <Link to="/blog" className="hover:text-amber-400/50 transition-colors">Notes</Link>
+              <Link to="/resume" className="hover:text-amber-400/50 transition-colors">Resume</Link>
+            </div>
+          </div>
         </footer>
       </div>
     </>

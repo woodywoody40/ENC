@@ -85,7 +85,7 @@ html.light .text-glow {
 }
 
 /* ==============================
-   Homepage premium animations — amber warmth
+   Homepage — editorial premium system
    ============================== */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -107,10 +107,55 @@ html.light .text-glow {
   50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.3); }
 }
 
-.animate-float {
-  animation: float 7s ease-in-out infinite;
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.animate-pulse-slow {
-  animation: pulse-slow 5s ease-in-out infinite;
+@keyframes scan-line {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.3; }
+}
+
+.animate-float { animation: float 7s ease-in-out infinite; }
+.animate-pulse-slow { animation: pulse-slow 5s ease-in-out infinite; }
+
+/* Editorial serif */
+.font-serif-editorial { font-family: 'Instrument Serif', 'Noto Sans TC', serif; }
+.font-mono-tech { font-family: 'JetBrains Mono', monospace; }
+
+/* Premium grid background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Noise texture overlay */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+/* Shimmer text */
+.text-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.3) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 8s linear infinite;
+}
+
+/* Marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 40s linear infinite; }
