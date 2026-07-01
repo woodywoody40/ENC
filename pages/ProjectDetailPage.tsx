@@ -227,7 +227,7 @@ const ProjectDetailPage: React.FC = () => {
   );
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black overflow-x-hidden">
       <section className="relative h-[60vh] sm:h-[75vh] w-full overflow-hidden flex flex-col justify-end">
         <motion.img 
           initial={{ scale: 1.05 }}

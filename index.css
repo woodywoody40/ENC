@@ -30,13 +30,15 @@ html.light {
   --card-shadow: 0 10px 40px -10px rgba(45, 52, 54, 0.15);
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background: var(--bg-base);
   color: var(--text-sub);
   font-family: 'Outfit', 'Noto Sans TC', sans-serif;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
   /* 禁止手機端下拉重新整理（若需要 PWA 感更強烈） */
   overscroll-behavior-y: contain;
 }

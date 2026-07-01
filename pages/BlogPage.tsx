@@ -42,7 +42,7 @@ const BlogPage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pt-[130px] sm:pt-[160px] pb-24 sm:pb-32 px-5 sm:px-8 max-w-7xl mx-auto relative"
+      className="min-h-screen pt-[130px] sm:pt-[160px] pb-24 sm:pb-32 px-5 sm:px-8 max-w-7xl mx-auto relative overflow-x-hidden"
     >
       <div className="fixed top-0 right-0 w-[60vw] h-[60vh] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
       <div className="fixed inset-0 opacity-[0.018] pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '56px 56px' }} />

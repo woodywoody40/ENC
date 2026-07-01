@@ -73,7 +73,7 @@ const ResumePage: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pt-[160px] pb-32 px-6 max-w-5xl mx-auto relative"
+      className="min-h-screen pt-[160px] pb-32 px-6 max-w-5xl mx-auto relative overflow-x-hidden"
     >
       <section className="mb-24 text-center">
         <motion.div 

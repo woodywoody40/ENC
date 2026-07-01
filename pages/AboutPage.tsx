@@ -46,7 +46,7 @@ const AboutPage: React.FC = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="min-h-screen pt-[160px] pb-32 px-6 max-w-7xl mx-auto relative"
+      className="min-h-screen pt-[160px] pb-32 px-6 max-w-7xl mx-auto relative overflow-x-hidden"
     >
       <div className="fixed inset-0 pointer-events-none dark:opacity-[0.03] opacity-[0.05] overflow-hidden">
         <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(#2D3436 1px, transparent 1px), linear-gradient(90deg, #2D3436 1px, transparent 1px)', backgroundSize: '40px 40px' }} />

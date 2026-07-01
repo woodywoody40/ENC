@@ -294,7 +294,7 @@ const AdminPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-[130px] pb-32 px-6 max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-10">
+    <div className="min-h-screen pt-[130px] pb-32 px-6 max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-10 overflow-x-hidden">
       <aside className="lg:w-72 shrink-0">
         <div className="glass-panel p-3 flex lg:flex-col gap-2 sticky top-32 bg-black/60 border-white/10 shadow-2xl">
           <NavBtn active={activeTab === 'dashboard'} icon={<LayoutDashboard size={18} />} label="資產概覽" onClick={() => setActiveTab('dashboard')} />
