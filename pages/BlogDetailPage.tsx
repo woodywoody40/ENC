@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { BlogAPI } from '../services/apiClient';
 import { BLOG_POSTS } from '../constants';
+import { SEOMeta, BlogPostSchema, BreadcrumbSchema } from '../lib/seo';
 import {
   ArrowLeft,
   ArrowRight,
@@ -451,7 +452,30 @@ const BlogDetailPage: React.FC = () => {
   const readingMinutes = getReadingMinutes(post.content);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f5f5f2] text-zinc-950 selection:bg-zinc-950 selection:text-white dark:bg-[#090a0f] dark:text-white">
+    <>
+      <SEOMeta
+        title={post?.title || '技術筆記'}
+        description={post?.excerpt?.replace(/^# /, '').slice(0, 160) || '技術筆記'}
+        path={`/blog/${post?.id}`}
+        ogImage={post?.image}
+        ogType="article"
+        publishedTime={post?.date}
+        tags={post?.category ? [post.category] : undefined}
+        keywords={`${post?.category || '技術'},Linux,Ubuntu,Netplan,基礎架構,資安`}
+      />
+      <BlogPostSchema
+        title={post?.title || ''}
+        description={post?.excerpt?.replace(/^# /, '') || ''}
+        path={`/blog/${post?.id}`}
+        image={post?.image}
+        datePublished={post?.date}
+      />
+      <BreadcrumbSchema items={[
+        { name: '首頁', path: '/' },
+        { name: '技術筆記', path: '/blog' },
+        { name: post?.title || '文章', path: `/blog/${post?.id}` },
+      ]} />
+      <main className="min-h-screen overflow-x-hidden bg-[#f5f5f2] text-zinc-950 selection:bg-zinc-950 selection:text-white dark:bg-[#090a0f] dark:text-white">
       <motion.div
         className="fixed left-0 right-0 top-0 z-50 h-1 origin-left bg-emerald-500"
         style={{ scaleX }}
@@ -651,6 +675,7 @@ const BlogDetailPage: React.FC = () => {
         <p className="text-[11px] font-black uppercase tracking-[0.35em] text-zinc-400 dark:text-zinc-600">Knowledge Core v3.1</p>
       </footer>
     </main>
+    </>
   );
 };
 

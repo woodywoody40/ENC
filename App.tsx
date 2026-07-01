@@ -2,9 +2,11 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { HelmetProvider } from 'react-helmet-async';
 
 import Navbar from './components/Navbar';
 import { AstryxProvider } from './components/AstryxProvider';
+import { SEOMeta, PersonSchema, DEFAULT_DESC } from './lib/seo';
 
 // Lazy-loaded pages（改為懶載入，縮小首包體積）
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -106,7 +108,11 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
+      <HelmetProvider>
       <AstryxProvider>
+      {/* Global SEO */}
+      <SEOMeta title="首頁" description={DEFAULT_DESC} path="/" />
+      <PersonSchema />
       <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f8fafc]'}`}>
         {/* 2D 莫蘭迪科技背景 */}
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
@@ -138,6 +144,7 @@ const App: React.FC = () => {
         </Suspense>
       </div>
       </AstryxProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 };

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://enc.woodywoody40.com/sitemap.xml

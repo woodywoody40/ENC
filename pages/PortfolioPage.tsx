@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ProjectsAPI } from '../services/apiClient';
@@ -47,11 +48,19 @@ const PortfolioPage: React.FC = () => {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen pt-[120px] md:pt-[180px] pb-32 px-6 max-w-7xl mx-auto overflow-x-hidden"
-    >
+    <>
+      <SEOMeta
+        title="維運實績"
+        description="Woody 的基礎架構與資安專案實績 — 151+ VM 叢集管理、Fortinet HA 部署、HPE 儲存架構。"
+        path="/portfolio"
+        keywords="維運專案,基礎架構,VMware,Fortinet,HPE 儲存"
+      />
+      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '維運實績', path: '/portfolio' }]} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen pt-[120px] md:pt-[180px] pb-32 px-6 max-w-7xl mx-auto overflow-x-hidden"
+      >
       <header className="mb-16 md:mb-24 text-center px-4">
         <motion.p 
           initial={{ opacity: 0, y: 10 }}
@@ -172,6 +181,7 @@ const PortfolioPage: React.FC = () => {
         </AnimatePresence>
       </div>
     </motion.div>
+    </>
   );
 };
 

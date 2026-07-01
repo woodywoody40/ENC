@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { motion, useScroll, useTransform, Variants } from 'framer-motion';
 import { ArrowRight, ChevronDown, Cpu, Shield, Database, Loader2, Sparkles, Terminal } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -56,7 +57,15 @@ const HomePage: React.FC = () => {
   );
 
   return (
-    <div className="relative overflow-x-hidden">
+    <>
+      <SEOMeta
+        title="首頁"
+        description="Woody Wu — 網管與資安維運實踐。151+ VM 叢集管理、Fortinet HA 部署、HPE 儲存架構調校、Ubuntu 24.04 自動化運維。"
+        path="/"
+        keywords="網管,資安,維運,Linux,VMware,Fortinet,HPE,Ubuntu"
+      />
+      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }]} />
+      <div className="relative overflow-x-hidden">
       {/* ===== HERO ===== */}
       <Section variant="transparent" padding={0}>
         <motion.section
@@ -208,6 +217,7 @@ const HomePage: React.FC = () => {
         </Text>
       </footer>
     </div>
+    </>
   );
 };
 

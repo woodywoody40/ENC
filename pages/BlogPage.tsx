@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogAPI } from '../services/apiClient';
 import { Calendar, ArrowRight, Loader2, Clock, Hash, Zap, Sparkles } from 'lucide-react';
+import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 
 const ALL_POSTS = '全部';
 
@@ -39,11 +40,19 @@ const BlogPage: React.FC = () => {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen pt-[130px] sm:pt-[160px] pb-24 sm:pb-32 px-5 sm:px-8 max-w-7xl mx-auto relative overflow-x-hidden"
-    >
+    <>
+      <SEOMeta
+        title="技術筆記"
+        description="Woody 的基礎架構與資安技術筆記 — Ubuntu 24.04 實戰、Netplan 網路配置、VMware vSphere 叢集管理、Fortinet 防火牆部署、HPE 儲存架構調校。"
+        path="/blog"
+        keywords="技術筆記,Ubuntu,Netplan,VMware,Fortinet,HPE,基礎架構,資安"
+      />
+      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '技術筆記', path: '/blog' }]} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen pt-[130px] sm:pt-[160px] pb-24 sm:pb-32 px-5 sm:px-8 max-w-7xl mx-auto relative overflow-x-hidden"
+      >
       <div className="fixed top-0 right-0 w-[60vw] h-[60vh] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
       <div className="fixed inset-0 opacity-[0.018] pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '56px 56px' }} />
 
@@ -154,6 +163,7 @@ const BlogPage: React.FC = () => {
         <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.5em] sm:tracking-[0.8em] dark:text-white text-morandi-stone/40">End of Feed</p>
       </footer>
     </motion.div>
+    </>
   );
 };
 

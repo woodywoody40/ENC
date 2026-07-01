@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { motion } from 'framer-motion';
 import { 
   Mail, Github, Linkedin, MapPin, 
@@ -70,11 +71,19 @@ const ResumePage: React.FC = () => {
   const certsList = getParsedArray('resume_certs_list');
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen pt-[160px] pb-32 px-6 max-w-5xl mx-auto relative overflow-x-hidden"
-    >
+    <>
+      <SEOMeta
+        title="技術履歷"
+        description="Woody Wu 的技術履歷 — 資深基礎架構與資安工程師。Linux 系統加固、VMware vSphere、Fortinet 網路安全。"
+        path="/resume"
+        keywords="履歷,技術履歷,Woody Wu,基礎架構工程師,資安"
+      />
+      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '技術履歷', path: '/resume' }]} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen pt-[160px] pb-32 px-6 max-w-5xl mx-auto relative overflow-x-hidden"
+      >
       <section className="mb-24 text-center">
         <motion.div 
           initial={{ y: 20, opacity: 0 }} 
@@ -176,6 +185,7 @@ const ResumePage: React.FC = () => {
         </div>
       </div>
     </motion.div>
+    </>
   );
 };
 
