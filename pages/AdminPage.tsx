@@ -402,8 +402,8 @@ const AdminPage: React.FC = () => {
               <div className="flex-1 flex overflow-hidden">
                 <div className="w-[450px] border-r border-white/10 p-10 overflow-y-auto no-scrollbar space-y-12 bg-black/20">
                    <div className="space-y-10">
-                      <Inp label="標題 / Title" value={editingItem.title} onChange={v => setEditingItem({...editingItem, title: v})} />
-                      <Inp label={modalType === 'project' ? "標籤 (逗號分隔)" : "文章分類"} value={modalType === 'project' ? editingItem.tagsString : editingItem.category} onChange={v => modalType === 'project' ? setEditingItem({...editingItem, tagsString: v}) : setEditingItem({...editingItem, category: v})} />
+                      <Inp label="標題 / Title" value={editingItem.title} onChange={(v: string) => setEditingItem({...editingItem, title: v})} />
+                      <Inp label={modalType === 'project' ? "標籤 (逗號分隔)" : "文章分類"} value={modalType === 'project' ? editingItem.tagsString : editingItem.category} onChange={(v: string) => modalType === 'project' ? setEditingItem({...editingItem, tagsString: v}) : setEditingItem({...editingItem, category: v})} />
                       
                       <div className="space-y-4">
                         <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">封面預覽 / Cover Preview</label>

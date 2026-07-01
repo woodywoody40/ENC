@@ -1,38 +1,6 @@
 import React from 'react';
 import { Github, Linkedin, Mail, Twitter } from 'lucide-react';
-
-export interface ProjectMedia {
-  url: string;
-  type: 'image' | 'video';
-  frame: 'none' | 'phone' | 'desktop';
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  details: string;
-  image: string;
-  tags: string[];
-  link: string;
-  media?: ProjectMedia[];
-  type?: string; // 3D 模型類型
-}
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  date: string;
-  category: string;
-  image: string;
-}
-
-export interface ChatMessage {
-  role: 'user' | 'model';
-  text: string;
-}
+import type { Project, BlogPost } from './types';
 
 export const PROJECTS: Project[] = [
   {

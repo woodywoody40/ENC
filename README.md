@@ -31,7 +31,7 @@ Browser ──> /api/*  ─>  Pages Function ─> D1 / R2
 
 1. 安裝依賴：
    `npm install`
-2. 設定 `GEMINI_API_KEY` 在 `.env.local` 以使用 AI 助理（前端使用）
+2. 設定 `VITE_GEMINI_API_KEY` 在 `.env.local` 以使用 AI 助理（前端使用）
 3. 建立 D1 資料庫與 R2 bucket 並更新 `wrangler.jsonc` 的 `database_id`：
    ```bash
    wrangler d1 create woody-portfolio

@@ -23,7 +23,7 @@ const SYSTEM_INSTRUCTION = `
 
 export async function generateContentFromPrompt(prompt: string, type: 'project' | 'blog') {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
     
     const projectSchema = {
       type: Type.OBJECT,
@@ -68,7 +68,7 @@ export async function generateContentFromPrompt(prompt: string, type: 'project' 
 
 export async function rewriteTechnicalContent(content: string) {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `請將此內容進行深度改寫，確保技術細節準確，但措辭與敘述方式與原稿不同：\n\n${content}`,
@@ -84,7 +84,7 @@ export async function rewriteTechnicalContent(content: string) {
 
 export async function getAiResponse(message: string) {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: message,
