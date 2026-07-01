@@ -469,6 +469,8 @@ const BlogDetailPage: React.FC = () => {
         path={`/blog/${post?.id}`}
         image={post?.image}
         datePublished={post?.date}
+        dateModified={post?.date}
+        tags={post?.category ? [post.category] : undefined}
       />
       <BreadcrumbSchema items={[
         { name: '首頁', path: '/' },
@@ -591,6 +593,7 @@ const BlogDetailPage: React.FC = () => {
                       <img
                         src={rp.image}
                         alt={rp.title}
+                        loading="lazy"
                         className="h-full w-full object-cover opacity-70 transition-all group-hover:scale-105 group-hover:opacity-100"
                       />
                     </div>

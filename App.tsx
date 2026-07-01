@@ -6,7 +6,7 @@ import { HelmetProvider } from 'react-helmet-async';
 
 import Navbar from './components/Navbar';
 import { AstryxProvider } from './components/AstryxProvider';
-import { SEOMeta, PersonSchema, DEFAULT_DESC } from './lib/seo';
+import { SEOMeta, PersonSchema, OrganizationSchema, WebSiteSchema, DEFAULT_DESC } from './lib/seo';
 
 // Lazy-loaded pages（改為懶載入，縮小首包體積）
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -110,9 +110,11 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <HelmetProvider>
       <AstryxProvider>
-      {/* Global SEO */}
+      {/* Global SEO — 全站統一中繼資料與結構化實體 */}
       <SEOMeta title="首頁" description={DEFAULT_DESC} path="/" />
       <PersonSchema />
+      <OrganizationSchema />
+      <WebSiteSchema />
       <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f8fafc]'}`}>
         {/* 2D 莫蘭迪科技背景 */}
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">

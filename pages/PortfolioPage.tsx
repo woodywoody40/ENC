@@ -150,7 +150,7 @@ const PortfolioPage: React.FC = () => {
                 <Link to={`/portfolio/${project.id}`} className="block h-full">
                   <div className="glass-panel p-6 h-full flex flex-col transition-all duration-700 hover:-translate-y-4 dark:hover:border-white/20 hover:border-morandi-slate/40 dark:bg-black/40 bg-white/60 dark:border-white/5 border-black/5 shadow-xl">
                      <div className="aspect-[16/10] rounded-[2rem] overflow-hidden mb-8 bg-black relative">
-                       <img src={project.image} alt={project.title} className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1s]" />
+                       <img src={project.image} alt={project.title} loading="lazy" className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1s]" />
                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                      </div>
                      

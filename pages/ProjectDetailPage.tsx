@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ProjectsAPI } from '../services/apiClient';
-import { ArrowLeft, ExternalLink, Calendar, Briefcase, Loader2, Eye, Terminal, ChevronRight, Smartphone, Monitor, Command, Share2, Cpu, Check, Copy, Hash, Zap, Info } from 'lucide-react';
+import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
+import { ArrowLeft, ExternalLink, Briefcase, Loader2, Smartphone, Monitor, Check, Copy, Zap } from 'lucide-react';
 
-const PhoneFrame: React.FC<{ src: string, type: 'image' | 'video' }> = ({ src, type }) => (
+const PhoneFrame: React.FC<{ src: string, type: 'image' | 'video', alt: string }> = ({ src, type, alt }) => (
   <div className="relative mx-auto w-full max-w-[280px] aspect-[9/19.5] group select-none perspective-1000">
     <motion.div 
       whileHover={{ rotateY: 5, rotateX: 2, scale: 1.02 }}
@@ -16,7 +17,7 @@ const PhoneFrame: React.FC<{ src: string, type: 'image' | 'video' }> = ({ src, t
         {type === 'video' ? (
           <video src={src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
         ) : (
-          <img src={src} className="w-full h-full object-cover" alt="Phone preview" />
+          <img src={src} className="w-full h-full object-cover" alt={alt} loading="lazy" />
         )}
       </div>
     </motion.div>
@@ -26,7 +27,7 @@ const PhoneFrame: React.FC<{ src: string, type: 'image' | 'video' }> = ({ src, t
   </div>
 );
 
-const DesktopFrame: React.FC<{ src: string, type: 'image' | 'video' }> = ({ src, type }) => (
+const DesktopFrame: React.FC<{ src: string, type: 'image' | 'video', alt: string }> = ({ src, type, alt }) => (
   <div className="relative mx-auto w-full max-w-[1000px] flex flex-col items-center group mb-16 md:mb-24 perspective-1000 px-2 sm:px-4">
     <motion.div 
       whileHover={{ rotateX: 1, scale: 1.01 }}
@@ -43,7 +44,7 @@ const DesktopFrame: React.FC<{ src: string, type: 'image' | 'video' }> = ({ src,
         {type === 'video' ? (
           <video src={src} className="w-full h-full object-cover object-top" autoPlay muted loop playsInline />
         ) : (
-          <img src={src} className="w-full h-full object-cover object-top" alt="Desktop preview" />
+          <img src={src} className="w-full h-full object-cover object-top" alt={alt} loading="lazy" />
         )}
       </div>
     </motion.div>
@@ -209,25 +210,34 @@ const ProjectDetailPage: React.FC = () => {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0b10]">
-      <div className="flex flex-col items-center gap-6">
-        <Loader2 className="animate-spin text-white/10" size={60} strokeWidth={1} />
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Syncing Node...</span>
+    <>
+      <SEOMeta title="載入中⋯" description="正在讀取專案內容⋯" path={`/projects/${id}`} />
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0b10]">
+        <div className="flex flex-col items-center gap-6">
+          <Loader2 className="animate-spin text-white/10" size={60} strokeWidth={1} />
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Syncing Node...</span>
+        </div>
       </div>
-    </div>
+    </>
   );
 
   if (!project) return (
-    <div className="min-h-screen flex items-center justify-center px-6 text-center bg-[#0a0b10]">
-      <div>
-        <h2 className="text-3xl font-black text-white mb-8 tracking-tighter uppercase">Project Offline</h2>
-        <Link to="/portfolio" className="text-white/40 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] border border-white/10 px-8 py-4 rounded-xl">← 返回主目錄</Link>
+    <>
+      <SEOMeta title="專案不存在" description="該維運專案不存在或已被移除。" path={`/projects/${id}`} noindex />
+      <div className="min-h-screen flex items-center justify-center px-6 text-center bg-[#0a0b10]">
+        <div>
+          <h2 className="text-3xl font-black text-white mb-8 tracking-tighter uppercase">Project Offline</h2>
+          <Link to="/portfolio" className="text-white/40 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] border border-white/10 px-8 py-4 rounded-xl">← 返回主目錄</Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black overflow-x-hidden">
+    <>
+      <SEOMeta title={project.title} description={project.description} path={`/projects/${id}`} ogImage={project.image} keywords={project.tags?.join(', ')} />
+      <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '維運實績', path: '/portfolio' }, { name: project.title, path: `/projects/${id}` }]} />
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black overflow-x-hidden">
       <section className="relative h-[60vh] sm:h-[75vh] w-full overflow-hidden flex flex-col justify-end">
         <motion.img 
           initial={{ scale: 1.05 }}
@@ -281,15 +291,15 @@ const ProjectDetailPage: React.FC = () => {
                 {project.media.map((m: any, idx: number) => (
                   <div key={idx} className={`${m.frame === 'desktop' ? 'md:col-span-2 xl:col-span-3' : 'col-span-1'}`}>
                     {m.frame === 'phone' ? (
-                      <PhoneFrame src={m.url} type={m.type} />
+                      <PhoneFrame src={m.url} type={m.type} alt={`${project.title} 手機畫面截圖 ${idx + 1}`} />
                     ) : m.frame === 'desktop' ? (
-                      <DesktopFrame src={m.url} type={m.type} />
+                      <DesktopFrame src={m.url} type={m.type} alt={`${project.title} 桌面畫面截圖 ${idx + 1}`} />
                     ) : (
                       <div className="aspect-video glass-panel overflow-hidden border-white/5 bg-black rounded-[2rem] relative shadow-2xl">
                         {m.type === 'video' ? (
                           <video src={m.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
                         ) : (
-                          <img src={m.url} className="w-full h-full object-cover" alt="System" />
+                          <img src={m.url} className="w-full h-full object-cover" alt={`${project.title} 系統截圖 ${idx + 1}`} loading="lazy" />
                         )}
                       </div>
                     )}
@@ -326,6 +336,7 @@ const ProjectDetailPage: React.FC = () => {
         <p className="text-[10px] font-black uppercase tracking-[0.6em] text-white">End of Project File</p>
       </footer>
     </motion.div>
+    </>
   );
 };
 

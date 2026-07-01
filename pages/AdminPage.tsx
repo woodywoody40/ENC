@@ -14,6 +14,7 @@ import { Section } from '@astryxdesign/core/Section';
 import { HStack, VStack, StackItem } from '@astryxdesign/core/Stack';
 import { Text, Heading } from '@astryxdesign/core/Text';
 import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
+import { SEOMeta } from '../lib/seo';
 import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/geminiService';
 
 const AdminPage: React.FC = () => {
@@ -270,15 +271,20 @@ const AdminPage: React.FC = () => {
 
   if (authChecking) {
     return (
+      <>
+      <SEOMeta title="管理後台" description="Woody 維運實踐．管理主控台" path="/admin" noindex />
       <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-[#050608]">
         <Loader2 className="animate-spin text-white/20" size={48} strokeWidth={1} />
         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Verifying Access Token...</span>
       </div>
+      </>
     );
   }
 
   if (!isAuthenticated) {
     return (
+      <>
+      <SEOMeta title="管理後台 — 認證" description="請透過 Cloudflare Access 登入管理後台。" path="/admin" noindex />
       <div className="min-h-screen flex items-center justify-center p-6 bg-[#050608]">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-12 max-w-md w-full text-center border-white/5 bg-black/40 shadow-2xl">
           <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-white/10 text-white/40"><Lock size={32} /></div>
@@ -294,10 +300,13 @@ const AdminPage: React.FC = () => {
           </p>
         </motion.div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    <SEOMeta title="管理後台" description="Woody 維運實踐．網站內容管理系統" path="/admin" noindex />
     <div className="min-h-screen pt-[130px] pb-32 px-6 max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-10 overflow-x-hidden">
       <aside className="lg:w-72 shrink-0">
         <div className="glass-panel p-3 flex lg:flex-col gap-2 sticky top-32 bg-black/60 border-white/10 shadow-2xl">
@@ -535,6 +544,7 @@ const AdminPage: React.FC = () => {
 
       <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />
     </div>
+    </>
   );
 };
 

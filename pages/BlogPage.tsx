@@ -114,7 +114,7 @@ const BlogPage: React.FC = () => {
                   </div>
 
                   <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-6 bg-black shadow-2xl">
-                    <img src={post.image} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out" alt={post.title} />
+                    <img src={post.image} className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out" alt={post.title} loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-80" />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1.5 glass-panel dark:bg-white/10 bg-black/40 dark:border-white/20 border-black/30 dark:text-white text-white text-[9px] font-black tracking-widest backdrop-blur-xl rounded-xl">

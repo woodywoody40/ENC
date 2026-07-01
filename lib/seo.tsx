@@ -18,6 +18,44 @@ const SITE_URL = 'https://enc.woodywoody40.com';
 const DEFAULT_OG_IMAGE = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=1200&h=630';
 const DEFAULT_DESC = '網管與資安維運實踐 | Ubuntu、VMware vSphere、Fortinet 網路安全、HPE 儲存架構 — 從底層基礎設施到高可用架構的技術筆記與實戰記錄。';
 
+export const OrganizationSchema: React.FC = () => (
+  <Helmet>
+    <script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "${SITE_NAME}",
+  "url": "${SITE_URL}",
+  "description": "${DEFAULT_DESC}",
+  "sameAs": [
+    "https://github.com/woodywoody40",
+    "https://linkedin.com/in/woodywu"
+  ]
+}`}</script>
+  </Helmet>
+);
+
+export const WebSiteSchema: React.FC = () => (
+  <Helmet>
+    <script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "${SITE_NAME}",
+  "url": "${SITE_URL}",
+  "description": "${DEFAULT_DESC}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "${SITE_URL}/blog?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}`}</script>
+  </Helmet>
+);
+
 export { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, DEFAULT_DESC };
 
 export const SEOMeta: React.FC<SEOProps> = ({
@@ -77,12 +115,17 @@ export const PersonSchema: React.FC = () => (
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Woody Wu",
+  "givenName": "東謙",
+  "familyName": "吳",
+  "alternateName": "Woody",
   "jobTitle": "資深基礎架構與資安工程師",
+  "description": "151+ VM 基礎架構管理、Fortinet HA 部署、HPE 儲存架構調校、Ubuntu 24.04 自動化運維",
   "url": "${SITE_URL}",
   "sameAs": [
     "https://github.com/woodywoody40",
     "https://linkedin.com/in/woodywu"
-  ]
+  ],
+  "knowsAbout": ["Linux", "VMware vSphere", "Fortinet FortiGate", "HPE Storage", "Docker", "Ubuntu", "Network Security"]
 }`}</script>
   </Helmet>
 );
@@ -99,12 +142,15 @@ export const BreadcrumbSchema: React.FC<{ items: BreadcrumbItem[] }> = ({ items 
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    ${items.map((item, i) => `{
+    ${items.map((item, i) => {
+      const isLast = i === items.length - 1;
+      return `{
       "@type": "ListItem",
       "position": ${i + 1},
-      "name": "${item.name}",
-      "item": "${SITE_URL}${item.path}"
-    }`).join(',\n    ')}
+      "name": "${item.name}"${isLast ? '' : `,
+      "item": "${SITE_URL}${item.path}"`}
+    }`;
+    }).join(',\n    ')}
   ]
 }`}</script>
   </Helmet>
@@ -116,8 +162,10 @@ export const BlogPostSchema: React.FC<{
   path: string;
   image: string;
   datePublished: string;
+  dateModified?: string;
   authorName?: string;
-}> = ({ title, description, path, image, datePublished, authorName = 'Woody Wu' }) => (
+  tags?: string[];
+}> = ({ title, description, path, image, datePublished, dateModified, authorName = 'Woody Wu', tags }) => (
   <Helmet>
     <script type="application/ld+json">{`
 {
@@ -126,17 +174,25 @@ export const BlogPostSchema: React.FC<{
   "headline": "${title.replace(/"/g, '\\"')}",
   "description": "${description.replace(/"/g, '\\"')}",
   "url": "${SITE_URL}${path}",
-  "image": "${image}",
+  "image": [
+    "${image}"
+  ],
   "datePublished": "${datePublished}",
-  "dateModified": "${datePublished}",
+  "dateModified": "${dateModified || datePublished}",
   "author": {
     "@type": "Person",
-    "name": "${authorName}"
+    "name": "${authorName}",
+    "url": "${SITE_URL}/about"
   },
   "publisher": {
-    "@type": "Person",
-    "name": "${authorName}"
-  },
+    "@type": "Organization",
+    "name": "Woody 維運實踐",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "${SITE_URL}/favicon-192x192.png"
+    }
+  }${tags && tags.length > 0 ? `,
+  "keywords": "${tags.join(', ')}"` : ''},
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "${SITE_URL}${path}"
