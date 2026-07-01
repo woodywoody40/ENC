@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { Card } from '@astryxdesign/core/Card';
 import { Section } from '@astryxdesign/core/Section';
-import { Grid } from '@astryxdesign/core/Grid';
 import { HStack, VStack, StackItem } from '@astryxdesign/core/Stack';
 import { Text, Heading } from '@astryxdesign/core/Text';
 import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
@@ -314,45 +313,45 @@ const AdminPage: React.FC = () => {
       <main className="flex-1 min-w-0">
         <Section>
         {activeTab === 'dashboard' && (
-          <Grid gap="xl" columns={{ base: 1, md: 3 }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
               <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><Briefcase size={32} /></div>
-              <Text size="display-2" className="!text-white font-[900] tracking-tighter">{projects.length}</Text>
+              <Text type="display-2" className="!text-white font-[900] tracking-tighter">{projects.length}</Text>
               <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">部署專案</Text>
             </Card>
             <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
               <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><BookOpen size={32} /></div>
-              <Text size="display-2" className="!text-white font-[900] tracking-tighter">{posts.length}</Text>
+              <Text type="display-2" className="!text-white font-[900] tracking-tighter">{posts.length}</Text>
               <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">技術文章</Text>
             </Card>
             <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
               <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-emerald-400"><Activity size={32} /></div>
-              <Text size="display-2" className="!text-emerald-400 font-[900] tracking-tighter">ONLINE</Text>
+              <Text type="display-2" className="!text-emerald-400 font-[900] tracking-tighter">ONLINE</Text>
               <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">核心狀態</Text>
             </Card>
-          </Grid>
+          </div>
         )}
 
         {(activeTab === 'projects' || activeTab === 'blog') && (
-          <VStack gap="lg">
+          <VStack gap={6}>
             <HStack justify="between" align="center" className="px-2">
-              <Text size="display-1" className="!text-white font-black uppercase tracking-widest !text-2xl">{activeTab === 'projects' ? '部署資產清單' : '技術文章清單'}</Text>
+              <Text type="display-1" className="!text-white font-black uppercase tracking-widest !text-2xl">{activeTab === 'projects' ? '部署資產清單' : '技術文章清單'}</Text>
               <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog')} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl">
                 <Plus size={18} /> 新增內容
               </button>
             </HStack>
-            <VStack gap="sm">
+            <VStack gap={3}>
               {(activeTab === 'projects' ? projects : posts).map(item => (
-                <Card key={item.id} padding="lg" className="bg-black/40 !border-white/5 shadow-lg group hover:bg-white/[0.05] transition-all">
+                <Card key={item.id} padding={6} className="bg-black/40 !border-white/5 shadow-lg group hover:bg-white/[0.05] transition-all">
                   <HStack justify="between" align="center">
-                    <HStack gap="lg" align="center">
+                    <HStack gap={6} align="center">
                       <img src={item.image} className="w-20 h-20 rounded-2xl object-cover bg-black shadow-inner border border-white/5 shrink-0" />
-                      <VStack gap="xs">
-                        <Text size="large" className="!text-white font-black uppercase tracking-tight">{item.title}</Text>
+                      <VStack gap={2}>
+                        <Text type="large" className="!text-white font-black uppercase tracking-tight">{item.title}</Text>
                         <Text size="sm" className="!text-white/40 font-bold uppercase tracking-widest">{activeTab === 'projects' ? item.tags?.join(' • ') : `${item.category} • ${item.date}`}</Text>
                       </VStack>
                     </HStack>
-                    <HStack gap="sm">
+                    <HStack gap={3}>
                       <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)} className="p-4 rounded-xl bg-white/5 text-white hover:text-emerald-400 hover:bg-white/10 transition-all border border-white/5"><Edit3 size={20} /></button>
                       <button onClick={async () => { if(confirm('確定移除？')) { const api = activeTab === 'projects' ? ProjectsAPI : BlogAPI; await api.remove(item.id); fetchAllData(); } }} className="p-4 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/20"><Trash2 size={20} /></button>
                     </HStack>
@@ -364,14 +363,14 @@ const AdminPage: React.FC = () => {
         )}
 
         {activeTab === 'site_config' && (
-          <Grid gap="xl" columns={{ base: 1, md: 2 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => {
                const config = siteConfigs.find(c => c.key === key);
                return (
-                 <Card key={key} padding="xl" className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
-                    <HStack gap="md" align="center">
+                 <Card key={key} padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
+                    <HStack gap={4} align="center">
                       <div className="w-1.5 h-5 bg-emerald-500 rounded-full" />
-                      <Text size="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
+                      <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
                     </HStack>
                     <textarea 
                       defaultValue={config?.value || ''} 
@@ -382,7 +381,7 @@ const AdminPage: React.FC = () => {
                  </Card>
                );
              })}
-          </Grid>
+          </div>
         )}
         </Section>
       </main>

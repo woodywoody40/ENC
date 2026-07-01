@@ -231,13 +231,13 @@ const StatsCard: React.FC<{ icon: React.ReactNode; title: string; desc: string; 
       <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[1.8rem] dark:bg-white dark:text-black bg-morandi-slate text-white flex items-center justify-center mb-8 sm:mb-10 group-hover:rotate-[360deg] transition-all duration-700 shadow-xl">
         {icon}
       </div>
-      <Heading as="h4" variant="label" className="dark:text-slate-500 text-morandi-stone mb-6 sm:mb-8 !text-[10px] !tracking-[0.35em] sm:!tracking-[0.5em] uppercase">
+      <Heading level={4} className="dark:text-slate-500 text-morandi-stone mb-6 sm:mb-8 !text-[10px] !tracking-[0.35em] sm:!tracking-[0.5em] uppercase">
         {title}
       </Heading>
-      <Text variant="body" className="dark:text-white text-morandi-slate !text-3xl sm:!text-5xl lg:!text-6xl !font-[900] mb-4 !tracking-tight sm:!tracking-tighter group-hover:text-glow transition-all">
+      <Text className="dark:text-white text-morandi-slate !text-3xl sm:!text-5xl lg:!text-6xl !font-[900] mb-4 !tracking-tight sm:!tracking-tighter group-hover:text-glow transition-all">
         {desc}
       </Text>
-      <Text variant="supporting" className="dark:text-slate-400 text-morandi-stone/60 !text-[10px] !font-bold !tracking-[0.24em] sm:!tracking-[0.3em] uppercase">
+      <Text type="supporting" className="dark:text-slate-400 text-morandi-stone/60 !text-[10px] !font-bold !tracking-[0.24em] sm:!tracking-[0.3em] uppercase">
         {detail}
       </Text>
     </Card>
