@@ -344,7 +344,7 @@ const BlogDetailPage: React.FC = () => {
         </div>
       </section>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-20 lg:py-20">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1fr_300px] lg:gap-20 lg:py-20">
         <article className="min-w-0">
           <div className="content-rendered">
             {renderContent(post.content)}
