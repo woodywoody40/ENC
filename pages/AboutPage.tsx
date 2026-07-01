@@ -58,7 +58,7 @@ const AboutPage: React.FC = () => {
             {configs.about_hero_subtitle || "The Infrastructure Guardian"}
           </p>
         </div>
-        <h2 className="text-7xl md:text-[10rem] font-[900] mb-8 tracking-tighter heading-gradient leading-none text-glow uppercase">
+        <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter heading-gradient leading-none text-glow uppercase">
           {configs.about_hero_title_left || "關於"}<span className="opacity-30 italic font-light">{configs.about_hero_title_right || "Woody"}</span>
         </h2>
         <div className="w-32 h-1 bg-gradient-to-r from-transparent via-morandi-slate/40 to-transparent mx-auto mt-12" />
@@ -77,11 +77,11 @@ const AboutPage: React.FC = () => {
                 <span className="text-[10px] font-black dark:text-slate-500 text-morandi-stone uppercase tracking-[0.5em]">Identity Verified</span>
               </div>
 
-              <h3 className="text-4xl md:text-6xl font-black dark:text-white text-morandi-slate mb-12 leading-tight tracking-tighter">
+              <h3 className="text-2xl md:text-4xl font-black dark:text-white text-morandi-slate mb-12 leading-tight tracking-tighter">
                 {configs.about_bio_heading || "在數位動脈中，\n維護絕對的穩定性。"}
               </h3>
               
-              <div className="space-y-10 dark:text-slate-300 text-morandi-slate text-lg md:text-2xl leading-relaxed font-light tracking-wide whitespace-pre-line border-l dark:border-white/10 border-slate-900/10 pl-10 md:pl-16">
+              <div className="space-y-10 dark:text-slate-300 text-morandi-slate text-base md:text-lg leading-relaxed font-light tracking-wide whitespace-pre-line border-l dark:border-white/10 border-slate-900/10 pl-10 md:pl-16">
                 {configs.about_content || "從底層的 HPE 儲存調優到核心防火牆策略，每一行指令都是為了追求極致穩定。"}
               </div>
 
@@ -112,7 +112,7 @@ const AboutPage: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-6xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_uptime || "99.9%"}</p>
+              <p className="text-4xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_uptime || "99.9%"}</p>
               <p className="text-[10px] dark:text-slate-500 text-morandi-stone font-black uppercase tracking-[0.5em] mt-6">System Reliability</p>
             </div>
           </div>
@@ -123,7 +123,7 @@ const AboutPage: React.FC = () => {
               <ShieldCheck size={40} strokeWidth={1.5} />
             </div>
             <div>
-              <p className="text-6xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_vm || "151+"}</p>
+              <p className="text-4xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_vm || "151+"}</p>
               <p className="text-[10px] dark:text-slate-500 text-morandi-stone font-black uppercase tracking-[0.5em] mt-6">Secure Nodes Managed</p>
             </div>
           </div>

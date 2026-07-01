@@ -61,10 +61,10 @@ const BlogPage: React.FC = () => {
 
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 lg:gap-16">
           <div className="relative min-w-0">
-            <h2 className="text-[clamp(2.75rem,13vw,5rem)] md:text-[clamp(6rem,10vw,9rem)] font-[900] tracking-normal heading-gradient leading-[0.92] text-glow select-none">
+            <h2 className="text-[clamp(2rem,8vw,3.5rem)] md:text-[clamp(3rem,6vw,5rem)] font-black tracking-normal heading-gradient leading-[0.92] text-glow select-none">
               技術筆記
             </h2>
-            <div className="absolute -top-8 -left-4 sm:-left-8 text-[5rem] sm:text-[8rem] md:text-[11rem] font-black dark:text-white/[0.02] text-morandi-slate/[0.04] -z-10 tracking-tight leading-none select-none pointer-events-none">
+            <div className="absolute -top-8 -left-4 sm:-left-8 text-[4rem] sm:text-[5rem] md:text-[7rem] font-black dark:text-white/[0.02] text-morandi-slate/[0.04] -z-10 tracking-tight leading-none select-none pointer-events-none">
               KNOWLEDGE
             </div>
           </div>

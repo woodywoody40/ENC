@@ -177,7 +177,7 @@ const ProjectDetailPage: React.FC = () => {
         
         if (trimmed.match(/^##\s+/)) {
           return (
-            <h2 key={`${i}-${j}`} className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mt-24 mb-10 tracking-tighter flex items-center gap-6">
+            <h2 key={`${i}-${j}`} className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mt-24 mb-10 tracking-tighter flex items-center gap-6">
               <div className="w-2 h-10 sm:h-12 bg-gradient-to-b from-emerald-500 to-emerald-800 rounded-full" />
               {processText(trimmed.replace(/^##\s+/, ''))}
             </h2>
@@ -245,7 +245,7 @@ const ProjectDetailPage: React.FC = () => {
 
         <div className="relative px-6 pb-16 max-w-7xl mx-auto w-full z-10">
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-            <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter uppercase text-glow leading-[0.9] max-w-5xl">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 tracking-tighter uppercase text-glow leading-[0.95] max-w-5xl">
               {project.title}
             </h1>
             <div className="flex flex-wrap gap-2.5">

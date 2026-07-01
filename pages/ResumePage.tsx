@@ -83,10 +83,10 @@ const ResumePage: React.FC = () => {
         >
           <span className="dark:text-white text-morandi-slate font-black text-[9px] tracking-[0.8em] uppercase">技術履歷 - Curriculum Vitae</span>
         </motion.div>
-        <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tighter heading-gradient text-glow uppercase">
+        <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter heading-gradient text-glow uppercase">
           {configs.resume_name || "Woody Wu"}
         </h1>
-        <p className="text-xl md:text-2xl dark:text-slate-400 text-morandi-stone font-light tracking-[0.1em] mb-12">
+        <p className="text-base md:text-lg dark:text-slate-400 text-morandi-stone font-light tracking-[0.1em] mb-12">
           {configs.resume_title || "資深基礎架構與資安工程師"}
         </p>
         
@@ -105,7 +105,7 @@ const ResumePage: React.FC = () => {
         <div className="lg:col-span-8 space-y-24">
           <section>
             <SectionHeader icon={<Terminal size={20} />} title="專業總結" />
-            <div className="text-xl dark:text-slate-300 text-morandi-stone font-light leading-relaxed whitespace-pre-line border-l dark:border-white/10 border-black/10 pl-10">
+            <div className="text-base dark:text-slate-300 text-morandi-stone font-light leading-relaxed whitespace-pre-line border-l dark:border-white/10 border-black/10 pl-10">
               {configs.resume_summary || "於教育體系維運核心基礎設施，專注於 Linux 系統加固、高效能儲存架構與資安通報應處。"}
             </div>
           </section>

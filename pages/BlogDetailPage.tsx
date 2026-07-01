@@ -309,7 +309,7 @@ const BlogDetailPage: React.FC = () => {
               <span>{post.date}</span>
             </div>
 
-            <h1 className="max-w-5xl break-all text-[clamp(1.75rem,8.2vw,4.35rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
+            <h1 className="max-w-5xl break-all text-[clamp(1.5rem,5vw,2.75rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
               {post.title}
             </h1>
           </div>

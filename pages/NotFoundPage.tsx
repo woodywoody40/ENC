@@ -16,7 +16,7 @@ const NotFoundPage: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="text-[10rem] sm:text-[14rem] font-black heading-gradient leading-none mb-4 select-none">
+          <div className="text-[6rem] sm:text-[8rem] font-black heading-gradient leading-none mb-4 select-none">
             404
           </div>
           <div className="w-16 h-1 bg-white/10 mx-auto rounded-full mb-8" />

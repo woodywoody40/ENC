@@ -63,7 +63,7 @@ const PortfolioPage: React.FC = () => {
         <motion.h2 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-[2.5rem] xs:text-[3rem] sm:text-[5rem] md:text-[7rem] lg:text-[9rem] font-black mb-12 tracking-tighter heading-gradient leading-[0.9] text-glow uppercase"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 tracking-tighter heading-gradient leading-[0.95] text-glow uppercase"
         >
           維運<span className="opacity-20 italic font-light">實績</span>
         </motion.h2>
