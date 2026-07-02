@@ -92,8 +92,8 @@ const ResumePage: React.FC = () => {
     const location = configs.resume_location || '';
     const github = configs.resume_github || '';
     const linkedin = configs.resume_linkedin || '';
-    const summary = configs.resume_summary || '';
-    const experience = configs.resume_experience || '';
+    const summary = configs.resume_summary || '現任基隆市教育網路中心系統維運工程師，負責 TANet 學術網路資安監控及全市教育網路服務維運。主導建置自動化 VM 備份系統與異地備援架構，管理 150+ 虛擬主機之儲存與資料保護。持有 CEH 與 MTCNA 國際認證。公關實習背景培養了跨部門協作與技術需求溝通能力，能有效橋接技術與業務兩端。';
+    const experience = configs.resume_experience || '### 系統維運工程師 | 基隆市教育網路中心\n2022 - Present\n- 監控 TANet 學術網路異常流量，執行資安事件通報與應處，保障全市教育網路穩定運行\n- 主導設計並建置自動化 VM 備份機制，整合 HPE Storage 與 QNAP NAS，實現異地備援\n- 管理超過 150 台 VMware 虛擬主機，制定標準化部署流程與系統弱掃修補 SOP\n- 兼任 Google Workspace 後台管理，處理全校網域帳號與權限控管\n\n### 公關實習生\n2021 - 2022\n- 負責客戶溝通與專案協調，歷練跨部門需求整合與利害關係人管理\n- 獨立撰寫新聞稿與媒體簡報，累積商業文案與品牌敘事能力';
     const skills = parseSkills(configs.resume_skills);
     const education = educationList.length > 0 ? educationList : [];
 
@@ -114,83 +114,150 @@ const ResumePage: React.FC = () => {
     if (cur) expItems.push(cur);
 
     const expHTML = expItems.map(item => `
-    <div class="exp-item">
-      <h3>${item.title}</h3>
-      <div class="date">${item.date}</div>
-      ${item.bullets.length ? '<ul>' + item.bullets.map(b => '<li>' + b + '</li>').join('') + '</ul>' : ''}
+    <div class="exp-card">
+      <div class="exp-head">
+        <div class="exp-left">
+          <div class="exp-dot"></div>
+          <div>
+            <div class="exp-title">${item.title}</div>
+            <div class="exp-date">${item.date}</div>
+          </div>
+        </div>
+      </div>
+      ${item.bullets.length ? '<ul class="exp-bullets">' + item.bullets.map(b => '<li>' + b + '</li>').join('') + '</ul>' : ''}
     </div>`).join('');
 
     const skillsHTML = skills.map(s =>
-      `<div class="skill-row"><span class="name">${s.name}</span><span class="level">${s.level}</span></div>`
+      `<div class="sk-item"><span class="sk-name">${s.name}</span><span class="sk-bar"><span class="sk-fill" style="width:${s.level === 'Expert' ? '90' : s.level === 'Advanced' ? '70' : '50'}%"></span></span><span class="sk-lvl">${s.level}</span></div>`
     ).join('');
 
     const eduHTML = education.length > 0
       ? education.map((e: any) => `
-    <div class="edu-item">
-      <h4>${e.school}</h4>
-      <div class="date">${e.year}</div>
-      <div class="degree">${e.degree}</div>
+    <div class="edu-card">
+      <div class="edu-icon">\uE601</div>
+      <div class="edu-body">
+        <div class="edu-name">${e.school}</div>
+        <div class="edu-meta"><span class="edu-badge">${e.year}</span><span class="edu-deg">${e.degree}</span></div>
+      </div>
     </div>`).join('')
-      : '<p style="font-size:9pt;color:#555;">國立臺灣海洋大學 — 資工系碩士專班 (2024 - Present)</p>';
+      : '<p style="font-size:9.5pt;color:#555;margin-bottom:4pt;"><strong>國立臺灣海洋大學</strong> — 資工系碩士專班 (2024 - Present)</p>';
 
     const html = `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>${name} 履歷</title>
+<head><meta charset="utf-8"><title>${name} · 專業履歷</title>
 <style>
-  @page { margin: 18mm 20mm; size: A4; }
+  @page { margin: 0; size: A4; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', 'Noto Sans TC', system-ui, sans-serif; color: #1a1a1a; background: #fff; line-height: 1.5; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .header { text-align: center; padding-bottom: 14pt; border-bottom: 2px solid #222; margin-bottom: 16pt; }
-  .header h1 { font-size: 22pt; font-weight: 900; letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 3pt; }
-  .header .title { font-size: 11pt; color: #555; letter-spacing: 1.5pt; margin-bottom: 6pt; }
-  .header .contact { font-size: 8.5pt; color: #666; display: flex; justify-content: center; flex-wrap: wrap; gap: 4pt 14pt; }
-  .header .contact span { white-space: nowrap; }
-  .section { margin-bottom: 14pt; }
-  .section-title { font-size: 11pt; font-weight: 800; text-transform: uppercase; letter-spacing: 2pt; padding-bottom: 3pt; border-bottom: 1px solid #ccc; margin-bottom: 8pt; color: #222; }
-  .summary p { font-size: 9.5pt; line-height: 1.6; color: #333; text-align: justify; }
-  .exp-item { margin-bottom: 10pt; page-break-inside: avoid; }
-  .exp-item h3 { font-size: 10.5pt; font-weight: 700; color: #111; }
-  .exp-item .date { font-size: 9pt; color: #666; font-weight: 600; margin-bottom: 3pt; }
-  .exp-item ul { list-style: none; padding-left: 4pt; }
-  .exp-item ul li { font-size: 9pt; color: #333; line-height: 1.55; padding-left: 12pt; position: relative; margin-bottom: 1.5pt; }
-  .exp-item ul li::before { content: '\\2013'; position: absolute; left: 0; color: #888; }
-  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 14pt; }
-  .skill-row { display: flex; justify-content: space-between; align-items: center; padding: 2pt 0; font-size: 9pt; border-bottom: 1px dotted #ddd; }
-  .skill-row .name { font-weight: 600; color: #222; }
-  .skill-row .level { font-size: 8pt; color: #888; text-transform: uppercase; letter-spacing: 1pt; }
-  .edu-item { margin-bottom: 6pt; page-break-inside: avoid; }
-  .edu-item h4 { font-size: 10pt; font-weight: 700; color: #111; }
-  .edu-item .date { font-size: 8.5pt; color: #666; font-weight: 500; }
-  .edu-item .degree { font-size: 9pt; color: #444; }
-  .footer { text-align: center; font-size: 7.5pt; color: #aaa; border-top: 1px solid #eee; padding-top: 8pt; margin-top: 10pt; }
+  body {
+    font-family: 'Noto Sans TC', 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: #1e1e1e; background: #f5f7fa; line-height: 1.5;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; padding: 0; position: relative; }
+
+  /* ===== TOP BANNER ===== */
+  .banner {
+    background: linear-gradient(135deg, #1a2a3a 0%, #2d4a6b 100%);
+    padding: 32pt 36pt 24pt; color: #fff;
+  }
+  .banner h1 { font-size: 26pt; font-weight: 900; letter-spacing: 2pt; margin-bottom: 2pt; }
+  .banner .sub { font-size: 10pt; color: #a0c0e0; letter-spacing: 2.5pt; font-weight: 500; margin-bottom: 10pt; }
+  .banner .contact { display: flex; flex-wrap: wrap; gap: 6pt 18pt; font-size: 8pt; color: #c0d8ec; }
+  .banner .contact span { opacity: 0.85; }
+
+  /* ===== CONTENT ===== */
+  .content { padding: 22pt 36pt 20pt; }
+
+  .sec { margin-bottom: 16pt; }
+  .sec-header {
+    display: flex; align-items: center; gap: 8pt; margin-bottom: 8pt;
+  }
+  .sec-header .sec-icon {
+    width: 20pt; height: 20pt; border-radius: 50%; background: #1a2a3a;
+    color: #fff; font-size: 9pt; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sec-header .sec-label {
+    font-size: 11pt; font-weight: 800; letter-spacing: 2pt; color: #1a2a3a; text-transform: uppercase;
+  }
+  .sec-header .sec-line { flex: 1; height: 1px; background: linear-gradient(to right, #d0d8e0, transparent); }
+
+  /* ===== SUMMARY ===== */
+  .summary-text { font-size: 9pt; line-height: 1.7; color: #333; text-align: justify; padding-left: 28pt; }
+
+  /* ===== EXPERIENCE ===== */
+  .exp-card { position: relative; padding-left: 28pt; margin-bottom: 10pt; page-break-inside: avoid; }
+  .exp-card::before {
+    content: ''; position: absolute; left: 7pt; top: 10pt; bottom: -6pt;
+    width: 1px; background: #dce3ea;
+  }
+  .exp-card:last-child::before { display: none; }
+  .exp-head { margin-bottom: 2pt; }
+  .exp-left { display: flex; align-items: flex-start; gap: 8pt; }
+  .exp-dot {
+    position: absolute; left: 2.5pt; top: 5pt; width: 10pt; height: 10pt;
+    border-radius: 50%; background: #1a2a3a; border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #dce3ea; flex-shrink: 0;
+  }
+  .exp-title { font-size: 10.5pt; font-weight: 700; color: #1a2a3a; }
+  .exp-date { font-size: 8pt; color: #7a8a9a; font-weight: 500; margin-top: 1pt; }
+  .exp-bullets { list-style: none; padding: 0; margin-top: 3pt; }
+  .exp-bullets li {
+    font-size: 8.5pt; color: #444; line-height: 1.55; padding-left: 12pt;
+    position: relative; margin-bottom: .5pt;
+  }
+  .exp-bullets li::before { content: ''; position: absolute; left: 0; top: 6.5pt; width: 4pt; height: 4pt; border-radius: 50%; background: #7a9abb; }
+
+  /* ===== SKILLS ===== */
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 16pt; padding-left: 28pt; }
+  .sk-item { display: flex; align-items: center; gap: 6pt; }
+  .sk-name { font-size: 8.5pt; font-weight: 600; color: #1a2a3a; min-width: 90pt; }
+  .sk-bar { flex: 1; height: 5pt; background: #eef2f6; border-radius: 3pt; overflow: hidden; }
+  .sk-fill { display: block; height: 100%; border-radius: 3pt; background: linear-gradient(90deg, #2d4a6b, #4a7a9a); }
+  .sk-lvl { font-size: 7pt; color: #888; min-width: 36pt; text-align: right; letter-spacing: .5pt; }
+
+  /* ===== EDUCATION ===== */
+  .edu-card { display: flex; align-items: flex-start; gap: 10pt; padding-left: 28pt; margin-bottom: 6pt; page-break-inside: avoid; }
+  .edu-icon { width: 18pt; height: 18pt; border-radius: 50%; background: #eef2f6; flex-shrink: 0; margin-top: 1pt; }
+  .edu-name { font-size: 10pt; font-weight: 700; color: #1a2a3a; }
+  .edu-meta { display: flex; align-items: center; gap: 8pt; margin-top: 1pt; }
+  .edu-badge { display: inline-block; font-size: 7.5pt; background: #1a2a3a; color: #fff; padding: 1pt 7pt; border-radius: 3pt; font-weight: 600; }
+  .edu-deg { font-size: 8.5pt; color: #555; }
+
+  .footer { text-align: center; font-size: 7pt; color: #bbb; padding: 6pt 36pt 14pt; border-top: 1px solid #eee; margin-top: 4pt; }
 </style></head>
 <body>
-  <div class="header">
+<div class="page">
+  <div class="banner">
     <h1>${name}</h1>
-    <div class="title">${title}</div>
+    <div class="sub">${title}</div>
     <div class="contact">
       ${email ? '<span>\u2709 ' + email + '</span>' : ''}
-      ${location ? '<span>\u2726 ' + location + '</span>' : ''}
-      ${github ? '<span>\u2B21 ' + github.replace('https://', '') + '</span>' : ''}
-      ${linkedin ? '<span>\u25C8 ' + linkedin.replace('https://', '') + '</span>' : ''}
+      ${location ? '<span>\u25CB ' + location + '</span>' : ''}
+      ${github ? '<span>\u25C6 ' + github.replace('https://', '') + '</span>' : ''}
+      ${linkedin ? '<span>\u25A3 ' + linkedin.replace('https://', '') + '</span>' : ''}
     </div>
   </div>
 
-  ${summary ? '<div class="section"><div class="section-title">\u5C08\u696D\u7E3D\u7D50</div><div class="summary"><p>' + summary.replace(/\n/g, '<br>') + '</p></div></div>' : ''}
+  <div class="content">
 
-  ${expItems.length ? '<div class="section"><div class="section-title">\u5DE5\u4F5C\u7D93\u6B77</div>' + expHTML + '</div>' : ''}
+  ${summary ? '<div class="sec"><div class="sec-header"><div class="sec-icon">\u25A0</div><div class="sec-label">\u5C08\u696D\u7E3D\u7D50</div><div class="sec-line"></div></div><div class="summary-text">' + summary.replace(/\n/g, '<br>') + '</div></div>' : ''}
 
-  <div class="section">
-    <div class="section-title">\u6838\u5FC3\u6280\u80FD</div>
+  ${expItems.length ? '<div class="sec"><div class="sec-header"><div class="sec-icon">\u25A0</div><div class="sec-label">\u5DE5\u4F5C\u7D93\u6B77</div><div class="sec-line"></div></div>' + expHTML + '</div>' : ''}
+
+  <div class="sec">
+    <div class="sec-header"><div class="sec-icon">\u25A0</div><div class="sec-label">\u6838\u5FC3\u6280\u80FD</div><div class="sec-line"></div></div>
     <div class="skills-grid">${skillsHTML}</div>
   </div>
 
-  <div class="section">
-    <div class="section-title">\u5B78\u6B77\u7D93\u6B77</div>
+  <div class="sec">
+    <div class="sec-header"><div class="sec-icon">\u25A0</div><div class="sec-label">\u5B78\u6B77\u7D93\u6B77</div><div class="sec-line"></div></div>
     ${eduHTML}
   </div>
 
-  <div class="footer">\u57FA\u65BC enc.moe22.com \u8CC7\u6599\u81EA\u52D5\u751F\u6210 \u00B7 ${new Date().toLocaleDateString('zh-TW')}</div>
+  </div>
+
+  <div class="footer">enc.moe22.com \u00B7 ${new Date().toLocaleDateString('zh-TW')}</div>
+</div>
 </body></html>`;
 
     // 第一優先：Blob URL 方式（最可靠，無快顯封鎖問題）

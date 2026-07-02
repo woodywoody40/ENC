@@ -372,24 +372,134 @@ const AdminPage: React.FC = () => {
         )}
 
         {activeTab === 'site_config' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => {
-               const config = siteConfigs.find(c => c.key === key);
-               return (
-                 <Card key={key} padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
-                    <HStack gap={4} align="center">
-                      <div className="w-1.5 h-5 bg-emerald-500 rounded-full" />
-                      <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
-                    </HStack>
-                    <textarea 
-                      defaultValue={config?.value || ''} 
-                      onBlur={(e) => handleSaveConfig(key, e.target.value)}
-                      placeholder={`輸入 ${key} 內容...`}
-                      className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-emerald-500/40 transition-all font-light leading-relaxed h-[120px]"
-                    />
-                 </Card>
-               );
-             })}
+          <div className="space-y-16">
+            {/* ===== 首頁設定 ===== */}
+            <div>
+              <h3 className="text-white font-black uppercase tracking-[0.4em] text-sm mb-6 flex items-center gap-3">
+                <Sparkles size={18} className="text-emerald-400" /> 首頁設定
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => {
+                  const config = siteConfigs.find(c => c.key === key);
+                  return (
+                    <Card key={key} padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
+                      <HStack gap={4} align="center">
+                        <div className="w-1.5 h-5 bg-emerald-500 rounded-full" />
+                        <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
+                      </HStack>
+                      <textarea
+                        defaultValue={config?.value || ''}
+                        onBlur={(e) => handleSaveConfig(key, e.target.value)}
+                        placeholder={`輸入 ${key} 內容...`}
+                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-emerald-500/40 transition-all font-light leading-relaxed h-[120px]"
+                      />
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ===== 履歷設定 ===== */}
+            <div>
+              <h3 className="text-white font-black uppercase tracking-[0.4em] text-sm mb-6 flex items-center gap-3">
+                <Briefcase size={18} className="text-blue-400" /> 履歷設定
+              </h3>
+
+              {/* 基本資訊 — 短欄位 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {['resume_name', 'resume_title', 'resume_email', 'resume_location', 'resume_github', 'resume_linkedin'].map(key => {
+                  const config = siteConfigs.find(c => c.key === key);
+                  return (
+                    <div key={key} className="bg-black/40 border border-white/10 rounded-2xl p-5 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1 h-4 bg-blue-500 rounded-full" />
+                        <span className="text-white/50 text-[9px] font-black uppercase tracking-[0.3em]">{key.replace('resume_', '').replace(/_/g, ' ')}</span>
+                      </div>
+                      <input
+                        defaultValue={config?.value || ''}
+                        onBlur={(e) => handleSaveConfig(key, e.target.value)}
+                        placeholder={`輸入 ${key.replace('resume_', '')}...`}
+                        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500/40 transition-all"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 專業總結 */}
+              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
+                <HStack gap={4} align="center">
+                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
+                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME SUMMARY</Text>
+                </HStack>
+                <textarea
+                  defaultValue={siteConfigs.find(c => c.key === 'resume_summary')?.value || ''}
+                  onBlur={(e) => handleSaveConfig('resume_summary', e.target.value)}
+                  placeholder="輸入專業總結..."
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[160px]"
+                />
+              </Card>
+
+              {/* 工作經歷（Markdown） */}
+              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
+                <HStack gap={4} align="center">
+                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
+                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EXPERIENCE</Text>
+                  <span className="text-white/20 text-[8px] tracking-widest">格式: ### 職稱 | 公司\n日期\n- 項目符號</span>
+                </HStack>
+                <textarea
+                  defaultValue={siteConfigs.find(c => c.key === 'resume_experience')?.value || ''}
+                  onBlur={(e) => handleSaveConfig('resume_experience', e.target.value)}
+                  placeholder="### 系統維運工程師 | 基隆市教育網路中心&#10;2022 - Present&#10;- 工作項目..."
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[280px] font-mono"
+                />
+              </Card>
+
+              {/* 核心技能 */}
+              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
+                <HStack gap={4} align="center">
+                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
+                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME SKILLS</Text>
+                  <span className="text-white/20 text-[8px] tracking-widest">格式: 技能名稱:等級, 用逗號分隔（等級: Expert / Advanced / Certified）</span>
+                </HStack>
+                <textarea
+                  defaultValue={siteConfigs.find(c => c.key === 'resume_skills')?.value || ''}
+                  onBlur={(e) => handleSaveConfig('resume_skills', e.target.value)}
+                  placeholder="VMware 虛擬化:Expert, 儲存與備援架構:Expert, TANet 資安監控:Expert, 系統弱掃與修補:Advanced, Google Workspace:Advanced, CEH & MTCNA:Certified"
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px]"
+                />
+              </Card>
+
+              {/* 學歷經歷（JSON） */}
+              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
+                <HStack gap={4} align="center">
+                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
+                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EDUCATION LIST</Text>
+                  <span className="text-white/20 text-[8px] tracking-widest">JSON 陣列, 格式: [{'{'}&quot;school&quot;:&quot;...&quot;,&quot;year&quot;:&quot;...&quot;,&quot;degree&quot;:&quot;...&quot;{'}'}]</span>
+                </HStack>
+                <textarea
+                  defaultValue={siteConfigs.find(c => c.key === 'resume_education_list')?.value || ''}
+                  onBlur={(e) => handleSaveConfig('resume_education_list', e.target.value)}
+                  placeholder='[{"school":"國立臺灣海洋大學","year":"2024 - Present","degree":"資工系碩士專班"}]'
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px] font-mono"
+                />
+              </Card>
+
+              {/* 額外連結（JSON） */}
+              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
+                <HStack gap={4} align="center">
+                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
+                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EXTRA LINKS</Text>
+                  <span className="text-white/20 text-[8px] tracking-widest">JSON 陣列, 格式: [{'{'}&quot;label&quot;:&quot;...&quot;,&quot;url&quot;:&quot;...&quot;{'}'}]</span>
+                </HStack>
+                <textarea
+                  defaultValue={siteConfigs.find(c => c.key === 'resume_extra_links')?.value || ''}
+                  onBlur={(e) => handleSaveConfig('resume_extra_links', e.target.value)}
+                  placeholder='[{"label":"個人網站","url":"https://..."}]'
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px] font-mono"
+                />
+              </Card>
+            </div>
           </div>
         )}
         </Section>
