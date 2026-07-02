@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { BlogAPI } from '../services/apiClient';
-import { Calendar, ArrowRight, Loader2, Hash, Zap, Sparkles, BookOpen, Cpu, Search } from 'lucide-react';
+import { Calendar, ArrowRight, Loader2, Hash, Zap, Sparkles, BookOpen, Search } from 'lucide-react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 
 const ALL_POSTS = '全部';
@@ -89,49 +89,87 @@ const BlogPage: React.FC = () => {
 
         {/* ══ HEADER ═══════════════════════════════════════ */}
         <header className="mb-14 sm:mb-16 md:mb-20 relative z-10">
+          {/* ── Eyeline ──────────────────────────────────── */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex items-center gap-4 mb-8 sm:mb-10"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center gap-3 mb-8 sm:mb-12"
           >
-            <div className="w-12 h-px bg-gradient-to-r from-emerald-500/80 to-transparent" />
-            <span className="dark:text-emerald-400/80 text-emerald-700 font-black text-[10px] sm:text-[11px] tracking-[0.35em] uppercase flex items-center gap-2.5">
-              <Cpu size={13} /> Engineering Protocol
+            <span className="dark:text-emerald-400/60 text-emerald-600/80 text-[8px] sm:text-[9px] font-mono font-black tracking-[0.3em] uppercase">
+              // ENGINEERING PROTOCOL
+            </span>
+            <span className="w-px h-3 dark:bg-emerald-500/30 bg-emerald-500/50" />
+            <span className="dark:text-emerald-400/30 text-emerald-600/30 text-[7px] font-mono tracking-widest">
+              v2.4
             </span>
           </motion.div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 lg:gap-16">
-            <div className="relative min-w-0">
-              <h1 className="text-[clamp(2.2rem,8vw,3.8rem)] md:text-[clamp(3.2rem,6vw,5.5rem)] font-black tracking-tight heading-gradient leading-[0.92] text-glow select-none">
-                技術筆記
-              </h1>
-              <div className="absolute -top-10 -left-6 sm:-left-10 text-[5rem] sm:text-[7rem] md:text-[10rem] font-black dark:text-white/[0.015] text-morandi-slate/[0.03] -z-10 tracking-tight leading-none select-none pointer-events-none">
-                KNOWLEDGE
-              </div>
-            </div>
+          {/* ── Main heading ─────────────────────────────── */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+            className="text-[clamp(2.5rem,10vw,6rem)] md:text-[clamp(3.5rem,7vw,7rem)] font-black tracking-tight leading-[0.88] dark:text-white text-morandi-slate select-none mb-5 sm:mb-7"
+          >
+            技術筆記
+          </motion.h1>
 
-            <div className="flex flex-wrap gap-2.5">
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
+          {/* ── Separator + metadata ─────────────────────── */}
+          <div className="flex items-center gap-4 pb-5 sm:pb-6 border-b dark:border-white/[0.06] border-black/[0.06]">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              className="h-px dark:bg-emerald-500/50 bg-emerald-600/60 origin-left flex-1 max-w-[120px]"
+            />
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] dark:text-white/25 text-morandi-stone/40 whitespace-nowrap"
+            >
+              {filteredPosts.length} ARTICLES
+            </motion.span>
+            <span className="w-px h-3 dark:bg-white/8 bg-black/8" />
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-[9px] sm:text-[10px] font-mono tracking-[0.15em] dark:text-white/15 text-morandi-stone/30"
+            >
+              KNOWLEDGE BASE
+            </motion.span>
+          </div>
+
+          {/* ── Category filter ──────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="mt-5 sm:mt-6 flex flex-wrap items-center gap-x-2 gap-y-2"
+          >
+            {categories.map((cat, i) => (
+              <React.Fragment key={cat}>
+                {i > 0 && (
+                  <span className="dark:text-white/8 text-morandi-stone/[0.07] mx-0.5 select-none text-xs font-extralight">/</span>
+                )}
+                <button
                   onClick={() => setFilter(cat)}
                   className={`
-                    relative px-4 sm:px-5 py-2.5 rounded-xl text-[10px] font-black tracking-[0.15em] uppercase
-                    transition-all duration-300 border whitespace-nowrap
+                    text-[10px] sm:text-[11px] font-mono font-black tracking-[0.2em] uppercase
+                    transition-all duration-300 py-1 relative
                     ${filter === cat
-                      ? 'dark:bg-emerald-500/20 bg-emerald-500/90 dark:text-emerald-300 text-white border-emerald-500/40 dark:shadow-[0_0_30px_-8px_rgba(16,185,129,0.3)]'
-                      : 'dark:bg-white/[0.04] bg-white/70 dark:text-white/40 text-morandi-stone/60 dark:border-white/8 border-black/8 hover:dark:border-white/20 hover:border-morandi-slate/30'
+                      ? 'dark:text-emerald-300 text-emerald-700'
+                      : 'dark:text-white/15 text-morandi-stone/25 hover:dark:text-white/35 hover:text-morandi-slate/45'
                     }
                   `}
                 >
                   {cat}
-                </motion.button>
-              ))}
-            </div>
-          </div>
+                </button>
+              </React.Fragment>
+            ))}
+          </motion.div>
         </header>
 
         {/* ══ CONTENT ═════════════════════════════════════ */}
