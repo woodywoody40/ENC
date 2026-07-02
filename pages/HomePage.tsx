@@ -231,14 +231,15 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Right side — floating abstract accent */}
-          <div className="absolute top-24 md:top-32 right-0 h-[100dvh] w-[90vw] md:w-[60vw] flex items-center justify-end pointer-events-none">
-            <div className="relative h-[120vh] aspect-square origin-center translate-x-1/4 pointer-events-auto">
+          <div className="absolute top-32 md:top-40 right-0 h-[100dvh] w-[60vw] md:w-[45vw] flex items-start justify-end pointer-events-none">
+            <div className="relative h-[90vh] aspect-[3/4] origin-center translate-x-1/6 pointer-events-auto">
               <img
                 src="/hero-accent.jpg"
                 alt="Infrastructure abstract"
-                className="w-full h-full object-contain drop-shadow-2xl brightness-50 md:brightness-60 transition-all duration-700 hover:brightness-75 mix-blend-screen opacity-80"
+                className="w-full h-full object-cover drop-shadow-2xl brightness-[0.35] saturate-[0.3] transition-all duration-700 hover:brightness-[0.5] hover:saturate-[0.5] mix-blend-screen opacity-70"
               />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/60 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/70 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
 
