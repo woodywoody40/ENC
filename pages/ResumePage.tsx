@@ -182,26 +182,35 @@ const ResumePage: React.FC = () => {
       {/* 專業證照 — 全寬圖片牆 */}
       <section className="mt-32">
         <SectionHeader icon={<Award size={20} />} title="專業證照" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[240px] md:auto-rows-[300px]">
           {CERTIFICATE_IMAGES.map((cert, idx) => (
             <motion.button
               key={idx}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.06 }}
+              transition={{ delay: idx * 0.07 }}
               onClick={() => setLightboxIndex(idx)}
-              className="group relative aspect-[4/3] rounded-xl overflow-hidden border dark:border-white/10 border-black/10 bg-white/20 dark:bg-black/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
+              className="group relative overflow-hidden rounded-[2.5rem] cursor-pointer"
             >
               <img
                 src={cert.file}
                 alt={cert.name}
                 loading="lazy"
-                className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-8 pb-3 px-3">
-                <p className="text-xs font-black text-white uppercase tracking-tight leading-tight truncate">{cert.name}</p>
-                <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest truncate">{cert.issuer}</p>
+              {/* 漸層疊層 */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* 內框線 */}
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[inherit] pointer-events-none" />
+              {/* 文字區塊 */}
+              <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full flex flex-col justify-end">
+                <h3 className="text-lg md:text-xl font-bold tracking-tight text-white mb-1 translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                  {cert.name}
+                </h3>
+                <p className="text-white/50 text-xs font-semibold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 translate-y-4 group-hover:translate-y-0 ease-out">
+                  {cert.issuer}
+                </p>
               </div>
             </motion.button>
           ))}
