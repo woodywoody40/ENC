@@ -190,16 +190,17 @@ const ResumePage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
               onClick={() => setLightboxIndex(idx)}
-              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-lg transition-shadow duration-500 cursor-pointer w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-1.333rem)] md:w-[calc(25%-1.5rem)] hover:-translate-y-1 transition-transform duration-500"
+              className="flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-lg cursor-pointer w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-1.333rem)] md:w-[calc(25%-1.5rem)] hover:-translate-y-1 transition-all duration-500"
             >
               {/* 圖片區 */}
               <div className="relative aspect-[4/3] flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 p-2 overflow-hidden">
-                <img
+                <motion.img
                   src={cert.file}
                   alt={cert.name}
                   loading="lazy"
-                  style={{ transition: 'transform 2000ms cubic-bezier(0.25,0.1,0.25,1)' }}
-                  className="max-w-full max-h-full object-contain scale-100 group-hover:scale-105"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="max-w-full max-h-full object-contain"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
