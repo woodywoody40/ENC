@@ -115,7 +115,7 @@ const App: React.FC = () => {
       <PersonSchema />
       <OrganizationSchema />
       <WebSiteSchema />
-      <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f8fafc]'}`}>
+      <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f0eae6]'}`}>
         {/* 2D 莫蘭迪科技背景 */}
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
           {/* 動態柔和光暈 */}

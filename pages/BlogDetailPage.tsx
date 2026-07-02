@@ -285,16 +285,16 @@ const BlogDetailPage: React.FC = () => {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-zinc-950 px-6 pt-32 text-white">
+    <div className="blog-detail-wrapper min-h-screen px-6 pt-32">
       <div className="mx-auto max-w-3xl animate-pulse space-y-8">
-        <div className="h-11 w-32 rounded-2xl bg-white/10" />
+        <div className="h-11 w-32 rounded-2xl bg-black/5 dark:bg-white/10" />
         <div className="space-y-4">
-          <div className="h-6 w-44 rounded-full bg-white/10" />
-          <div className="h-12 w-full rounded-2xl bg-white/10" />
-          <div className="h-12 w-4/5 rounded-2xl bg-white/10" />
+          <div className="h-6 w-44 rounded-full bg-black/5 dark:bg-white/10" />
+          <div className="h-12 w-full rounded-2xl bg-black/5 dark:bg-white/10" />
+          <div className="h-12 w-4/5 rounded-2xl bg-black/5 dark:bg-white/10" />
         </div>
-        <div className="h-72 rounded-[2rem] bg-white/10" />
-        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">
+        <div className="h-72 rounded-[2rem] bg-black/5 dark:bg-white/10" />
+        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] dark:text-white/30 text-morandi-stone/50">
           <Loader2 className="animate-spin" size={16} /> Loading article
         </div>
       </div>
@@ -302,10 +302,10 @@ const BlogDetailPage: React.FC = () => {
   );
 
   if (!post) return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6 text-center text-white">
+    <div className="blog-detail-wrapper flex min-h-screen items-center justify-center px-6 text-center">
       <div className="max-w-md">
-        <h2 className="mb-4 text-3xl font-black tracking-tight">找不到這篇文章</h2>
-        <p className="mb-8 text-sm leading-7 text-zinc-400">文章可能已經移除，或目前無法從資料庫讀取。</p>
+        <h2 className="mb-4 text-3xl font-black tracking-tight dark:text-white text-morandi-slate">找不到這篇文章</h2>
+        <p className="mb-8 text-sm leading-7 dark:text-zinc-400 text-morandi-stone">文章可能已經移除，或目前無法從資料庫讀取。</p>
         <Link to="/blog" className="inline-flex min-h-11 items-center justify-center gap-3 rounded-2xl bg-white px-5 text-[12px] font-bold tracking-[0.16em] text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/70">
           <ArrowLeft size={16} /> 返回筆記
         </Link>
@@ -316,7 +316,7 @@ const BlogDetailPage: React.FC = () => {
   const readingMinutes = getReadingMinutes(post.content);
 
   return (
-    <>
+    <div className="blog-detail-wrapper">
       <SEOMeta
         title={post.title}
         description={post.excerpt?.replace(/^# /, '').slice(0, 160) || '技術筆記'}
@@ -434,7 +434,7 @@ const BlogDetailPage: React.FC = () => {
       <footer className="border-t border-zinc-200 px-5 py-14 text-center dark:border-white/10 sm:px-8">
         <p className="text-[11px] font-black uppercase tracking-[0.35em] text-zinc-400 dark:text-zinc-600">Knowledge Core v3.1</p>
       </footer>
-    </>
+    </div>
   );
 };
 

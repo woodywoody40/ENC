@@ -46,9 +46,9 @@ const AboutPage: React.FC = () => {
     <>
       <SEOMeta
         title="關於"
-        description="Woody Wu — 資深基礎架構與資安工程師。擅長 Linux 系統加固、高效能儲存架構與資安通報應處。"
+        description="吳東謙 — 系統維運工程師。專注於 TANet 資安監控、VMware 虛擬化管理、Storage 備份架構，現就讀國立臺灣海洋大學資工系碩專班。"
         path="/about"
-        keywords="關於 Woody,基礎架構工程師,資安工程師,Linux,儲存架構"
+        keywords="關於吳東謙,系統維運,資安工程師,Storage,VMware,CEH"
       />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '關於', path: '/about' }]} />
       <motion.div
@@ -64,11 +64,11 @@ const AboutPage: React.FC = () => {
       <motion.div variants={itemVariants} className="text-center mb-32 relative z-10">
         <div className="inline-block px-6 py-2 glass-panel dark:border-white/10 border-slate-900/10 dark:bg-white/5 bg-white/40 mb-8">
           <p className="dark:text-white text-morandi-slate font-black text-[10px] tracking-[0.8em] uppercase">
-            {configs.about_hero_subtitle || "The Infrastructure Guardian"}
+            {configs.about_hero_subtitle || "系統維運 · 資安監控 · 基隆在地"}
           </p>
         </div>
         <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter dark:text-white text-morandi-slate uppercase">
-          {configs.about_hero_title_left || "關於"}<span className="opacity-30 italic font-light">{configs.about_hero_title_right || "Woody"}</span>
+          {configs.about_hero_title_left || "關於"}<span className="opacity-30 italic font-light">{configs.about_hero_title_right || "東謙"}</span>
         </h2>
         <div className="w-32 h-1 bg-gradient-to-r from-transparent via-morandi-slate/40 to-transparent mx-auto mt-12" />
       </motion.div>
@@ -87,11 +87,11 @@ const AboutPage: React.FC = () => {
               </div>
 
               <h3 className="text-2xl md:text-4xl font-black dark:text-white text-morandi-slate mb-12 leading-tight tracking-tighter">
-                {configs.about_bio_heading || "在數位動脈中，\n維護絕對的穩定性。"}
+                {configs.about_bio_heading || "從基隆出發，\n守護教育數位基礎。"}
               </h3>
               
               <div className="space-y-10 dark:text-slate-300 text-morandi-slate text-base md:text-lg leading-relaxed font-light tracking-wide whitespace-pre-line border-l dark:border-white/10 border-slate-900/10 pl-10 md:pl-16">
-                {configs.about_content || "從底層的 HPE 儲存調優到核心防火牆策略，每一行指令都是為了追求極致穩定。"}
+                {configs.about_content || "我是吳東謙，現就讀國立臺灣海洋大學資訊工程碩士專班，同時任職於基隆市教育網路中心。學術與實戰並行的雙軌節奏，讓我能將理論帶進機房，也把第一線維運經驗反芻為研究深度。\n\n在教網中心，我負責 TANet 學術網路的資安監控與流量分析，確保全市教育網路服務穩定運行。從零建置的自動化 VM 備份系統與異地備援架構，結合 HPE Storage 與 QNAP NAS 的整合調度，為超過 150 台虛擬主機提供了可驗證的資料韌性。\n\n除技術實務外，公關產業的實習背景給了我另一種視野——跨部門溝通、需求轉譯、利害關係人協調，讓我在技術團隊中不只是執行者，更是連結者。"}
               </div>
 
               <div className="flex flex-wrap gap-5 pt-20">
@@ -141,21 +141,21 @@ const AboutPage: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10 relative z-10">
         <SkillCard 
-          icon={<Server size={32} />} 
-          title={configs.about_skill1_title || "OS & Virtualization"}
-          desc={configs.about_skill1_desc || "Ubuntu 24.04 LTS 專家, vSphere 8.0 管理, 151+ VM 叢集調度。"}
+          icon={<HardDrive size={32} />} 
+          title={configs.about_skill1_title || "儲存 & 備份"}
+          desc={configs.about_skill1_desc || "規劃異地備援架構，設計自動化 VM 備份策略，管理 HPE Storage 與 QNAP NAS 儲存集群。"}
           accentColor="rgba(52, 211, 153, 0.2)"
         />
         <SkillCard 
-          icon={<Network size={32} />} 
-          title={configs.about_skill2_title || "Security Edge"}
-          desc={configs.about_skill2_desc || `${configs.stat_defense || "Fortinet HA"} 部署, VDOM 隔離實踐, TANet 維運。`}
+          icon={<ShieldCheck size={32} />} 
+          title={configs.about_skill2_title || "資安 & 弱掃"}
+          desc={configs.about_skill2_desc || "執行系統弱點掃描與漏洞修補，監控 TANet 異常流量，持有 CEH 國際資安認證。"}
           accentColor="rgba(56, 189, 248, 0.2)"
         />
         <SkillCard 
-          icon={<HardDrive size={32} />} 
-          title={configs.about_skill3_title || "Storage Logic"}
-          desc={configs.about_skill3_desc || "HPE MSA 2050 混合儲存, QNAP NAS 備援, iSCSI Multipath。"}
+          icon={<Server size={32} />} 
+          title={configs.about_skill3_title || "VM & 雲端管理"}
+          desc={configs.about_skill3_desc || "維運 VMware vSphere 集群（150+ VM），制定標準化部署流程，管理 Google Workspace 網域。"}
           accentColor="rgba(168, 85, 247, 0.2)"
         />
       </div>

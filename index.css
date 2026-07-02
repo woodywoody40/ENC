@@ -41,7 +41,7 @@
 }
 
 html.light {
-  --bg-base: #E9E5E3;
+  --bg-base: #f0eae6;
   --text-main: #2D3436;
   --text-sub: #434C5E;
   --glass-bg: rgba(255, 255, 255, 0.8);
@@ -319,3 +319,28 @@ html.light .project-detail-wrapper .bg-white\/10 { background: rgba(45,52,54,0.0
 html.light .project-detail-wrapper section:first-of-type .text-white { color: #fff; }
 html.light .project-detail-wrapper section:first-of-type .text-white\/70 { color: rgba(255,255,255,0.7); }
 html.light .project-detail-wrapper ::selection { background: rgba(45,52,54,0.15); color: #2D3436; }
+
+/* ==============================
+   NotFoundPage — Light mode support
+   ============================== */
+html.light .not-found-wrapper { background: #f0eae6; }
+html.light .not-found-wrapper .text-white { color: #2D3436; }
+html.light .not-found-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
+html.light .not-found-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
+html.light .not-found-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .not-found-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .not-found-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+
+/* ==============================
+   BlogDetailPage — Light mode support
+   ============================== */
+html.light .blog-detail-wrapper { background: #f0eae6; color: #2D3436; }
+html.light .blog-detail-wrapper .text-white { color: #2D3436; }
+html.light .blog-detail-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
+html.light .blog-detail-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
+html.light .blog-detail-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
+html.light .blog-detail-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
+html.light .blog-detail-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
+html.light .blog-detail-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .blog-detail-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .blog-detail-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }

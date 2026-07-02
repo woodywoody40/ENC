@@ -63,9 +63,12 @@ const ResumePage: React.FC = () => {
 
   const parseSkills = (skillsStr: string) => {
     if (!skillsStr) return [
-      { name: "Linux System", level: "Expert" },
-      { name: "Network Security", level: "Expert" },
-      { name: "Cloud Storage", level: "Advanced" }
+      { name: "VMware 虛擬化", level: "Expert" },
+      { name: "儲存與備援架構", level: "Expert" },
+      { name: "TANet 資安監控", level: "Expert" },
+      { name: "系統弱掃與修補", level: "Advanced" },
+      { name: "Google Workspace", level: "Advanced" },
+      { name: "CEH & MTCNA", level: "Certified" }
     ];
     return skillsStr.split(',').map(s => {
       const [name, level] = s.split(':');
@@ -87,9 +90,9 @@ const ResumePage: React.FC = () => {
     <>
       <SEOMeta
         title="技術履歷"
-        description="Woody Wu 的技術履歷 — 資深基礎架構與資安工程師。Linux 系統加固、VMware vSphere、Fortinet 網路安全。"
+        description="吳東謙的技術履歷 — 系統維運工程師。TANet 資安監控、VMware 虛擬化管理、自動化備份架構，CEH / MTCNA 雙認證。"
         path="/resume"
-        keywords="履歷,技術履歷,Woody Wu,基礎架構工程師,資安"
+        keywords="履歷,技術履歷,吳東謙,系統維運,Storage,VMware,CEH,MTCNA"
       />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '技術履歷', path: '/resume' }]} />
       <motion.div
@@ -106,15 +109,15 @@ const ResumePage: React.FC = () => {
           <span className="dark:text-white text-morandi-slate font-black text-[9px] tracking-[0.8em] uppercase">技術履歷 - Curriculum Vitae</span>
         </motion.div>
         <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter dark:text-white text-morandi-slate uppercase">
-          {configs.resume_name || "Woody Wu"}
+          {configs.resume_name || "吳東謙"}
         </h1>
         <p className="text-base md:text-lg dark:text-slate-400 text-morandi-stone font-light tracking-[0.1em] mb-12">
-          {configs.resume_title || "資深基礎架構與資安工程師"}
+          {configs.resume_title || "系統維運工程師"}
         </p>
         
         <div className="flex flex-wrap justify-center gap-6 md:gap-8 dark:text-slate-500 text-morandi-stone">
           <ContactItem icon={<Mail size={16} />} text={configs.resume_email || "example@mail.com"} />
-          <ContactItem icon={<MapPin size={16} />} text={configs.resume_location || "Taiwan"} />
+          <ContactItem icon={<MapPin size={16} />} text={configs.resume_location || "基隆, Taiwan"} />
           {configs.resume_github && <ContactItem icon={<Github size={16} />} text="GitHub" href={configs.resume_github} />}
           {configs.resume_linkedin && <ContactItem icon={<Linkedin size={16} />} text="LinkedIn" href={configs.resume_linkedin} />}
           {extraLinks.map((link: any, idx: number) => (
@@ -128,14 +131,14 @@ const ResumePage: React.FC = () => {
           <section>
             <SectionHeader icon={<Terminal size={20} />} title="專業總結" />
             <div className="text-base dark:text-slate-300 text-morandi-stone font-light leading-relaxed whitespace-pre-line border-l dark:border-white/10 border-black/10 pl-10">
-              {configs.resume_summary || "於教育體系維運核心基礎設施，專注於 Linux 系統加固、高效能儲存架構與資安通報應處。"}
+              {configs.resume_summary || "現任基隆市教育網路中心系統維運工程師，負責 TANet 學術網路資安監控及全市教育網路服務維運。主導建置自動化 VM 備份系統與異地備援架構，管理 150+ 虛擬主機之儲存與資料保護。持有 CEH 與 MTCNA 國際認證。公關實習背景培養了跨部門協作與技術需求溝通能力，能有效橋接技術與業務兩端。"}
             </div>
           </section>
 
           <section>
             <SectionHeader icon={<Briefcase size={20} />} title="工作經歷" />
             <div className="space-y-12 border-l dark:border-white/5 border-black/10 ml-4 pl-10 relative">
-              {renderMarkdownText(configs.resume_experience || "### 資深工程師 | 基隆市教網中心\n2020 - Present\n- 管理 151+ 台伺服器\n- 導入自動化備份體系")}
+              {renderMarkdownText(configs.resume_experience || "### 系統維運工程師 | 基隆市教育網路中心\n2022 - Present\n- 監控 TANet 學術網路異常流量，執行資安事件通報與應處，保障全市教育網路穩定運行\n- 主導設計並建置自動化 VM 備份機制，整合 HPE Storage 與 QNAP NAS，實現異地備援\n- 管理超過 150 台 VMware 虛擬主機，制定標準化部署流程與系統弱掃修補 SOP\n- 兼任 Google Workspace 後台管理，處理全校網域帳號與權限控管\n\n### 公關實習生\n2021 - 2022\n- 負責客戶溝通與專案協調，歷練跨部門需求整合與利害關係人管理\n- 獨立撰寫新聞稿與媒體簡報，累積商業文案與品牌敘事能力")}
             </div>
           </section>
         </div>
@@ -163,7 +166,7 @@ const ResumePage: React.FC = () => {
                 ))
               ) : (
                 <div className="dark:text-slate-400 text-morandi-stone">
-                  {renderMarkdownText(configs.resume_education)}
+                  {renderMarkdownText(configs.resume_education || "### 國立臺灣海洋大學\n2024 - Present\n資工系碩士專班")}
                 </div>
               )}
             </div>
@@ -211,7 +214,7 @@ const ResumePage: React.FC = () => {
                 ))
               ) : (
                 <div className="dark:text-slate-400 text-morandi-stone">
-                  {renderMarkdownText(configs.resume_certs)}
+                  {renderMarkdownText(configs.resume_certs || "### EC-Council\nCEH (Certified Ethical Hacker)\n\n### MikroTik\nMTCNA 網路工程師認證\n\n### Google\nIT Support Professional Certificate")}
                 </div>
               )}
             </div>
