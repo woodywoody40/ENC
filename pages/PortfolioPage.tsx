@@ -160,39 +160,67 @@ const PortfolioPage: React.FC = () => {
 
       {/* ══ HEADER ══════════════════════════════════════════ */}
       <header className="mb-16 md:mb-24 relative z-10">
+
+        {/* ── Eyeline ──────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="flex items-center gap-4 mb-8"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center gap-3 mb-8 sm:mb-12"
         >
-          <div className="w-12 h-px bg-gradient-to-r from-emerald-500/80 to-transparent" />
-          <span className="dark:text-emerald-400/80 text-emerald-700 font-black text-[10px] sm:text-[11px] tracking-[0.35em] uppercase flex items-center gap-2.5">
-            <Cpu size={13} /> Operational Archive
+          <span className="dark:text-emerald-400/60 text-emerald-600/80 text-[8px] sm:text-[9px] font-mono font-black tracking-[0.3em] uppercase">
+            // OPERATIONAL ARCHIVE
+          </span>
+          <span className="w-px h-3 dark:bg-emerald-500/30 bg-emerald-500/50" />
+          <span className="dark:text-emerald-400/30 text-emerald-600/30 text-[7px] font-mono tracking-widest">
+            v1.0
           </span>
         </motion.div>
 
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-          <div className="relative min-w-0">
-            <h1 className="text-[clamp(2.8rem,12vw,6rem)] md:text-[clamp(4rem,8vw,8rem)] font-black tracking-tight leading-[0.88] select-none">
-              <span className="heading-gradient text-glow block">維運</span>
-              <span className="dark:text-white/10 text-morandi-slate/20 italic font-light block -mt-2 sm:-mt-4">
-                實績
-              </span>
-            </h1>
-            <div className="absolute -top-12 -left-8 sm:-left-12 text-[6rem] sm:text-[10rem] md:text-[14rem] font-black dark:text-white/[0.015] text-morandi-slate/[0.03] -z-10 tracking-tight leading-none select-none pointer-events-none">
-              PROJECTS
-            </div>
-          </div>
+        {/* ── Main heading ─────────────────────────────── */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          className="text-[clamp(3rem,14vw,8rem)] md:text-[clamp(4.5rem,9vw,9rem)] font-black tracking-tight leading-[0.88] dark:text-white text-morandi-slate select-none mb-5 sm:mb-7"
+        >
+          維運實績
+        </motion.h1>
 
-          <p className="dark:text-white/30 text-morandi-stone/60 text-xs sm:text-sm font-mono max-w-xs lg:text-right leading-relaxed shrink-0">
-            {filteredProjects.length} 個基礎建設專案實錄<br className="hidden sm:block" />
-            <span className="dark:text-white/10 text-morandi-stone/30 text-[10px]">CASE STUDIES · INFRASTRUCTURE</span>
-          </p>
+        {/* ── Separator + metadata ─────────────────────── */}
+        <div className="flex items-center gap-4 pb-5 sm:pb-6 border-b dark:border-white/[0.06] border-black/[0.06]">
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            className="h-px dark:bg-emerald-500/50 bg-emerald-600/60 origin-left flex-1 max-w-[120px]"
+          />
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="text-[9px] sm:text-[10px] font-mono tracking-[0.2em] dark:text-white/25 text-morandi-stone/40 whitespace-nowrap"
+          >
+            {filteredProjects.length} PROJECTS
+          </motion.span>
+          <span className="w-px h-3 dark:bg-white/8 bg-black/8" />
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-[9px] sm:text-[10px] font-mono tracking-[0.15em] dark:text-white/15 text-morandi-stone/30"
+          >
+            CASE STUDIES · INFRASTRUCTURE
+          </motion.span>
         </div>
 
         {/* ── Category filter ──────────────────────────── */}
-        <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-x-2 gap-y-2">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
+          className="mt-5 sm:mt-6 flex flex-wrap items-center gap-x-2 gap-y-2"
+        >
           {TAG_CATEGORIES.map((cat, i) => (
             <React.Fragment key={cat.id}>
               {i > 0 && (
@@ -213,7 +241,7 @@ const PortfolioPage: React.FC = () => {
               </button>
             </React.Fragment>
           ))}
-        </div>
+        </motion.div>
       </header>
 
       {/* ══ CONTENT ════════════════════════════════════════ */}
