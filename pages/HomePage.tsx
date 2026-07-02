@@ -233,24 +233,12 @@ const HomePage: React.FC = () => {
           {/* Right side — floating abstract accent */}
           <div className="absolute top-24 md:top-32 right-0 h-[100dvh] w-[90vw] md:w-[60vw] flex items-center justify-end pointer-events-none">
             <div className="relative h-[120vh] aspect-square origin-center translate-x-1/4 pointer-events-auto">
-              <div className="absolute inset-0 opacity-[0.10] mix-blend-screen"
-                style={{
-                  background: 'radial-gradient(ellipse at 35% 50%, rgba(245,158,11,0.8) 0%, rgba(56,189,248,0.2) 25%, transparent 50%)',
-                  filter: 'blur(80px)',
-                }}
+              <img
+                src="/hero-accent.jpg"
+                alt="Infrastructure abstract"
+                className="w-full h-full object-contain drop-shadow-2xl brightness-50 md:brightness-60 transition-all duration-700 hover:brightness-75 mix-blend-screen opacity-80"
               />
-              <div className="absolute inset-0 opacity-[0.020]"
-                style={{
-                  backgroundImage: 'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.4) 0%, transparent 1px)',
-                  backgroundSize: '60px 60px',
-                }}
-              />
-              <div className="absolute -bottom-20 -left-20 w-3/4 aspect-square opacity-[0.06] mix-blend-screen"
-                style={{
-                  background: 'radial-gradient(ellipse at center, rgba(56,189,248,0.6) 0%, transparent 50%)',
-                  filter: 'blur(100px)',
-                }}
-              />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/60 pointer-events-none" />
             </div>
           </div>
 
