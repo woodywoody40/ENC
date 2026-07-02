@@ -1,13 +1,14 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, BookOpen, Briefcase, Plus, Trash2, Edit3, 
-  Activity, LogOut, Loader2, X, Save, 
+import {
+  LayoutDashboard, BookOpen, Briefcase, Plus, Trash2, Edit3,
+  Activity, LogOut, Loader2, X, Save,
   Lock, Image as ImageIcon, CheckCircle2,
   Upload, Settings, PlusCircle,
   Bold, Heading2, Heading3, List, Code, Link as LinkIcon, Minus, Type, Info,
-  Zap, Sparkles
+  Zap, Sparkles, Search, ChevronDown,
+  Globe, Mail, MapPin, User, AtSign, AlertCircle, Eye, AlertTriangle
 } from 'lucide-react';
 import { Card } from '@astryxdesign/core/Card';
 import { Section } from '@astryxdesign/core/Section';
@@ -17,29 +18,56 @@ import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../service
 import { SEOMeta } from '../lib/seo';
 import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/geminiService';
 
+/*
+ * AdminPage — 管理後台 (UX/UI Redesign v2)
+ * Top-navigation layout, accordion-style config, toast feedback,
+ * search filtering, dirty tracking, and cleaner modal editor.
+ */
+
+// ─── Types ────────────────────────────────────────────
+type TabKey = 'dashboard' | 'projects' | 'blog' | 'site_config';
+type SaveStatusExt = 'idle' | 'saving' | 'success';
+interface Toast { id: number; type: 'success' | 'error' | 'info'; message: string; }
+
 const AdminPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
   const [authChecking, setAuthChecking] = useState(true);
-  
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'projects' | 'blog' | 'site_config'>('dashboard');
+
+  const [activeTab, setActiveTab] = useState<TabKey>('dashboard');
   const [loading, setLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
+  const [saveStatus, setSaveStatus] = useState<SaveStatusExt>('idle');
   const [isUploading, setIsUploading] = useState(false);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
-  
+
   const [projects, setProjects] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [siteConfigs, setSiteConfigs] = useState<any[]>([]);
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'project' | 'blog' | null>(null);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('split');
 
+  // ─── New state for redesign ──────────────────────────
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [configSections, setConfigSections] = useState({
+    homepage: false, resume_basic: false, resume_content: false, resume_data: false,
+  });
+  const [configDirty, setConfigDirty] = useState<Record<string, string>>({});
+  const toastId = useRef(0);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // ─── Toast system ────────────────────────────────────
+  const addToast = useCallback((type: Toast['type'], message: string) => {
+    const id = ++toastId.current;
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+  }, []);
 
   useEffect(() => {
     AuthAPI.me()
@@ -59,7 +87,7 @@ const AdminPage: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isModalOpen, editingItem]);
+  }, []);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -115,8 +143,9 @@ const AdminPage: React.FC = () => {
     try {
       const rewritten = await rewriteTechnicalContent(currentContent);
       setEditingItem({ ...editingItem, [field]: rewritten });
+      addToast('success', 'AI 改寫完成');
     } catch (err) {
-      alert("AI 改寫暫時無法連線。");
+      addToast('error', 'AI 改寫暫時無法連線');
     } finally {
       setIsAiProcessing(false);
     }
@@ -130,13 +159,14 @@ const AdminPage: React.FC = () => {
       const publicUrl = await uploadFile(file);
       if (target === 'cover') {
         setEditingItem({ ...editingItem, image: publicUrl });
+        addToast('success', '圖片上傳成功');
       } else {
         const newMedia = [...(editingItem.media || [])];
         newMedia[target] = { ...newMedia[target], url: publicUrl };
         setEditingItem({ ...editingItem, media: newMedia });
       }
     } catch (err: any) {
-      alert(err?.message || '上傳失敗');
+      addToast('error', err?.message || '上傳失敗');
     } finally {
       setIsUploading(false);
     }
@@ -153,8 +183,10 @@ const AdminPage: React.FC = () => {
       const api = modalType === 'project' ? ProjectsAPI : BlogAPI;
       if (editingItem.id) {
         await api.update(editingItem.id, payload);
+        addToast('success', '內容已更新');
       } else {
         await api.create(payload);
+        addToast('success', '新內容已發佈');
       }
 
       setSaveStatus('success');
@@ -165,16 +197,52 @@ const AdminPage: React.FC = () => {
       }, 1500);
     } catch (err: any) {
       setSaveStatus('idle');
-      alert(`儲存失敗: ${err?.message || err}`);
+      addToast('error', `儲存失敗: ${err?.message || err}`);
     }
   };
 
-  const handleSaveConfig = async (key: string, value: string) => {
+  // ─── Config: dirty tracking + batch save ─────────────
+  const handleConfigChange = (key: string, value: string) => {
+    setConfigDirty(prev => ({ ...prev, [key]: value }));
+  };
+
+  const getConfig = (key: string): string => {
+    if (configDirty[key] !== undefined) return configDirty[key];
+    return siteConfigs.find(c => c.key === key)?.value || '';
+  };
+
+  const handleSaveAllConfig = async () => {
+    if (Object.keys(configDirty).length === 0) return;
+    setSaveStatus('saving');
     try {
-      await ConfigAPI.set(key, value);
-      setSiteConfigs(prev => prev.map(c => c.key === key ? { ...c, value } : c));
+      for (const [key, value] of Object.entries(configDirty)) {
+        await ConfigAPI.set(key, value);
+        setSiteConfigs(prev => prev.map(c => c.key === key ? { ...c, value } : c));
+      }
+      setConfigDirty({});
+      setSaveStatus('success');
+      addToast('success', '所有設定已儲存');
+      setTimeout(() => setSaveStatus('idle'), 1500);
     } catch (err: any) {
-      console.error(`Config save error for ${key}:`, err);
+      setSaveStatus('idle');
+      addToast('error', `設定儲存失敗: ${err?.message || err}`);
+    }
+  };
+
+  const toggleConfigSection = (section: keyof typeof configSections) => {
+    setConfigSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleDeleteItem = async (type: 'project' | 'blog', id: string, title: string) => {
+    const confirmed = window.confirm(`確定要刪除「${title}」？\n此操作無法復原。`);
+    if (!confirmed) return;
+    try {
+      const api = type === 'project' ? ProjectsAPI : BlogAPI;
+      await api.remove(id);
+      addToast('success', `已刪除「${title}」`);
+      fetchAllData();
+    } catch (err: any) {
+      addToast('error', `刪除失敗: ${err?.message || err}`);
     }
   };
 
@@ -269,13 +337,24 @@ const AdminPage: React.FC = () => {
     previewRef.current.scrollTop = ratio * (previewRef.current.scrollHeight - previewRef.current.clientHeight);
   };
 
+  // ─── Filtered lists ───────────────────────────────────
+  const filteredProjects = projects.filter(p =>
+    !searchQuery || p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.tags?.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+  const filteredPosts = posts.filter(p =>
+    !searchQuery || p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.category?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // ─── Auth gate ────────────────────────────────────────
   if (authChecking) {
     return (
       <>
       <SEOMeta title="管理後台" description="Woody 維運實踐．管理主控台" path="/admin" noindex />
-      <div className="admin-wrapper min-h-screen flex flex-col items-center justify-center gap-6 bg-[#050608]">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-[#050608]">
         <Loader2 className="animate-spin text-white/20" size={48} strokeWidth={1} />
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20">Verifying Access Token...</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30">驗證階段...</span>
       </div>
       </>
     );
@@ -284,367 +363,547 @@ const AdminPage: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <>
-      <SEOMeta title="管理後台 — 認證" description="請透過 Cloudflare Access 登入管理後台。" path="/admin" noindex />
-      <div className="admin-wrapper min-h-screen flex items-center justify-center p-6 bg-[#050608]">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel p-12 max-w-md w-full text-center border-white/5 bg-black/40 shadow-2xl">
-          <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-10 border border-white/10 text-white/40"><Lock size={32} /></div>
-          <h2 className="text-3xl font-black text-white mb-6 tracking-tighter uppercase leading-tight">Woody Wu<br/>管理主控台</h2>
-          <p className="text-white/40 text-[11px] font-bold uppercase tracking-[0.3em] mb-10 leading-relaxed">
-            本區域受 Cloudflare Access 守護<br/>請透過組織 SSO 登入後繼續
-          </p>
-          <button onClick={handleLoginRedirect} className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl">
-            啟動認證
-          </button>
-          <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.3em] mt-8">
-            若已登入，重新整理即可載入主控台
-          </p>
+      <SEOMeta title="管理後台 — 認證" description="請登入管理後台。" path="/admin" noindex />
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[#050608]">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full text-center"
+        >
+          <div className="bg-black/60 border border-white/10 rounded-3xl p-12 shadow-2xl backdrop-blur-xl">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/10">
+              <Lock size={28} className="text-white/40" />
+            </div>
+            <h2 className="text-2xl font-black text-white mb-4 tracking-tight">管理主控台</h2>
+            <p className="text-white/30 text-xs font-bold uppercase tracking-widest mb-8 leading-relaxed">
+              本區域受 Cloudflare Access 保護<br/>請透過組織 SSO 登入
+            </p>
+            <button
+              onClick={handleLoginRedirect}
+              className="w-full bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl"
+            >
+              啟動認證
+            </button>
+          </div>
         </motion.div>
       </div>
       </>
     );
   }
 
+  // ─── Main render ──────────────────────────────────────
   return (
     <>
     <SEOMeta title="管理後台" description="Woody 維運實踐．網站內容管理系統" path="/admin" noindex />
-    <div className="admin-wrapper min-h-screen pt-[130px] pb-32 px-6 max-w-[1700px] mx-auto flex flex-col lg:flex-row gap-10 overflow-x-hidden">
-      <aside className="lg:w-72 shrink-0">
-        <div className="glass-panel p-3 flex lg:flex-col gap-2 sticky top-32 bg-black/60 border-white/10 shadow-2xl">
-          <NavBtn active={activeTab === 'dashboard'} icon={<LayoutDashboard size={18} />} label="資產概覽" onClick={() => setActiveTab('dashboard')} />
-          <NavBtn active={activeTab === 'projects'} icon={<Briefcase size={18} />} label="作品管理" onClick={() => setActiveTab('projects')} />
-          <NavBtn active={activeTab === 'blog'} icon={<BookOpen size={18} />} label="技術文章" onClick={() => setActiveTab('blog')} />
-          <NavBtn active={activeTab === 'site_config'} icon={<Settings size={18} />} label="網站設定" onClick={() => setActiveTab('site_config')} />
-          <div className="hidden lg:block h-px bg-white/10 my-2" />
-          <button onClick={() => { setIsAuthenticated(false); setAuthEmail(''); }} className="flex items-center gap-4 px-6 py-4 rounded-xl font-black text-[10px] uppercase text-rose-500 hover:bg-rose-500/10 transition-all"><LogOut size={18} /> 登出本機</button>
-        </div>
-      </aside>
 
-      <main className="flex-1 min-w-0">
-        <Section>
-        {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
-              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><Briefcase size={32} /></div>
-              <Text type="display-2" className="!text-white font-[900] tracking-tighter">{projects.length}</Text>
-              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">部署專案</Text>
-            </Card>
-            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
-              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-white"><BookOpen size={32} /></div>
-              <Text type="display-2" className="!text-white font-[900] tracking-tighter">{posts.length}</Text>
-              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">技術文章</Text>
-            </Card>
-            <Card className="flex flex-col items-center justify-center gap-6 bg-black/60 !border-white/10 shadow-2xl p-12 group hover:!border-white/30 transition-all text-center">
-              <div className="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-white/40 mb-2 border border-white/10 group-hover:scale-110 transition-transform group-hover:text-emerald-400"><Activity size={32} /></div>
-              <Text type="display-2" className="!text-emerald-400 font-[900] tracking-tighter">ONLINE</Text>
-              <Text size="sm" className="!text-white/40 font-black uppercase tracking-[0.5em]">核心狀態</Text>
-            </Card>
+    {/* Toast Container */}
+    <div className="fixed top-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none">
+      <AnimatePresence>
+        {toasts.map(t => (
+          <motion.div
+            key={t.id}
+            initial={{ opacity: 0, x: 80, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 80, scale: 0.95 }}
+            className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-bold tracking-wide backdrop-blur-xl ${
+              t.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' :
+              t.type === 'error' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' :
+              'bg-blue-500/20 border-blue-500/30 text-blue-300'
+            }`}
+          >
+            {t.type === 'success' ? <CheckCircle2 size={18} /> : t.type === 'error' ? <AlertCircle size={18} /> : <Info size={18} />}
+            {t.message}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+
+    <div className="min-h-screen bg-[#050608]">
+      {/* ===== Top Navigation Bar ===== */}
+      <header className="sticky top-0 z-50 bg-[#050608]/90 backdrop-blur-2xl border-b border-white/5">
+        <div className="max-w-[1700px] mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+              <Settings size={16} className="text-white/60" />
+            </div>
+            <span className="text-sm font-black text-white tracking-tight whitespace-nowrap">Woody 後台</span>
+            <span className="text-[9px] font-bold text-white/20 tracking-wider hidden sm:block uppercase truncate">
+              {authEmail}
+            </span>
           </div>
-        )}
 
-        {(activeTab === 'projects' || activeTab === 'blog') && (
-          <VStack gap={6}>
-            <HStack justify="between" align="center" className="px-2">
-              <Text type="display-1" className="!text-white font-black uppercase tracking-widest !text-2xl">{activeTab === 'projects' ? '部署資產清單' : '技術文章清單'}</Text>
-              <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog')} className="bg-white text-black px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-xl">
-                <Plus size={18} /> 新增內容
+          <nav className="flex items-center gap-1 bg-white/5 rounded-2xl p-1 shrink-0">
+            {([
+              { key: 'dashboard' as TabKey, icon: <LayoutDashboard size={15} />, label: '概覽' },
+              { key: 'projects' as TabKey, icon: <Briefcase size={15} />, label: '作品' },
+              { key: 'blog' as TabKey, icon: <BookOpen size={15} />, label: '文章' },
+              { key: 'site_config' as TabKey, icon: <Settings size={15} />, label: '設定' },
+            ]).map(t => (
+              <button
+                key={t.key}
+                onClick={() => { setActiveTab(t.key); setSearchQuery(''); }}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                  activeTab === t.key
+                    ? 'bg-white text-black shadow-lg'
+                    : 'text-white/40 hover:text-white/80'
+                }`}
+              >
+                {t.icon}
+                <span className="hidden sm:inline">{t.label}</span>
               </button>
-            </HStack>
-            <VStack gap={3}>
-              {(activeTab === 'projects' ? projects : posts).map(item => (
-                <Card key={item.id} padding={6} className="bg-black/40 !border-white/5 shadow-lg group hover:bg-white/[0.05] transition-all">
-                  <HStack justify="between" align="center">
-                    <HStack gap={6} align="center">
-                      <img src={item.image} className="w-20 h-20 rounded-2xl object-cover bg-black shadow-inner border border-white/5 shrink-0" />
-                      <VStack gap={2}>
-                        <Text type="large" className="!text-white font-black uppercase tracking-tight">{item.title}</Text>
-                        <Text size="sm" className="!text-white/40 font-bold uppercase tracking-widest">{activeTab === 'projects' ? item.tags?.join(' • ') : `${item.category} • ${item.date}`}</Text>
-                      </VStack>
-                    </HStack>
-                    <HStack gap={3}>
-                      <button onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)} className="p-4 rounded-xl bg-white/5 text-white hover:text-emerald-400 hover:bg-white/10 transition-all border border-white/5"><Edit3 size={20} /></button>
-                      <button onClick={async () => { if(confirm('確定移除？')) { const api = activeTab === 'projects' ? ProjectsAPI : BlogAPI; await api.remove(item.id); fetchAllData(); } }} className="p-4 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/20"><Trash2 size={20} /></button>
-                    </HStack>
-                  </HStack>
-                </Card>
-              ))}
-            </VStack>
-          </VStack>
-        )}
+            ))}
+          </nav>
 
-        {activeTab === 'site_config' && (
-          <div className="space-y-16">
-            {/* ===== 首頁設定 ===== */}
-            <div>
-              <h3 className="text-white font-black uppercase tracking-[0.4em] text-sm mb-6 flex items-center gap-3">
-                <Sparkles size={18} className="text-emerald-400" /> 首頁設定
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => {
-                  const config = siteConfigs.find(c => c.key === key);
-                  return (
-                    <Card key={key} padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
-                      <HStack gap={4} align="center">
-                        <div className="w-1.5 h-5 bg-emerald-500 rounded-full" />
-                        <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">{key.replace(/_/g, ' ')}</Text>
-                      </HStack>
-                      <textarea
-                        defaultValue={config?.value || ''}
-                        onBlur={(e) => handleSaveConfig(key, e.target.value)}
-                        placeholder={`輸入 ${key} 內容...`}
-                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-emerald-500/40 transition-all font-light leading-relaxed h-[120px]"
-                      />
-                    </Card>
-                  );
-                })}
-              </div>
+          <button
+            onClick={() => { setIsAuthenticated(false); setAuthEmail(''); }}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/10 transition-all shrink-0"
+          >
+            <LogOut size={15} />
+            <span className="hidden sm:inline">登出</span>
+          </button>
+        </div>
+      </header>
+
+      {/* ===== Main Content ===== */}
+      <main className="max-w-[1700px] mx-auto px-6 py-8">
+
+        {/* ─── DASHBOARD ──────────────────────────────────── */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {([
+                { icon: <Briefcase size={22} />, label: '部署專案', value: projects.length, color: 'text-blue-400', tab: 'projects' as TabKey },
+                { icon: <BookOpen size={22} />, label: '技術文章', value: posts.length, color: 'text-violet-400', tab: 'blog' as TabKey },
+                { icon: <Activity size={22} />, label: '核心狀態', value: '連線中', color: 'text-emerald-400', tab: null },
+              ]).map((stat, i) => (
+                <button
+                  key={i}
+                  onClick={() => stat.tab && setActiveTab(stat.tab!)}
+                  disabled={!stat.tab}
+                  className={`bg-black/60 border border-white/10 rounded-2xl p-8 text-center group transition-all ${
+                    stat.tab ? 'hover:border-white/30 hover:bg-white/[0.04] cursor-pointer' : 'cursor-default'
+                  }`}
+                >
+                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5 group-hover:scale-110 transition-transform">
+                    <span className={stat.color}>{stat.icon}</span>
+                  </div>
+                  <div className={`text-3xl font-black tracking-tight mb-2 ${typeof stat.value === 'number' ? 'text-white' : stat.color}`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{stat.label}</div>
+                </button>
+              ))}
             </div>
 
-            {/* ===== 履歷設定 ===== */}
-            <div>
-              <h3 className="text-white font-black uppercase tracking-[0.4em] text-sm mb-6 flex items-center gap-3">
-                <Briefcase size={18} className="text-blue-400" /> 履歷設定
-              </h3>
-
-              {/* 基本資訊 — 短欄位 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {['resume_name', 'resume_title', 'resume_email', 'resume_location', 'resume_github', 'resume_linkedin'].map(key => {
-                  const config = siteConfigs.find(c => c.key === key);
-                  return (
-                    <div key={key} className="bg-black/40 border border-white/10 rounded-2xl p-5 space-y-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-blue-500 rounded-full" />
-                        <span className="text-white/50 text-[9px] font-black uppercase tracking-[0.3em]">{key.replace('resume_', '').replace(/_/g, ' ')}</span>
-                      </div>
-                      <input
-                        defaultValue={config?.value || ''}
-                        onBlur={(e) => handleSaveConfig(key, e.target.value)}
-                        placeholder={`輸入 ${key.replace('resume_', '')}...`}
-                        className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500/40 transition-all"
-                      />
-                    </div>
-                  );
-                })}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-4">
+                <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
+                  <Zap size={14} className="text-blue-400" /> 快速操作
+                </h3>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <QuickBtn icon={<Plus size={15} />} label="新增專案" color="text-blue-400" onClick={() => openEditor('project')} />
+                  <QuickBtn icon={<Plus size={15} />} label="新增文章" color="text-violet-400" onClick={() => openEditor('blog')} />
+                  <QuickBtn icon={<Settings size={15} />} label="站台設定" color="text-emerald-400" onClick={() => setActiveTab('site_config')} />
+                  <QuickBtn icon={<Eye size={15} />} label="檢視履歷" color="text-amber-400" onClick={() => window.open('/resume', '_blank')} />
+                </div>
               </div>
-
-              {/* 專業總結 */}
-              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
-                <HStack gap={4} align="center">
-                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
-                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME SUMMARY</Text>
-                </HStack>
-                <textarea
-                  defaultValue={siteConfigs.find(c => c.key === 'resume_summary')?.value || ''}
-                  onBlur={(e) => handleSaveConfig('resume_summary', e.target.value)}
-                  placeholder="輸入專業總結..."
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[160px]"
-                />
-              </Card>
-
-              {/* 工作經歷（Markdown） */}
-              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
-                <HStack gap={4} align="center">
-                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
-                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EXPERIENCE</Text>
-                  <span className="text-white/20 text-[8px] tracking-widest">格式: ### 職稱 | 公司\n日期\n- 項目符號</span>
-                </HStack>
-                <textarea
-                  defaultValue={siteConfigs.find(c => c.key === 'resume_experience')?.value || ''}
-                  onBlur={(e) => handleSaveConfig('resume_experience', e.target.value)}
-                  placeholder="### 系統維運工程師 | 基隆市教育網路中心&#10;2022 - Present&#10;- 工作項目..."
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[280px] font-mono"
-                />
-              </Card>
-
-              {/* 核心技能 */}
-              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
-                <HStack gap={4} align="center">
-                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
-                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME SKILLS</Text>
-                  <span className="text-white/20 text-[8px] tracking-widest">格式: 技能名稱:等級, 用逗號分隔（等級: Expert / Advanced / Certified）</span>
-                </HStack>
-                <textarea
-                  defaultValue={siteConfigs.find(c => c.key === 'resume_skills')?.value || ''}
-                  onBlur={(e) => handleSaveConfig('resume_skills', e.target.value)}
-                  placeholder="VMware 虛擬化:Expert, 儲存與備援架構:Expert, TANet 資安監控:Expert, 系統弱掃與修補:Advanced, Google Workspace:Advanced, CEH & MTCNA:Certified"
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px]"
-                />
-              </Card>
-
-              {/* 學歷經歷（JSON） */}
-              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6 mb-6">
-                <HStack gap={4} align="center">
-                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
-                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EDUCATION LIST</Text>
-                  <span className="text-white/20 text-[8px] tracking-widest">JSON 陣列, 格式: [{'{'}&quot;school&quot;:&quot;...&quot;,&quot;year&quot;:&quot;...&quot;,&quot;degree&quot;:&quot;...&quot;{'}'}]</span>
-                </HStack>
-                <textarea
-                  defaultValue={siteConfigs.find(c => c.key === 'resume_education_list')?.value || ''}
-                  onBlur={(e) => handleSaveConfig('resume_education_list', e.target.value)}
-                  placeholder='[{"school":"國立臺灣海洋大學","year":"2024 - Present","degree":"資工系碩士專班"}]'
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px] font-mono"
-                />
-              </Card>
-
-              {/* 額外連結（JSON） */}
-              <Card padding={8} className="bg-black/60 !border-white/10 shadow-2xl space-y-6">
-                <HStack gap={4} align="center">
-                  <div className="w-1.5 h-5 bg-blue-500 rounded-full" />
-                  <Text type="label" className="!text-white font-black uppercase tracking-[0.4em]">RESUME EXTRA LINKS</Text>
-                  <span className="text-white/20 text-[8px] tracking-widest">JSON 陣列, 格式: [{'{'}&quot;label&quot;:&quot;...&quot;,&quot;url&quot;:&quot;...&quot;{'}'}]</span>
-                </HStack>
-                <textarea
-                  defaultValue={siteConfigs.find(c => c.key === 'resume_extra_links')?.value || ''}
-                  onBlur={(e) => handleSaveConfig('resume_extra_links', e.target.value)}
-                  placeholder='[{"label":"個人網站","url":"https://..."}]'
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 text-white text-sm outline-none focus:border-blue-500/40 transition-all font-light leading-relaxed h-[120px] font-mono"
-                />
-              </Card>
+              <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-4">
+                <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
+                  <Activity size={14} className="text-emerald-400" /> 系統資訊
+                </h3>
+                <div className="space-y-2.5 text-xs">
+                  <div className="flex justify-between"><span className="text-white/30">驗證</span><span className="text-white/70 font-bold">Cloudflare Access</span></div>
+                  <div className="flex justify-between"><span className="text-white/30">管理員</span><span className="text-white/70 font-bold truncate ml-4">{authEmail || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-white/30">框架</span><span className="text-white/70 font-bold">React 19 + Vite</span></div>
+                  <div className="flex justify-between"><span className="text-white/30">部署</span><span className="text-white/70 font-bold">Cloudflare Pages</span></div>
+                </div>
+              </div>
             </div>
           </div>
         )}
-        </Section>
+
+        {/* ─── PROJECTS / BLOG CONTENT LIST ──────────────── */}
+        {(activeTab === 'projects' || activeTab === 'blog') && (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+                <input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={`搜尋${activeTab === 'projects' ? '專案' : '文章'}...`}
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15"
+                />
+              </div>
+              <button
+                onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog')}
+                className="flex items-center gap-2.5 bg-white text-black px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
+              >
+                <Plus size={16} /> 新增
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {(activeTab === 'projects' ? filteredProjects : filteredPosts).length === 0 && (
+                <div className="text-center py-16 text-white/15 text-sm font-bold uppercase tracking-widest">
+                  {searchQuery ? '找不到符合的內容' : '尚無內容，點擊「新增」開始'}
+                </div>
+              )}
+              {(activeTab === 'projects' ? filteredProjects : filteredPosts).map(item => (
+                <div
+                  key={item.id}
+                  className="bg-black/40 border border-white/5 rounded-xl px-5 py-4 flex items-center gap-4 group hover:bg-white/[0.03] hover:border-white/10 transition-all"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-12 h-12 rounded-xl object-cover bg-black border border-white/5 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-white truncate">{item.title}</div>
+                    <div className="text-[10px] font-bold text-white/30 uppercase tracking-wider truncate mt-0.5">
+                      {activeTab === 'projects'
+                        ? (item.tags?.join(' • ') || '')
+                        : `${item.category || ''}${item.category && item.date ? ' • ' : ''}${item.date || ''}`
+                      }
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
+                      title="編輯"
+                    >
+                      <Edit3 size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(activeTab === 'projects' ? 'project' : 'blog', item.id, item.title)}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-400/40 hover:text-rose-400 hover:bg-rose-500/15 transition-all"
+                      title="刪除"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── SITE CONFIG ──────────────────────────────────── */}
+        {activeTab === 'site_config' && (
+          <div className="max-w-4xl mx-auto space-y-5">
+
+            {/* Save All Toolbar */}
+            <div className="sticky top-24 z-40 bg-black/80 backdrop-blur-2xl border border-white/5 rounded-2xl px-6 py-4 flex items-center justify-between shadow-2xl">
+              <div>
+                <h2 className="text-sm font-black text-white tracking-tight">站台設定</h2>
+                <p className="text-[10px] text-white/30 font-bold tracking-wider mt-0.5">
+                  {Object.keys(configDirty).length > 0
+                    ? `${Object.keys(configDirty).length} 個未儲存的變更`
+                    : '所有設定已儲存'}
+                </p>
+              </div>
+              <button
+                onClick={handleSaveAllConfig}
+                disabled={Object.keys(configDirty).length === 0 || saveStatus === 'saving'}
+                className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                  Object.keys(configDirty).length === 0
+                    ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : saveStatus === 'saving'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]'
+                }`}
+              >
+                {saveStatus === 'saving' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {saveStatus === 'saving' ? '儲存中...' : '儲存全部'}
+              </button>
+            </div>
+
+            {/* ── 首頁設定 ── */}
+            <AccordionSection
+              title="首頁設定"
+              icon={<Sparkles size={16} className="text-emerald-400" />}
+              isOpen={configSections.homepage}
+              onToggle={() => toggleConfigSection('homepage')}
+              dirty={configDirty}
+              keys={['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense']}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => (
+                  <ConfigField
+                    key={key}
+                    label={key.replace(/_/g, ' ')}
+                    value={getConfig(key)}
+                    onChange={v => handleConfigChange(key, v)}
+                    placeholder={`輸入 ${key}...`}
+                    large={key === 'hero_intro'}
+                  />
+                ))}
+              </div>
+            </AccordionSection>
+
+            {/* ── 基本資訊 ── */}
+            <AccordionSection
+              title="基本資訊"
+              icon={<User size={16} className="text-blue-400" />}
+              isOpen={configSections.resume_basic}
+              onToggle={() => toggleConfigSection('resume_basic')}
+              dirty={configDirty}
+              keys={['resume_name', 'resume_title', 'resume_email', 'resume_location', 'resume_github', 'resume_linkedin']}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {([
+                  { key: 'resume_name', icon: <AtSign size={14} />, placeholder: '姓名' },
+                  { key: 'resume_title', icon: <Briefcase size={14} />, placeholder: '職稱' },
+                  { key: 'resume_email', icon: <Mail size={14} />, placeholder: 'Email' },
+                  { key: 'resume_location', icon: <MapPin size={14} />, placeholder: '所在地' },
+                  { key: 'resume_github', icon: <Globe size={14} />, placeholder: 'GitHub' },
+                  { key: 'resume_linkedin', icon: <LinkIcon size={14} />, placeholder: 'LinkedIn' },
+                ]).map(({ key, icon, placeholder }) => (
+                  <div key={key} className="bg-black/30 border border-white/5 rounded-xl p-4 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/30">{icon}</span>
+                      <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                        {key.replace('resume_', '').replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <input
+                      value={getConfig(key)}
+                      onChange={e => handleConfigChange(key, e.target.value)}
+                      placeholder={`輸入 ${placeholder}...`}
+                      className="w-full bg-black/60 border border-white/5 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-blue-500/30 transition-all placeholder:text-white/15"
+                    />
+                  </div>
+                ))}
+              </div>
+            </AccordionSection>
+
+            {/* ── 專業內容 ── */}
+            <AccordionSection
+              title="專業內容"
+              icon={<Zap size={16} className="text-amber-400" />}
+              isOpen={configSections.resume_content}
+              onToggle={() => toggleConfigSection('resume_content')}
+              dirty={configDirty}
+              keys={['resume_summary', 'resume_experience', 'resume_skills']}
+            >
+              <div className="space-y-4">
+                <ConfigField
+                  label="專業總結"
+                  value={getConfig('resume_summary')}
+                  onChange={v => handleConfigChange('resume_summary', v)}
+                  placeholder="輸入專業總結..."
+                  large
+                />
+                <ConfigField
+                  label="工作經歷（Markdown）"
+                  value={getConfig('resume_experience')}
+                  onChange={v => handleConfigChange('resume_experience', v)}
+                  placeholder="### 職稱 | 公司\n日期\n- 項目符號..."
+                  large
+                  mono
+                  hint="### 職稱 | 公司 / 日期 / - 項目符號"
+                />
+                <ConfigField
+                  label="核心技能"
+                  value={getConfig('resume_skills')}
+                  onChange={v => handleConfigChange('resume_skills', v)}
+                  placeholder="技能名稱:等級, 用逗號分隔"
+                  hint="等級: Expert / Advanced / Certified"
+                />
+              </div>
+            </AccordionSection>
+
+            {/* ── 結構化資料 ── */}
+            <AccordionSection
+              title="結構化資料 (JSON)"
+              icon={<Code size={16} className="text-violet-400" />}
+              isOpen={configSections.resume_data}
+              onToggle={() => toggleConfigSection('resume_data')}
+              dirty={configDirty}
+              keys={['resume_education_list', 'resume_extra_links']}
+            >
+              <div className="space-y-4">
+                <ConfigField
+                  label="學歷經歷 (JSON)"
+                  value={getConfig('resume_education_list')}
+                  onChange={v => handleConfigChange('resume_education_list', v)}
+                  placeholder='[{"school":"...","year":"...","degree":"..."}]'
+                  mono
+                  hint='格式: [{"school":"學校名","year":"年份","degree":"學位"}]'
+                />
+                <ConfigField
+                  label="額外連結 (JSON)"
+                  value={getConfig('resume_extra_links')}
+                  onChange={v => handleConfigChange('resume_extra_links', v)}
+                  placeholder='[{"label":"...","url":"https://..."}]'
+                  mono
+                  hint='格式: [{"label":"顯示名稱","url":"https://..."}]'
+                />
+              </div>
+            </AccordionSection>
+
+          </div>
+        )}
       </main>
 
+      {/* ===== Modal Editor ===== */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[400] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl overflow-y-auto">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="glass-panel w-full max-w-[1550px] h-[92vh] flex flex-col bg-[#0a0b10] border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.9)] overflow-hidden"
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.97, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: 10 }}
+              className="w-full max-w-[1400px] h-[90vh] flex flex-col bg-[#0a0b10] border border-white/5 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden"
             >
-              <div className="px-12 py-8 border-b border-white/10 flex justify-between items-center bg-black/40">
-                <div className="flex items-center gap-8">
-                   <div className="space-y-1">
-                      <h2 className="text-3xl font-black text-white uppercase tracking-[0.2em]">{editingItem.id ? '更新部署' : '建立節點'}</h2>
-                      <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Protocol Version v4.2 — Engineer Mode (Ctrl+S to save)</p>
-                   </div>
-                   <div className="flex bg-white/5 rounded-2xl p-1.5 border border-white/10">
-                     <button onClick={() => setViewMode('edit')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'edit' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>編輯</button>
-                     <button onClick={() => setViewMode('split')} className={`hidden lg:block px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'split' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>雙欄</button>
-                     <button onClick={() => setViewMode('preview')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'preview' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>預覽</button>
-                   </div>
-                </div>
+              {/* Modal Header */}
+              <div className="px-8 py-5 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
                 <div className="flex items-center gap-6">
-                   <button onClick={() => setIsModalOpen(false)} className="text-white/30 hover:text-white flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors"><X size={20} /> 取消</button>
-                   <button 
-                    onClick={handleSaveItem} 
-                    className={`px-12 py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.4em] flex items-center gap-4 transition-all shadow-2xl ${saveStatus === 'success' ? 'bg-emerald-500 text-white' : 'bg-white text-black hover:scale-105 active:scale-95'}`}
-                   >
-                     {saveStatus === 'saving' ? <Loader2 className="animate-spin" size={18} /> : saveStatus === 'success' ? <CheckCircle2 size={18} /> : <Save size={18} />}
-                     {saveStatus === 'success' ? 'DEPLOYED' : 'COMMIT & PUSH'}
-                   </button>
+                  <div>
+                    <h2 className="text-lg font-black text-white tracking-tight">
+                      {editingItem?.id ? '編輯內容' : '新增內容'}
+                    </h2>
+                    <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mt-0.5">
+                      {modalType === 'project' ? '專案' : '文章'} · Ctrl+S 快速儲存
+                    </p>
+                  </div>
+                  <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
+                    <button onClick={() => setViewMode('edit')} className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'edit' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>編輯</button>
+                    <button onClick={() => setViewMode('split')} className={`hidden lg:block px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'split' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>雙欄</button>
+                    <button onClick={() => setViewMode('preview')} className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'preview' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>預覽</button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex items-center gap-2 text-white/30 hover:text-white/70 transition-all text-[10px] font-bold uppercase tracking-wider"
+                  >
+                    <X size={16} /> 取消
+                  </button>
+                  <button
+                    onClick={handleSaveItem}
+                    className={`px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-3 transition-all shadow-xl ${
+                      saveStatus === 'success'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                  >
+                    {saveStatus === 'saving' ? <Loader2 className="animate-spin" size={16} /> : saveStatus === 'success' ? <CheckCircle2 size={16} /> : <Save size={16} />}
+                    {saveStatus === 'saving' ? '儲存中...' : saveStatus === 'success' ? '已儲存' : '儲存'}
+                  </button>
                 </div>
               </div>
 
+              {/* Modal Body */}
               <div className="flex-1 flex overflow-hidden">
-                <div className="w-[450px] border-r border-white/10 p-10 overflow-y-auto no-scrollbar space-y-12 bg-black/20">
-                   <div className="space-y-10">
-                      <Inp label="標題 / Title" value={editingItem.title} onChange={(v: string) => setEditingItem({...editingItem, title: v})} />
-                      <Inp label={modalType === 'project' ? "標籤 (逗號分隔)" : "文章分類"} value={modalType === 'project' ? editingItem.tagsString : editingItem.category} onChange={(v: string) => modalType === 'project' ? setEditingItem({...editingItem, tagsString: v}) : setEditingItem({...editingItem, category: v})} />
-                      
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">封面預覽 / Cover Preview</label>
-                        <div className="aspect-[16/10] bg-black rounded-[2rem] border border-white/10 overflow-hidden relative group">
-                          {editingItem.image ? (
-                            <img src={editingItem.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]" />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-white/10 gap-4"><ImageIcon size={48} /></div>
-                          )}
-                          <button onClick={() => fileInputRef.current?.click()} className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-3">
-                            <Upload size={24} />
-                            <span className="text-[10px] font-black tracking-widest uppercase">上傳封面</span>
-                          </button>
-                        </div>
-                      </div>
+                {/* Sidebar Metadata */}
+                <div className="w-[380px] shrink-0 border-r border-white/5 p-6 overflow-y-auto space-y-8 bg-black/20">
+                  <Inp label="標題" value={editingItem.title} onChange={(v: string) => setEditingItem({...editingItem, title: v})} />
+                  <Inp
+                    label={modalType === 'project' ? '標籤 (逗號分隔)' : '分類'}
+                    value={modalType === 'project' ? editingItem.tagsString : editingItem.category}
+                    onChange={(v: string) => modalType === 'project' ? setEditingItem({...editingItem, tagsString: v}) : setEditingItem({...editingItem, category: v})}
+                  />
 
-                      {modalType === 'project' && (
-                        <div className="space-y-6">
-                          <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">多媒體資產庫 / Gallery</label>
-                          <div className="space-y-4">
-                            {(editingItem.media || []).map((m: any, idx: number) => (
-                              <div key={idx} className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center gap-4 relative">
-                                <img src={m.url} className="w-12 h-12 rounded-xl object-cover bg-black" />
-                                <div className="flex-1">
-                                  <p className="text-[9px] font-black text-white uppercase tracking-widest">{m.type} • {m.frame}</p>
-                                </div>
-                                <button onClick={() => removeMediaItem(idx)} className="text-white/20 hover:text-rose-500 p-2"><Trash2 size={16} /></button>
-                              </div>
-                            ))}
-                            <button onClick={addMediaItem} className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-white/20 hover:text-white hover:border-white/30 transition-all text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3">
-                              <PlusCircle size={16} /> 新增項目
-                            </button>
-                          </div>
-                        </div>
+                  {/* Cover Image */}
+                  <div className="space-y-3">
+                    <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">封面圖片</label>
+                    <div className="aspect-[16/9] bg-black rounded-2xl border border-white/5 overflow-hidden relative group">
+                      {editingItem.image ? (
+                        <img src={editingItem.image} alt="封面" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center"><ImageIcon size={36} className="text-white/10" /></div>
                       )}
-                   </div>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Upload size={20} className="text-white" />
+                        <span className="text-[9px] font-bold text-white tracking-wider uppercase">{isUploading ? '上傳中...' : '更換圖片'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Media Gallery (projects only) */}
+                  {modalType === 'project' && (
+                    <div className="space-y-3">
+                      <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">多媒體資產</label>
+                      <div className="space-y-2">
+                        {(editingItem.media || []).map((m: any, idx: number) => (
+                          <div key={idx} className="bg-white/[0.03] rounded-xl p-3 border border-white/5 flex items-center gap-3">
+                            <img src={m.url} alt={m.type} className="w-10 h-10 rounded-lg object-cover bg-black shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider truncate">{m.type || 'image'}</p>
+                            </div>
+                            <button onClick={() => removeMediaItem(idx)} className="text-white/20 hover:text-rose-400 p-1"><Trash2 size={14} /></button>
+                          </div>
+                        ))}
+                        <button onClick={addMediaItem} className="w-full py-3 border border-dashed border-white/5 rounded-xl text-white/20 hover:text-white/50 hover:border-white/20 transition-all text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                          <PlusCircle size={14} /> 新增媒體
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
+                {/* Editor + Preview */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                   <div className="px-10 py-5 border-b border-white/5 bg-white/5 flex items-center gap-8">
-                      <div className="flex items-center gap-2">
-                        <ToolBtn onClick={() => insertMarkdown('## ')} icon={<Heading2 size={16} />} title="標題 H2" />
-                        <ToolBtn onClick={() => insertMarkdown('### ')} icon={<Heading3 size={16} />} title="標題 H3" />
-                      </div>
-                      <div className="w-px h-6 bg-white/10" />
-                      <div className="flex items-center gap-2">
-                        <ToolBtn onClick={() => insertMarkdown('**', '**')} icon={<Bold size={16} />} title="粗體" />
-                        <ToolBtn onClick={() => insertMarkdown('- ')} icon={<List size={16} />} title="清單" />
-                      </div>
-                      <div className="w-px h-6 bg-white/10" />
-                      <div className="flex items-center gap-2">
-                        <ToolBtn onClick={() => insertMarkdown('```bash\n', '\n```')} icon={<Code size={16} />} title="代碼塊" />
-                        <ToolBtn onClick={() => insertMarkdown('[', '](url)')} icon={<LinkIcon size={16} />} title="連結" />
-                        <ToolBtn onClick={() => insertMarkdown('\n---\n')} icon={<Minus size={16} />} title="水平線" />
-                      </div>
-                      <div className="w-px h-6 bg-white/10" />
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={handleAiRewrite}
-                          disabled={isAiProcessing}
-                          className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all border ${isAiProcessing ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/40' : 'text-emerald-500/60 hover:text-emerald-500 hover:bg-emerald-500/10 border-transparent hover:border-emerald-500/20'}`}
-                          title="AI 智慧改寫文案"
-                        >
-                          {isAiProcessing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-                        </button>
-                        <span className="text-[10px] font-black text-emerald-500/40 uppercase tracking-widest hidden sm:block">AI ASSISTANT</span>
-                      </div>
-                      <div className="flex-1" />
-                      <div className="text-[10px] font-black text-white/20 tracking-widest uppercase flex items-center gap-2">
-                         <Type size={14} /> Markdown Engine v4.2
-                      </div>
-                   </div>
+                  {/* Toolbar */}
+                  <div className="px-6 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-1">
+                      <ToolBtn onClick={() => insertMarkdown('## ')} icon={<Heading2 size={14} />} title="標題 H2" />
+                      <ToolBtn onClick={() => insertMarkdown('### ')} icon={<Heading3 size={14} />} title="標題 H3" />
+                    </div>
+                    <div className="w-px h-5 bg-white/5" />
+                    <div className="flex items-center gap-1">
+                      <ToolBtn onClick={() => insertMarkdown('**', '**')} icon={<Bold size={14} />} title="粗體" />
+                      <ToolBtn onClick={() => insertMarkdown('- ')} icon={<List size={14} />} title="清單" />
+                    </div>
+                    <div className="w-px h-5 bg-white/5" />
+                    <div className="flex items-center gap-1">
+                      <ToolBtn onClick={() => insertMarkdown('```\n', '\n```')} icon={<Code size={14} />} title="Code" />
+                      <ToolBtn onClick={() => insertMarkdown('[', '](url)')} icon={<LinkIcon size={14} />} title="Link" />
+                    </div>
+                    <div className="w-px h-5 bg-white/5" />
+                    <button
+                      onClick={handleAiRewrite}
+                      disabled={isAiProcessing}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all border ${
+                        isAiProcessing
+                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                          : 'text-emerald-500/50 hover:text-emerald-400 border-transparent hover:border-emerald-500/20'
+                      }`}
+                    >
+                      {isAiProcessing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      AI
+                    </button>
+                    <div className="flex-1" />
+                    <span className="text-[8px] font-bold text-white/15 uppercase tracking-wider hidden sm:inline">Markdown</span>
+                  </div>
 
-                   <div className="flex-1 flex overflow-hidden">
-                      {(viewMode === 'edit' || viewMode === 'split') && (
-                        <textarea 
-                          ref={textareaRef}
-                          value={modalType === 'project' ? editingItem.details : editingItem.content}
-                          onScroll={handleScroll}
-                          onChange={e => setEditingItem({...editingItem, [modalType === 'project' ? 'details' : 'content']: e.target.value})}
-                          className="flex-1 bg-transparent p-12 text-slate-300 font-mono text-base leading-loose outline-none resize-none no-scrollbar selection:bg-emerald-500 selection:text-black custom-scrollbar"
-                          placeholder="開始撰寫技術細節..."
-                        />
-                      )}
-
-                      {viewMode === 'split' && <div className="w-px bg-white/10" />}
-
-                      {(viewMode === 'preview' || viewMode === 'split') && (
-                        <div 
-                          ref={previewRef}
-                          className="flex-1 p-12 overflow-y-auto no-scrollbar bg-black/20"
-                        >
-                           <div className="max-w-4xl mx-auto">
-                              <div className="flex items-center gap-4 mb-10 opacity-30">
-                                <Info size={18} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Live System Preview</span>
-                              </div>
-                              {renderPreview(modalType === 'project' ? editingItem.details : editingItem.content)}
-                           </div>
+                  {/* Textarea + Preview */}
+                  <div className="flex-1 flex overflow-hidden">
+                    {(viewMode === 'edit' || viewMode === 'split') && (
+                      <textarea
+                        ref={textareaRef}
+                        value={modalType === 'project' ? editingItem.details : editingItem.content}
+                        onScroll={handleScroll}
+                        onChange={e => setEditingItem({...editingItem, [modalType === 'project' ? 'details' : 'content']: e.target.value})}
+                        className="flex-1 bg-transparent p-8 text-slate-300 font-mono text-sm leading-relaxed outline-none resize-none no-scrollbar selection:bg-emerald-500/30"
+                        placeholder="開始撰寫..."
+                      />
+                    )}
+                    {viewMode === 'split' && <div className="w-px bg-white/5" />}
+                    {(viewMode === 'preview' || viewMode === 'split') && (
+                      <div ref={previewRef} className="flex-1 p-8 overflow-y-auto no-scrollbar bg-black/15">
+                        <div className="max-w-3xl mx-auto">
+                          {renderPreview(modalType === 'project' ? editingItem.details : editingItem.content)}
                         </div>
-                      )}
-                   </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -658,27 +917,129 @@ const AdminPage: React.FC = () => {
   );
 };
 
+/* ============================================================
+   Sub-components
+   ============================================================ */
+
+// ─── Accordion Section ─────────────────────────────────
+const AccordionSection = ({ title, icon, isOpen, onToggle, children, dirty, keys }: {
+  title: string; icon: React.ReactNode; isOpen: boolean; onToggle: () => void;
+  children: React.ReactNode; dirty?: Record<string, string>; keys?: string[];
+}) => {
+  const hasDirty = keys?.some(k => dirty?.[k] !== undefined);
+  return (
+    <div className="bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          {icon}
+          <span className="text-sm font-bold text-white/80 tracking-tight">{title}</span>
+          {hasDirty && (
+            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="有未儲存的變更" />
+          )}
+        </div>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-white/20 shrink-0"
+        >
+          <ChevronDown size={18} />
+        </motion.div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ─── Config Field ──────────────────────────────────────
+const ConfigField = ({ label, value, onChange, placeholder, large, mono, hint }: {
+  label: string; value: string; onChange: (v: string) => void;
+  placeholder?: string; large?: boolean; mono?: boolean; hint?: string;
+}) => (
+  <div className="space-y-2.5">
+    <div className="flex items-center justify-between">
+      <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">{label}</label>
+      {hint && <span className="text-[8px] text-white/20 tracking-wider">{hint}</span>}
+    </div>
+    {large ? (
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15 leading-relaxed resize-y ${
+          mono ? 'font-mono text-xs' : ''
+        } h-[140px]`}
+      />
+    ) : (
+      mono ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-xs text-white outline-none focus:border-white/20 transition-all font-mono placeholder:text-white/15 h-[100px] resize-y"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15"
+        />
+      )
+    )}
+  </div>
+);
+
+// ─── Tool Button ───────────────────────────────────────
 const ToolBtn = ({ onClick, icon, title }: any) => (
-  <button 
-    onClick={onClick} 
+  <button
+    onClick={onClick}
     title={title}
-    className="w-10 h-10 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-all border border-transparent hover:border-white/10"
+    className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white hover:bg-white/5 transition-all"
   >
     {icon}
   </button>
 );
 
-const NavBtn = ({ active, icon, label, onClick }: any) => (
-  <button onClick={onClick} className={`flex items-center gap-5 px-8 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all shrink-0 ${active ? 'bg-white text-black shadow-2xl scale-105' : 'text-white/40 hover:text-white hover:bg-white/5'}`}>
-    <span className={active ? 'text-black' : 'text-white/40 group-hover:text-white'}>{icon}</span> {label}
-  </button>
+// ─── Input ─────────────────────────────────────────────
+const Inp = ({ label, value, onChange }: any) => (
+  <div className="space-y-2.5">
+    <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">{label}</label>
+    <input
+      type="text"
+      value={value || ''}
+      onChange={e => onChange(e.target.value)}
+      className="w-full bg-black/60 border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-white/20 transition-all"
+    />
+  </div>
 );
 
-const Inp = ({ label, value, onChange }: any) => (
-  <div className="space-y-4 w-full">
-    <label className="text-[11px] font-black text-white/60 uppercase tracking-widest ml-3">{label}</label>
-    <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-2xl px-6 py-5 text-white text-sm focus:border-white/40 transition-all outline-none shadow-inner" />
-  </div>
+// ─── Quick Button ──────────────────────────────────────
+const QuickBtn = ({ icon, label, color, onClick }: {
+  icon: React.ReactNode; label: string; color: string; onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-xl px-4 py-3 transition-all text-left"
+  >
+    <span className={`${color} shrink-0`}>{icon}</span>
+    <span className="text-xs font-bold text-white/70">{label}</span>
+  </button>
 );
 
 export default AdminPage;
