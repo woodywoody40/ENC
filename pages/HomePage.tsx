@@ -217,9 +217,34 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* ===== HERO ===== */}
-        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-20 pb-12 px-6 sm:px-12 lg:px-20">
+        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-20 pb-12 px-6 sm:px-12 lg:px-20 overflow-hidden">
 
-          <div className="flex-1 flex flex-col justify-center max-w-6xl">
+          {/* Right-to-left gradient image layer */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="absolute -right-20 -top-20 w-[80%] h-[140%] opacity-[0.10]"
+              style={{
+                background: 'radial-gradient(ellipse at 70% 40%, rgba(245,158,11,1) 0%, transparent 60%)',
+                filter: 'blur(100px)',
+              }}
+            />
+            <div className="absolute -right-40 bottom-0 w-[60%] aspect-square opacity-[0.05]"
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(56,189,248,1) 0%, transparent 60%)',
+                filter: 'blur(120px)',
+              }}
+            />
+            <div className="absolute right-0 top-0 w-3/5 h-full opacity-[0.020] mix-blend-overlay"
+              style={{
+                background: 'linear-gradient(270deg, rgba(245,158,11,0.5) 0%, rgba(56,189,248,0.2) 30%, transparent 55%)',
+                mask: 'linear-gradient(270deg, rgba(0,0,0,1) 0%, transparent 50%)',
+                WebkitMask: 'linear-gradient(270deg, rgba(0,0,0,1) 0%, transparent 50%)',
+              }}
+            />
+            {/* Fade transition to clean left */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#08090c]/30" />
+          </div>
+
+          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl">
             <Reveal delay={100}>
               <h1
                 className="font-sans text-[clamp(2.8rem,10vw,8rem)] leading-[1.08] tracking-[-0.04em] text-white/95 mb-6 parallax-layer-slow"

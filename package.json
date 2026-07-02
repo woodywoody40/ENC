@@ -19,6 +19,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "framer-motion": "^12.23.26",
+    "geist": "^1.7.2",
     "jose": "^5.9.6",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
