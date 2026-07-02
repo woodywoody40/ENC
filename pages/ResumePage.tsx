@@ -171,36 +171,6 @@ const ResumePage: React.FC = () => {
             </div>
           </section>
 
-          <section>
-            <SectionHeader icon={<Award size={20} />} title="專業證照" />
-            
-            {/* 證照圖片牆 */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {CERTIFICATE_IMAGES.map((cert, idx) => (
-                <motion.button
-                  key={idx}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.06 }}
-                  onClick={() => setLightboxIndex(idx)}
-                  className="group relative aspect-[4/3] rounded-xl overflow-hidden border dark:border-white/10 border-black/10 bg-white/20 dark:bg-black/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
-                >
-                  <img
-                    src={cert.file}
-                    alt={cert.name}
-                    loading="lazy"
-                    className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-7 pb-2.5 px-2.5">
-                    <p className="text-[10px] font-black text-white uppercase tracking-tight leading-tight truncate">{cert.name}</p>
-                    <p className="text-[8px] text-white/60 font-bold uppercase tracking-widest truncate">{cert.issuer}</p>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </section>
-
           <div className="pt-10">
             <button className="w-full py-5 glass-panel dark:bg-white dark:text-black bg-morandi-slate text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-xl">
               <FileText size={18} /> 索取完整 PDF 履歷
@@ -208,6 +178,35 @@ const ResumePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 專業證照 — 全寬圖片牆 */}
+      <section className="mt-32">
+        <SectionHeader icon={<Award size={20} />} title="專業證照" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {CERTIFICATE_IMAGES.map((cert, idx) => (
+            <motion.button
+              key={idx}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.06 }}
+              onClick={() => setLightboxIndex(idx)}
+              className="group relative aspect-[4/3] rounded-xl overflow-hidden border dark:border-white/10 border-black/10 bg-white/20 dark:bg-black/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
+            >
+              <img
+                src={cert.file}
+                alt={cert.name}
+                loading="lazy"
+                className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-8 pb-3 px-3">
+                <p className="text-xs font-black text-white uppercase tracking-tight leading-tight truncate">{cert.name}</p>
+                <p className="text-[10px] text-white/60 font-bold uppercase tracking-widest truncate">{cert.issuer}</p>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </section>
 
       {/* 證照 Lightbox */}
       <AnimatePresence>
