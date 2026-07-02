@@ -103,7 +103,7 @@ const ResumePage: React.FC = () => {
         <motion.div 
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }}
-          className="inline-block px-5 py-2 dark:border-white/10 border-black/10 dark:bg-white/5 bg-white/40 mb-8 rounded-[40px] shadow-xl backdrop-blur-[40px] border"
+          className="inline-block px-5 py-2 dark:border-white/10 border-black/10 dark:bg-white/[0.07] bg-white/60 mb-8 rounded-[40px] shadow-xl backdrop-blur-[40px] border"
         >
           <span className="dark:text-white text-morandi-slate font-black text-[9px] tracking-[0.8em] uppercase">技術履歷 - Curriculum Vitae</span>
         </motion.div>
