@@ -222,7 +222,7 @@ const HomePage: React.FC = () => {
           <div className="flex-1 flex flex-col justify-center max-w-6xl">
             <Reveal delay={100}>
               <h1
-                className="font-serif-editorial text-[clamp(3rem,11vw,9rem)] leading-[0.92] tracking-[-0.02em] text-white/95 mb-2 parallax-layer-slow"
+                className="font-sans text-[clamp(2.8rem,10vw,8rem)] leading-[1.08] tracking-[-0.04em] text-white/95 mb-6 parallax-layer-slow"
                 style={{ transform: `translateY(${scrollY * -0.04}px)` }}
               >
                 {heroTitle}
@@ -230,7 +230,7 @@ const HomePage: React.FC = () => {
             </Reveal>
             <Reveal delay={300}>
               <h2
-                className="font-serif-editorial italic text-[clamp(1.5rem,5vw,3.5rem)] leading-[1] tracking-[-0.01em] text-white/30 mb-10 parallax-layer-medium"
+                className="font-sans text-[clamp(1.2rem,3.5vw,2.5rem)] leading-[1.3] tracking-[0.02em] text-white/25 font-light mb-12 parallax-layer-medium"
                 style={{ transform: `translateY(${scrollY * -0.02}px)` }}
               >
                 Architecture of Reliability
@@ -238,7 +238,7 @@ const HomePage: React.FC = () => {
             </Reveal>
             <Reveal delay={400}>
               <p
-                className="text-sm sm:text-base text-slate-400/80 leading-relaxed max-w-xl font-light mb-12 parallax-layer-fast"
+                className="text-base sm:text-lg text-slate-400/80 leading-relaxed max-w-xl font-light mb-16 parallax-layer-fast"
                 style={{ transform: `translateY(${scrollY * -0.01}px)` }}
               >
                 {heroIntro}
