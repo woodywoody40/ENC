@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Github, Linkedin, MapPin, 
   Briefcase, GraduationCap, Award, 
-  Terminal, Server, ShieldCheck, Loader2, FileText, Globe, Link as LinkIcon, ExternalLink,
-  X, ChevronLeft, ChevronRight, Image
+  Terminal, Server, ShieldCheck, Loader2, FileText, Globe,
+  X, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { ConfigAPI } from '../services/apiClient';
 
@@ -84,7 +84,6 @@ const ResumePage: React.FC = () => {
 
   const extraLinks = getParsedArray('resume_extra_links');
   const educationList = getParsedArray('resume_education_list');
-  const certsList = getParsedArray('resume_certs_list');
 
   return (
     <>
@@ -176,13 +175,13 @@ const ResumePage: React.FC = () => {
             <SectionHeader icon={<Award size={20} />} title="專業證照" />
             
             {/* 證照圖片牆 */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {CERTIFICATE_IMAGES.map((cert, idx) => (
                 <motion.button
                   key={idx}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
+                  transition={{ delay: idx * 0.06 }}
                   onClick={() => setLightboxIndex(idx)}
                   className="group relative aspect-[4/3] rounded-xl overflow-hidden border dark:border-white/10 border-black/10 bg-white/20 dark:bg-black/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
                 >
@@ -190,33 +189,15 @@ const ResumePage: React.FC = () => {
                     src={cert.file}
                     alt={cert.name}
                     loading="lazy"
-                    className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-6 pb-2 px-2.5">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent pt-7 pb-2.5 px-2.5">
                     <p className="text-[10px] font-black text-white uppercase tracking-tight leading-tight truncate">{cert.name}</p>
                     <p className="text-[8px] text-white/60 font-bold uppercase tracking-widest truncate">{cert.issuer}</p>
                   </div>
                 </motion.button>
               ))}
-            </div>
-
-            {/* 證照文字列表（來自 config） */}
-            <div className="space-y-4">
-              {certsList.length > 0 ? (
-                certsList.map((cert: any, idx: number) => (
-                  <div key={idx} className="flex items-center gap-4 group">
-                    <div className="w-2 h-2 rounded-full dark:bg-white/20 bg-morandi-slate group-hover:bg-morandi-rose transition-colors" />
-                    <div className="flex-1">
-                      <p className="text-sm font-black dark:text-white text-morandi-slate uppercase tracking-tighter">{cert.name}</p>
-                      <p className="text-[10px] dark:text-slate-500 text-morandi-stone font-bold uppercase tracking-widest">{cert.issuer}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="dark:text-slate-400 text-morandi-stone">
-                  {renderMarkdownText(configs.resume_certs || "### EC-Council\nCEH (Certified Ethical Hacker)\n\n### MikroTik\nMTCNA 網路工程師認證\n\n### Google\nIT Support Professional Certificate")}
-                </div>
-              )}
             </div>
           </section>
 
