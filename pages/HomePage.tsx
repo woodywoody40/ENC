@@ -68,55 +68,52 @@ function TechMarquee() {
   );
 }
 
-/* ---------- Stat block (editorial, no card) ---------- */
+/* ---------- Stat block (minimal, Floria-style) ---------- */
 function StatBlock({ label, value, desc, index }: { label: string; value: string; desc: string; index: number }) {
   return (
     <Reveal delay={index * 80}>
-      <div className="group py-8 border-t border-white/[0.06] hover:border-amber-400/20 transition-colors duration-700">
-        <div className="flex items-baseline justify-between mb-4">
-          <span className="text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/20">{label}</span>
-          <span className="text-[10px] font-mono-tech text-white/10">0{index + 1}</span>
-        </div>
-        <p className="font-serif-editorial text-4xl sm:text-5xl lg:text-6xl text-white/90 leading-none mb-3 group-hover:text-amber-100/90 transition-colors duration-700">
+      <div className="group py-6 border-t border-white/[0.06] hover:border-amber-400/20 transition-colors duration-700">
+        <p className="font-bold text-4xl sm:text-5xl lg:text-6xl text-white/90 leading-none mb-2 group-hover:text-amber-100/90 transition-colors duration-700">
           {value}
         </p>
-        <p className="text-xs text-slate-500 font-light leading-relaxed max-w-[16rem]">{desc}</p>
+        <p className="text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/25 mb-2">{label}</p>
+        <p className="text-xs text-white/30 font-light leading-relaxed max-w-[20rem]">{desc}</p>
       </div>
     </Reveal>
   );
 }
 
-/* ---------- Process step (editorial) ---------- */
+/* ---------- Process step (Floria-style) ---------- */
 function ProcessStep({ num, title, desc, index }: { num: string; title: string; desc: string; index: number }) {
   return (
     <Reveal delay={index * 120}>
       <div className="group flex gap-8 sm:gap-12 py-10 border-t border-white/[0.06] hover:border-amber-400/15 transition-colors duration-700">
         <span className="font-mono-tech text-sm text-amber-400/40 tracking-widest pt-1 select-none">{num}</span>
         <div className="flex-1">
-          <h3 className="font-serif-editorial text-2xl sm:text-3xl text-white/90 mb-3 leading-tight group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
-          <p className="text-sm text-slate-500 font-light leading-relaxed max-w-md">{desc}</p>
+          <h3 className="font-bold text-xl sm:text-2xl text-white/90 mb-3 leading-tight group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
+          <p className="text-sm text-white/40 font-light leading-relaxed max-w-md">{desc}</p>
         </div>
-        <ArrowUpRight size={18} className="text-white/10 group-hover:text-amber-400/50 group-hover:rotate-45 transition-all duration-500 pt-1" />
+        <ArrowUpRight size={16} className="text-white/10 group-hover:text-amber-400/50 group-hover:rotate-45 transition-all duration-500 pt-1" />
       </div>
     </Reveal>
   );
 }
 
-/* ---------- Competency row (editorial list, not grid cards) ---------- */
+/* ---------- Competency row (Floria-style) ---------- */
 function CompetencyRow({ icon, title, desc, tags, index }: { icon: React.ReactNode; title: string; desc: string; tags: string[]; index: number }) {
   return (
     <Reveal delay={index * 100}>
-      <div className="group grid grid-cols-12 gap-4 sm:gap-8 py-10 border-t border-white/[0.06] hover:border-amber-400/15 transition-colors duration-700 cursor-default">
+      <div className="group grid grid-cols-12 gap-4 sm:gap-8 py-8 border-t border-white/[0.06] hover:border-amber-400/15 transition-colors duration-700 cursor-default">
         <div className="col-span-2 sm:col-span-1 flex items-start pt-1">
-          <div className="w-9 h-9 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 group-hover:border-amber-400/25 group-hover:text-amber-300/70 transition-all duration-500">
+          <div className="w-8 h-8 rounded-lg border border-white/[0.08] flex items-center justify-center text-white/30 group-hover:border-amber-400/25 group-hover:text-amber-300/70 transition-all duration-500">
             {icon}
           </div>
         </div>
         <div className="col-span-10 sm:col-span-4">
-          <h3 className="font-serif-editorial text-xl sm:text-2xl text-white/90 group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
+          <h3 className="font-bold text-lg sm:text-xl text-white/90 group-hover:text-amber-100/90 transition-colors duration-500">{title}</h3>
         </div>
         <div className="col-span-12 sm:col-span-5">
-          <p className="text-sm text-slate-500 font-light leading-relaxed">{desc}</p>
+          <p className="text-sm text-white/40 font-light leading-relaxed">{desc}</p>
         </div>
         <div className="col-span-12 sm:col-span-2 flex sm:flex-col flex-wrap gap-1.5 pt-1">
           {tags.map((t) => (
@@ -299,48 +296,37 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* ===== STATS ===== */}
-        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32">
           <div className="max-w-6xl mx-auto">
-            <Reveal>
-              <div className="flex items-baseline justify-between mb-16">
-                <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40">
-                  § 01 — Operational Metrics
-                </p>
-                <p className="text-[10px] font-mono-tech text-white/15 hidden sm:block">Live Data</p>
-              </div>
-            </Reveal>
             <Reveal delay={100}>
-              <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4rem)] leading-[1] text-white/90 mb-16 max-w-3xl">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.9] text-white mb-16 max-w-3xl">
                 Numbers from the<br />
-                <span className="italic text-white/30">operations floor.</span>
+                <span className="italic text-white/30 font-normal">operations floor.</span>
               </h2>
             </Reveal>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12">
-              <StatBlock index={0} label="Virtual Machines" value={statVm} desc="Active virtual clusters managed across multiple hypervisors and datacenters." />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4">
+              <StatBlock index={0} label="Virtual Machines" value={statVm} desc="Active virtual clusters managed across multiple hypervisors." />
               <StatBlock index={1} label="Storage Array" value="HPE 2050" desc="Multipath iSCSI SAN with redundant fabric topology." />
               <StatBlock index={2} label="Network Edge" value={statDefense} desc="High-availability Fortinet security cluster." />
               <StatBlock index={3} label="Measured SLA" value={configs.stat_uptime || '99.9%'} desc="Uptime across all managed infrastructure." />
-              <StatBlock index={4} label="Incident Response" value="24/7" desc="Continuous monitoring with automated alerting and escalation." />
+              <StatBlock index={4} label="Incident Response" value="24/7" desc="Continuous monitoring with automated alerting." />
               <StatBlock index={5} label="Years in Production" value="8+" desc="Hands-on infrastructure engineering across enterprise environments." />
             </div>
           </div>
         </section>
 
         {/* ===== APPROACH + PROCESS ===== */}
-        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
               <div className="lg:col-span-5">
                 <Reveal>
-                  <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40 mb-8">
-                    § 02 — Approach
-                  </p>
-                  <h2 className="font-serif-editorial text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] text-white/90 mb-8">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter leading-[0.95] text-white mb-8">
                     From the<br />
-                    <span className="italic text-white/30">operations floor.</span>
+                    <span className="italic text-white/30 font-normal">operations floor.</span>
                   </h2>
-                  <div className="w-16 h-px bg-amber-400/30 mb-8" />
-                  <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed font-light max-w-md mb-8">
+                  <div className="w-12 h-px bg-amber-400/30 mb-8" />
+                  <p className="text-sm sm:text-base text-white/40 leading-relaxed font-light max-w-md mb-8">
                     把網路、虛擬化、儲存與安全整合成清楚的流程，讓日常維運更快、更穩，也更容易交接。
                     每個節點、每條規則、每份備份，都經過實際部署驗證，不是紙上談兵的架構。
                   </p>
@@ -365,20 +351,12 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* ===== COMPETENCIES ===== */}
-        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32">
           <div className="max-w-6xl mx-auto">
-            <Reveal>
-              <div className="flex items-baseline justify-between mb-16">
-                <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40">
-                  § 03 — Core Competencies
-                </p>
-                <p className="text-[10px] font-mono-tech text-white/15 hidden sm:block">04 Disciplines</p>
-              </div>
-            </Reveal>
             <Reveal delay={100}>
-              <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4rem)] leading-[1] text-white/90 mb-4">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.9] text-white mb-4">
                 Four disciplines.<br />
-                <span className="italic text-white/30">One engineering ethos.</span>
+                <span className="italic text-white/30 font-normal">One engineering ethos.</span>
               </h2>
             </Reveal>
             <div className="mt-12">
@@ -392,7 +370,7 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* ===== PULL QUOTE ===== */}
-        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32 sm:py-40 border-t border-white/[0.04]">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-40">
           <div className="max-w-4xl mx-auto text-center">
             <Reveal>
               <Cpu size={28} className="mx-auto text-amber-400/30 mb-10" />
@@ -407,28 +385,25 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* ===== CTA ===== */}
-        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-24 sm:py-32 border-t border-white/[0.04]">
+        <section className="relative z-10 px-6 sm:px-12 lg:px-20 py-32">
           <div className="max-w-5xl mx-auto">
             <Reveal>
               <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-12">
                 <div>
-                  <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/40 mb-6">
-                    § 04 — Explore
-                  </p>
-                  <h2 className="font-serif-editorial text-[clamp(2rem,6vw,4.5rem)] leading-[1] text-white/90 mb-6">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-[0.9] text-white mb-6">
                     See the<br />
-                    <span className="italic text-white/30">infrastructure in action.</span>
+                    <span className="italic text-white/30 font-normal">infrastructure in action.</span>
                   </h2>
-                  <p className="text-sm text-slate-400/70 max-w-md font-light leading-relaxed">
+                  <p className="text-sm text-white/40 max-w-md font-light leading-relaxed">
                     Browse real deployment cases, network topology diagrams, and the full technology stack powering this environment.
                   </p>
                 </div>
                 <Link
                   to="/portfolio"
-                  className="group inline-flex items-center gap-3 bg-white text-[#08090c] px-10 py-5 text-sm font-semibold tracking-wide hover:bg-amber-50 transition-all duration-300 active:scale-[0.97] whitespace-nowrap"
+                  className="group inline-flex items-center gap-2 text-amber-400/70 text-sm font-semibold tracking-wide hover:text-amber-300 transition-colors duration-300"
                 >
                   瀏覽維運實績
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
               </div>
             </Reveal>
@@ -436,15 +411,12 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* ===== FOOTER ===== */}
-        <footer className="relative z-10 px-6 sm:px-12 lg:px-20 py-16 border-t border-white/[0.04]">
+        <footer className="relative z-10 px-6 sm:px-12 lg:px-20 py-16">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/50 animate-pulse" />
-              <p className="text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/15">
-                Infrastructure Managed with Precision
-              </p>
-            </div>
-            <div className="flex items-center gap-6 text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/15">
+            <p className="text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/15">
+              Infrastructure Managed with Precision
+            </p>
+            <div className="flex items-center gap-8 text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/15">
               <Link to="/portfolio" className="hover:text-amber-400/50 transition-colors">Portfolio</Link>
               <Link to="/blog" className="hover:text-amber-400/50 transition-colors">Notes</Link>
               <Link to="/resume" className="hover:text-amber-400/50 transition-colors">Resume</Link>
