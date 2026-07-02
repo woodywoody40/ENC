@@ -193,17 +193,18 @@ const ResumePage: React.FC = () => {
               className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-lg transition-shadow duration-500 cursor-pointer w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-1.333rem)] md:w-[calc(25%-1.5rem)] hover:-translate-y-1 transition-transform duration-500"
             >
               {/* 圖片區 */}
-              <div className="relative aspect-[4/3] flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 p-5 overflow-hidden">
+              <div className="relative aspect-[4/3] flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 p-2 overflow-hidden">
                 <img
                   src={cert.file}
                   alt={cert.name}
                   loading="lazy"
-                  className="max-w-full max-h-full object-contain transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-105"
+                  style={{ transition: 'transform 2000ms cubic-bezier(0.25,0.1,0.25,1)' }}
+                  className="max-w-full max-h-full object-contain scale-100 group-hover:scale-105"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
               {/* 文字區 */}
-              <div className="px-5 py-4 text-left border-t border-neutral-100 dark:border-neutral-800">
+              <div className="px-4 py-3 text-left border-t border-neutral-100 dark:border-neutral-800">
                 <h3 className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-white leading-snug">
                   {cert.name}
                 </h3>
