@@ -1,17 +1,30 @@
 
 import React, { useState, useEffect } from 'react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Github, Linkedin, MapPin, 
   Briefcase, GraduationCap, Award, 
-  Terminal, Server, ShieldCheck, Loader2, FileText, Globe, Link as LinkIcon, ExternalLink
+  Terminal, Server, ShieldCheck, Loader2, FileText, Globe, Link as LinkIcon, ExternalLink,
+  X, ChevronLeft, ChevronRight, Image
 } from 'lucide-react';
 import { ConfigAPI } from '../services/apiClient';
+
+// 證照圖片清單（位於 /media/certs/ 靜態目錄）
+const CERTIFICATE_IMAGES: { file: string; name: string; issuer: string }[] = [
+  { file: '/media/certs/ceh-certified-ethical-hacker.png',     name: 'Certified Ethical Hacker',        issuer: 'EC-Council' },
+  { file: '/media/certs/mikrotik-mtcna.png',                   name: 'MTCNA',                           issuer: 'MikroTik' },
+  { file: '/media/certs/erp-software-applications.png',        name: 'ERP 軟體應用師',                 issuer: '中華企業資源規劃學會' },
+  { file: '/media/certs/adobe-photoshop-certified.png',        name: 'Photoshop Certified',             issuer: 'Adobe' },
+  { file: '/media/certs/google-ads-measurement.png',           name: 'Google Ads Measurement',          issuer: 'Google' },
+  { file: '/media/certs/google-it-support.png',                name: 'IT Support Professional',         issuer: 'Google' },
+  { file: '/media/certs/ibm-program-manager.png',              name: 'Program Manager',                 issuer: 'IBM' },
+];
 
 const ResumePage: React.FC = () => {
   const [configs, setConfigs] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchConfigs = async () => {
@@ -158,6 +171,33 @@ const ResumePage: React.FC = () => {
 
           <section>
             <SectionHeader icon={<Award size={20} />} title="專業證照" />
+            
+            {/* 證照圖片牆 */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+              {CERTIFICATE_IMAGES.map((cert, idx) => (
+                <motion.button
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => setLightboxIndex(idx)}
+                  className="group relative aspect-[4/3] rounded-xl overflow-hidden border dark:border-white/10 border-black/10 bg-white/20 dark:bg-black/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
+                >
+                  <img
+                    src={cert.file}
+                    alt={cert.name}
+                    loading="lazy"
+                    className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-6 pb-2 px-2.5">
+                    <p className="text-[10px] font-black text-white uppercase tracking-tight leading-tight truncate">{cert.name}</p>
+                    <p className="text-[8px] text-white/60 font-bold uppercase tracking-widest truncate">{cert.issuer}</p>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* 證照文字列表（來自 config） */}
             <div className="space-y-4">
               {certsList.length > 0 ? (
                 certsList.map((cert: any, idx: number) => (
@@ -184,7 +224,65 @@ const ResumePage: React.FC = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+
+      {/* 證照 Lightbox */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8"
+            onClick={() => setLightboxIndex(null)}
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+              className="absolute top-5 right-5 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
+            >
+              <X size={22} />
+            </button>
+
+            {lightboxIndex > 0 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
+              >
+                <ChevronLeft size={22} />
+              </button>
+            )}
+
+            <motion.img
+              key={lightboxIndex}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              src={CERTIFICATE_IMAGES[lightboxIndex].file}
+              alt={CERTIFICATE_IMAGES[lightboxIndex].name}
+              className="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {lightboxIndex < CERTIFICATE_IMAGES.length - 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"
+              >
+                <ChevronRight size={22} />
+              </button>
+            )}
+
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center">
+              <p className="text-white font-black text-sm tracking-tight">
+                {CERTIFICATE_IMAGES[lightboxIndex].name}
+              </p>
+              <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-1">
+                {CERTIFICATE_IMAGES[lightboxIndex].issuer} · {lightboxIndex + 1} / {CERTIFICATE_IMAGES.length}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </motion.div>
     </>
   );
 };
