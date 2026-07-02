@@ -182,36 +182,35 @@ const ResumePage: React.FC = () => {
       {/* 專業證照 — 全寬圖片牆 */}
       <section className="mt-32">
         <SectionHeader icon={<Award size={20} />} title="專業證照" />
-        <div className="flex flex-wrap gap-4 md:gap-6 justify-center">
+        <div className="flex flex-wrap gap-5 md:gap-8 justify-center">
           {CERTIFICATE_IMAGES.map((cert, idx) => (
             <motion.button
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.07 }}
+              transition={{ delay: idx * 0.08, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
               onClick={() => setLightboxIndex(idx)}
-              className="group relative overflow-hidden rounded-[2rem] cursor-pointer flex-shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.667rem)] md:w-[calc(25%-1rem)]"
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-lg transition-shadow duration-500 cursor-pointer w-[calc(50%-0.625rem)] sm:w-[calc(33.333%-1.333rem)] md:w-[calc(25%-1.5rem)] hover:-translate-y-1 transition-transform duration-500"
             >
-              <div className="relative h-[280px] md:h-[340px] flex items-center justify-center bg-white/5 dark:bg-black/20 p-4">
+              {/* 圖片區 */}
+              <div className="relative aspect-[4/3] flex items-center justify-center bg-neutral-50 dark:bg-neutral-800 p-5 overflow-hidden">
                 <img
                   src={cert.file}
                   alt={cert.name}
                   loading="lazy"
-                  className="max-w-full max-h-full object-contain transition-transform duration-[2000ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-110"
+                  className="max-w-full max-h-full object-contain transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:scale-105"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
-              {/* 底部漸層 + 文字 */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent pt-10 pb-4 px-5">
-                <h3 className="text-sm md:text-base font-bold tracking-tight text-white translate-y-2 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] delay-100">
+              {/* 文字區 */}
+              <div className="px-5 py-4 text-left border-t border-neutral-100 dark:border-neutral-800">
+                <h3 className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-white leading-snug">
                   {cert.name}
                 </h3>
-                <p className="text-white/40 text-[10px] font-semibold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] delay-200 translate-y-2 group-hover:translate-y-0 leading-relaxed">
+                <p className="text-[11px] font-medium uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mt-1">
                   {cert.issuer}
                 </p>
               </div>
-              {/* 內框線 */}
-              <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[inherit] pointer-events-none" />
             </motion.button>
           ))}
         </div>
