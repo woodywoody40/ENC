@@ -99,9 +99,9 @@ const ResumePage: React.FC = () => {
 
     // 解析經歷文字 → 結構化物件
     const expItems: { title: string; date: string; bullets: string[] }[] = [];
-    const expLines = experience.split('\n').filter(l => l.trim());
+    const expLines = experience.split('\n').filter((l: string) => l.trim());
     let cur: any = null;
-    expLines.forEach(line => {
+    expLines.forEach((line: string) => {
       if (line.startsWith('### ')) {
         if (cur) expItems.push(cur);
         cur = { title: line.replace('### ', '').trim(), date: '', bullets: [] };
