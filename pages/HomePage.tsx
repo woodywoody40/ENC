@@ -217,18 +217,7 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* ===== HERO ===== */}
-        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-28 pb-12 px-6 sm:px-12 lg:px-20">
-
-          <Reveal>
-            <div className="flex items-center justify-between text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/20">
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60 animate-pulse" />
-                System Operational
-              </span>
-              <span className="hidden sm:block">N 24.0° / E 121.5°</span>
-              <span>v2.0</span>
-            </div>
-          </Reveal>
+        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-20 pb-12 px-6 sm:px-12 lg:px-20">
 
           <div className="flex-1 flex flex-col justify-center max-w-6xl">
             <Reveal delay={100}>
