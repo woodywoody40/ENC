@@ -397,68 +397,91 @@ const AdminPage: React.FC = () => {
     <SEOMeta title="管理後台" description="Woody 維運實踐．網站內容管理系統" path="/admin" noindex />
 
     {/* Toast Container */}
-    <div className="fixed top-6 right-6 z-[999] flex flex-col gap-3 pointer-events-none">
+    <div className="fixed top-6 right-6 z-[999] flex flex-col gap-2.5 pointer-events-none">
       <AnimatePresence>
         {toasts.map(t => (
           <motion.div
             key={t.id}
-            initial={{ opacity: 0, x: 80, scale: 0.95 }}
+            layout
+            initial={{ opacity: 0, x: 40, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 80, scale: 0.95 }}
-            className={`pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-bold tracking-wide backdrop-blur-xl ${
-              t.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' :
-              t.type === 'error' ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' :
-              'bg-blue-500/20 border-blue-500/30 text-blue-300'
+            exit={{ opacity: 0, x: 40, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+            className={`pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-2xl border text-[11px] font-semibold tracking-wide backdrop-blur-2xl ${
+              t.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+              t.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
+              'bg-blue-500/10 border-blue-500/20 text-blue-400'
             }`}
           >
-            {t.type === 'success' ? <CheckCircle2 size={18} /> : t.type === 'error' ? <AlertCircle size={18} /> : <Info size={18} />}
+            <span className={`flex items-center justify-center w-5 h-5 rounded-full ${
+              t.type === 'success' ? 'bg-emerald-500/15' : t.type === 'error' ? 'bg-rose-500/15' : 'bg-blue-500/15'
+            }`}>
+              {t.type === 'success' ? <CheckCircle2 size={12} /> : t.type === 'error' ? <AlertCircle size={12} /> : <Info size={12} />}
+            </span>
             {t.message}
           </motion.div>
         ))}
       </AnimatePresence>
     </div>
 
-    <div className="min-h-screen bg-[#050608]">
+    <div className="min-h-screen bg-[#050608] relative">
+      {/* Subtle background glow */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-blue-500/[0.02] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-violet-500/[0.015] rounded-full blur-[100px]" />
+      </div>
       {/* ===== Top Navigation Bar ===== */}
-      <header className="sticky top-0 z-50 bg-[#050608]/90 backdrop-blur-2xl border-b border-white/5">
+      <header className="sticky top-0 z-50 bg-[#050608]/80 backdrop-blur-3xl border-b border-white/[0.04] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]">
         <div className="max-w-[1700px] mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-              <Settings size={16} className="text-white/60" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center shrink-0 border border-white/5">
+              <span className="text-[10px] font-black text-white/50">W</span>
             </div>
-            <span className="text-sm font-black text-white tracking-tight whitespace-nowrap">Woody 後台</span>
-            <span className="text-[9px] font-bold text-white/20 tracking-wider hidden sm:block uppercase truncate">
-              {authEmail}
-            </span>
+            <span className="text-sm font-bold text-white/90 tracking-tight whitespace-nowrap">管理後台</span>
+            <div className="hidden sm:flex items-center gap-2 ml-2">
+              <span className="w-1 h-1 rounded-full bg-emerald-400/60" />
+              <span className="text-[9px] font-medium text-white/25 uppercase tracking-wider truncate max-w-[140px]">
+                {authEmail}
+              </span>
+            </div>
           </div>
 
-          <nav className="flex items-center gap-1 bg-white/5 rounded-2xl p-1 shrink-0">
+          <nav className="flex items-center bg-white/[0.04] rounded-2xl p-0.5 border border-white/5 shrink-0 relative">
             {([
-              { key: 'dashboard' as TabKey, icon: <LayoutDashboard size={15} />, label: '概覽' },
-              { key: 'projects' as TabKey, icon: <Briefcase size={15} />, label: '作品' },
-              { key: 'blog' as TabKey, icon: <BookOpen size={15} />, label: '文章' },
-              { key: 'site_config' as TabKey, icon: <Settings size={15} />, label: '設定' },
+              { key: 'dashboard' as TabKey, icon: <LayoutDashboard size={14} />, label: '概覽' },
+              { key: 'projects' as TabKey, icon: <Briefcase size={14} />, label: '作品' },
+              { key: 'blog' as TabKey, icon: <BookOpen size={14} />, label: '文章' },
+              { key: 'site_config' as TabKey, icon: <Settings size={14} />, label: '設定' },
             ]).map(t => (
               <button
                 key={t.key}
                 onClick={() => { setActiveTab(t.key); setSearchQuery(''); }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
                   activeTab === t.key
-                    ? 'bg-white text-black shadow-lg'
-                    : 'text-white/40 hover:text-white/80'
+                    ? 'text-black'
+                    : 'text-white/35 hover:text-white/70'
                 }`}
               >
-                {t.icon}
-                <span className="hidden sm:inline">{t.label}</span>
+                {activeTab === t.key && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-white rounded-xl shadow-lg shadow-white/10"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {t.icon}
+                  <span className="hidden sm:inline">{t.label}</span>
+                </span>
               </button>
             ))}
           </nav>
 
           <button
             onClick={() => { setIsAuthenticated(false); setAuthEmail(''); }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/10 transition-all shrink-0"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-semibold uppercase text-rose-400/40 hover:text-rose-400 hover:bg-rose-500/8 transition-all shrink-0"
           >
-            <LogOut size={15} />
+            <LogOut size={14} />
             <span className="hidden sm:inline">登出</span>
           </button>
         </div>
@@ -469,53 +492,61 @@ const AdminPage: React.FC = () => {
 
         {/* ─── DASHBOARD ──────────────────────────────────── */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {([
-                { icon: <Briefcase size={22} />, label: '部署專案', value: projects.length, color: 'text-blue-400', tab: 'projects' as TabKey },
-                { icon: <BookOpen size={22} />, label: '技術文章', value: posts.length, color: 'text-violet-400', tab: 'blog' as TabKey },
-                { icon: <Activity size={22} />, label: '核心狀態', value: '連線中', color: 'text-emerald-400', tab: null },
+                { icon: <Briefcase size={20} />, label: '部署專案', value: projects.length, gradient: 'from-blue-500/20 via-blue-500/5', border: 'hover:border-blue-500/30', tab: 'projects' as TabKey },
+                { icon: <BookOpen size={20} />, label: '技術文章', value: posts.length, gradient: 'from-violet-500/20 via-violet-500/5', border: 'hover:border-violet-500/30', tab: 'blog' as TabKey },
+                { icon: <Activity size={20} />, label: '核心狀態', value: '連線中', gradient: 'from-emerald-500/20 via-emerald-500/5', border: 'hover:border-emerald-500/30', tab: null },
               ]).map((stat, i) => (
                 <button
                   key={i}
                   onClick={() => stat.tab && setActiveTab(stat.tab!)}
                   disabled={!stat.tab}
-                  className={`bg-black/60 border border-white/10 rounded-2xl p-8 text-center group transition-all ${
-                    stat.tab ? 'hover:border-white/30 hover:bg-white/[0.04] cursor-pointer' : 'cursor-default'
+                  className={`relative bg-gradient-to-b ${stat.gradient} to-transparent border border-white/[0.06] rounded-2xl p-7 text-center group transition-all duration-300 overflow-hidden ${
+                    stat.tab ? `${stat.border} cursor-pointer hover:shadow-[0_0_30px_-10px_rgba(255,255,255,0.05)]` : 'cursor-default'
                   }`}
                 >
-                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5 group-hover:scale-110 transition-transform">
-                    <span className={stat.color}>{stat.icon}</span>
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className={`w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3.5 border border-white/5 group-hover:scale-110 group-hover:border-white/20 transition-all duration-300 ${
+                    stat.tab ? 'group-hover:shadow-lg' : ''
+                  }`}>
+                    <span className={stat.tab ? 'text-white/60 group-hover:text-white transition-colors' : 'text-emerald-400'}>{stat.icon}</span>
                   </div>
-                  <div className={`text-3xl font-black tracking-tight mb-2 ${typeof stat.value === 'number' ? 'text-white' : stat.color}`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{stat.label}</div>
+                  <div className="text-[28px] font-bold tracking-tight text-white/90 mb-1.5">{stat.value}</div>
+                  <div className="text-[9px] font-semibold text-white/25 uppercase tracking-[0.2em]">{stat.label}</div>
                 </button>
               ))}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-4">
-                <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
-                  <Zap size={14} className="text-blue-400" /> 快速操作
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4 hover:border-white/10 transition-all">
+                <h3 className="text-[9px] font-semibold text-white/25 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Zap size={12} className="text-blue-400/60" /> 快速操作
                 </h3>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <QuickBtn icon={<Plus size={15} />} label="新增專案" color="text-blue-400" onClick={() => openEditor('project')} />
-                  <QuickBtn icon={<Plus size={15} />} label="新增文章" color="text-violet-400" onClick={() => openEditor('blog')} />
-                  <QuickBtn icon={<Settings size={15} />} label="站台設定" color="text-emerald-400" onClick={() => setActiveTab('site_config')} />
-                  <QuickBtn icon={<Eye size={15} />} label="檢視履歷" color="text-amber-400" onClick={() => window.open('/resume', '_blank')} />
+                <div className="grid grid-cols-2 gap-2">
+                  <QuickBtn icon={<Plus size={13} />} label="新增專案" color="text-blue-400" onClick={() => openEditor('project')} />
+                  <QuickBtn icon={<Plus size={13} />} label="新增文章" color="text-violet-400" onClick={() => openEditor('blog')} />
+                  <QuickBtn icon={<Settings size={13} />} label="站台設定" color="text-emerald-400" onClick={() => setActiveTab('site_config')} />
+                  <QuickBtn icon={<Eye size={13} />} label="檢視履歷" color="text-amber-400" onClick={() => window.open('/resume', '_blank')} />
                 </div>
               </div>
-              <div className="bg-black/40 border border-white/5 rounded-2xl p-6 space-y-4">
-                <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-widest flex items-center gap-2">
-                  <Activity size={14} className="text-emerald-400" /> 系統資訊
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4 hover:border-white/10 transition-all">
+                <h3 className="text-[9px] font-semibold text-white/25 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Activity size={12} className="text-emerald-400/60" /> 系統資訊
                 </h3>
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex justify-between"><span className="text-white/30">驗證</span><span className="text-white/70 font-bold">Cloudflare Access</span></div>
-                  <div className="flex justify-between"><span className="text-white/30">管理員</span><span className="text-white/70 font-bold truncate ml-4">{authEmail || '—'}</span></div>
-                  <div className="flex justify-between"><span className="text-white/30">框架</span><span className="text-white/70 font-bold">React 19 + Vite</span></div>
-                  <div className="flex justify-between"><span className="text-white/30">部署</span><span className="text-white/70 font-bold">Cloudflare Pages</span></div>
+                <div className="space-y-2 text-xs">
+                  {[
+                    ['驗證方式', 'Cloudflare Access'],
+                    ['管理員', authEmail || '—'],
+                    ['執行框架', 'React 19 + Vite 5'],
+                    ['部署平台', 'Cloudflare Pages'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between py-1 border-b border-white/[0.02] last:border-0">
+                      <span className="text-white/25 text-[10px] font-medium uppercase tracking-wider">{label}</span>
+                      <span className="text-white/60 text-[10px] font-semibold truncate ml-4">{value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -524,64 +555,74 @@ const AdminPage: React.FC = () => {
 
         {/* ─── PROJECTS / BLOG CONTENT LIST ──────────────── */}
         {(activeTab === 'projects' || activeTab === 'blog') && (
-          <div className="space-y-5">
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 group">
+                <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/15 pointer-events-none group-focus-within:text-white/30 transition-colors" />
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder={`搜尋${activeTab === 'projects' ? '專案' : '文章'}...`}
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15"
+                  className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-white/12"
                 />
               </div>
               <button
                 onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog')}
-                className="flex items-center gap-2.5 bg-white text-black px-6 py-3.5 rounded-2xl font-bold text-xs uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0"
+                className="flex items-center gap-2.5 bg-white text-black px-5 py-3 rounded-xl font-semibold text-[11px] uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 shadow-lg shadow-white/5"
               >
-                <Plus size={16} /> 新增
+                <Plus size={15} /> 新增
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {(activeTab === 'projects' ? filteredProjects : filteredPosts).length === 0 && (
-                <div className="text-center py-16 text-white/15 text-sm font-bold uppercase tracking-widest">
+                <div className="text-center py-20 text-white/10 text-xs font-semibold uppercase tracking-[0.2em]">
                   {searchQuery ? '找不到符合的內容' : '尚無內容，點擊「新增」開始'}
                 </div>
               )}
-              {(activeTab === 'projects' ? filteredProjects : filteredPosts).map(item => (
+              {(activeTab === 'projects' ? filteredProjects : filteredPosts).map((item, idx) => (
                 <div
                   key={item.id}
-                  className="bg-black/40 border border-white/5 rounded-xl px-5 py-4 flex items-center gap-4 group hover:bg-white/[0.03] hover:border-white/10 transition-all"
+                  className="group relative bg-white/[0.015] border border-white/[0.04] rounded-xl px-4 py-3.5 flex items-center gap-4 hover:bg-white/[0.03] hover:border-white/10 transition-all duration-200"
                 >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-12 h-12 rounded-xl object-cover bg-black border border-white/5 shrink-0"
-                  />
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-black border border-white/5 shrink-0">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold text-white truncate">{item.title}</div>
-                    <div className="text-[10px] font-bold text-white/30 uppercase tracking-wider truncate mt-0.5">
-                      {activeTab === 'projects'
-                        ? (item.tags?.join(' • ') || '')
-                        : `${item.category || ''}${item.category && item.date ? ' • ' : ''}${item.date || ''}`
-                      }
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-sm font-semibold text-white/80 group-hover:text-white transition-colors truncate">{item.title}</span>
+                      <span className="w-[3px] h-[3px] rounded-full bg-white/10 shrink-0" />
+                      <span className="text-[8px] font-medium text-white/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+                        #{idx + 1}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[9px] font-medium text-white/25 uppercase tracking-wider truncate">
+                        {activeTab === 'projects'
+                          ? (item.tags?.join(' · ') || '')
+                          : `${item.category || ''}${item.category && item.date ? ' · ' : ''}${item.date || ''}`
+                        }
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                     <button
                       onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/30 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
                       title="編輯"
                     >
-                      <Edit3 size={15} />
+                      <Edit3 size={13} />
                     </button>
                     <button
                       onClick={() => handleDeleteItem(activeTab === 'projects' ? 'project' : 'blog', item.id, item.title)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/5 text-rose-400/40 hover:text-rose-400 hover:bg-rose-500/15 transition-all"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/5 text-rose-400/30 hover:text-rose-400 hover:bg-rose-500/12 transition-all"
                       title="刪除"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
@@ -592,30 +633,39 @@ const AdminPage: React.FC = () => {
 
         {/* ─── SITE CONFIG ──────────────────────────────────── */}
         {activeTab === 'site_config' && (
-          <div className="max-w-4xl mx-auto space-y-5">
+          <div className="max-w-4xl mx-auto space-y-4">
 
             {/* Save All Toolbar */}
-            <div className="sticky top-24 z-40 bg-black/80 backdrop-blur-2xl border border-white/5 rounded-2xl px-6 py-4 flex items-center justify-between shadow-2xl">
-              <div>
-                <h2 className="text-sm font-black text-white tracking-tight">站台設定</h2>
-                <p className="text-[10px] text-white/30 font-bold tracking-wider mt-0.5">
-                  {Object.keys(configDirty).length > 0
-                    ? `${Object.keys(configDirty).length} 個未儲存的變更`
-                    : '所有設定已儲存'}
-                </p>
+            <div className={`sticky top-24 z-40 rounded-2xl px-5 py-3.5 flex items-center justify-between transition-all duration-300 ${
+              Object.keys(configDirty).length > 0
+                ? 'bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/15 shadow-[0_0_30px_-10px_rgba(251,191,36,0.15)]'
+                : 'bg-white/[0.02] border border-white/[0.04]'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  Object.keys(configDirty).length > 0 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]' : 'bg-white/10'
+                }`} />
+                <div>
+                  <h2 className="text-sm font-semibold text-white/90 tracking-tight">站台設定</h2>
+                  <p className="text-[9px] font-medium text-white/25 tracking-wider mt-0.5">
+                    {Object.keys(configDirty).length > 0
+                      ? `${Object.keys(configDirty).length} 個未儲存的變更`
+                      : '所有設定已儲存'}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={handleSaveAllConfig}
                 disabled={Object.keys(configDirty).length === 0 || saveStatus === 'saving'}
-                className={`flex items-center gap-2.5 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-all duration-200 ${
                   Object.keys(configDirty).length === 0
-                    ? 'bg-white/5 text-white/20 cursor-not-allowed'
+                    ? 'bg-white/[0.03] text-white/15 cursor-not-allowed'
                     : saveStatus === 'saving'
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]'
+                    ? 'bg-blue-500/15 text-blue-400'
+                    : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5'
                 }`}
               >
-                {saveStatus === 'saving' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {saveStatus === 'saving' ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                 {saveStatus === 'saving' ? '儲存中...' : '儲存全部'}
               </button>
             </div>
@@ -623,7 +673,8 @@ const AdminPage: React.FC = () => {
             {/* ── 首頁設定 ── */}
             <AccordionSection
               title="首頁設定"
-              icon={<Sparkles size={16} className="text-emerald-400" />}
+              icon={<Sparkles size={15} className="text-emerald-400" />}
+              accent="border-l-emerald-500/30"
               isOpen={configSections.homepage}
               onToggle={() => toggleConfigSection('homepage')}
               dirty={configDirty}
@@ -646,7 +697,8 @@ const AdminPage: React.FC = () => {
             {/* ── 基本資訊 ── */}
             <AccordionSection
               title="基本資訊"
-              icon={<User size={16} className="text-blue-400" />}
+              icon={<User size={15} className="text-blue-400" />}
+              accent="border-l-blue-500/30"
               isOpen={configSections.resume_basic}
               onToggle={() => toggleConfigSection('resume_basic')}
               dirty={configDirty}
@@ -654,17 +706,17 @@ const AdminPage: React.FC = () => {
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {([
-                  { key: 'resume_name', icon: <AtSign size={14} />, placeholder: '姓名' },
-                  { key: 'resume_title', icon: <Briefcase size={14} />, placeholder: '職稱' },
-                  { key: 'resume_email', icon: <Mail size={14} />, placeholder: 'Email' },
-                  { key: 'resume_location', icon: <MapPin size={14} />, placeholder: '所在地' },
-                  { key: 'resume_github', icon: <Globe size={14} />, placeholder: 'GitHub' },
-                  { key: 'resume_linkedin', icon: <LinkIcon size={14} />, placeholder: 'LinkedIn' },
+                  { key: 'resume_name', icon: <AtSign size={13} />, placeholder: '姓名' },
+                  { key: 'resume_title', icon: <Briefcase size={13} />, placeholder: '職稱' },
+                  { key: 'resume_email', icon: <Mail size={13} />, placeholder: 'Email' },
+                  { key: 'resume_location', icon: <MapPin size={13} />, placeholder: '所在地' },
+                  { key: 'resume_github', icon: <Globe size={13} />, placeholder: 'GitHub' },
+                  { key: 'resume_linkedin', icon: <LinkIcon size={13} />, placeholder: 'LinkedIn' },
                 ]).map(({ key, icon, placeholder }) => (
-                  <div key={key} className="bg-black/30 border border-white/5 rounded-xl p-4 space-y-2.5">
+                  <div key={key} className="bg-white/[0.015] border border-white/[0.04] rounded-xl p-3.5 space-y-2 hover:border-white/10 transition-all">
                     <div className="flex items-center gap-2">
-                      <span className="text-white/30">{icon}</span>
-                      <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                      <span className="text-white/20">{icon}</span>
+                      <span className="text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em]">
                         {key.replace('resume_', '').replace(/_/g, ' ')}
                       </span>
                     </div>
@@ -672,7 +724,7 @@ const AdminPage: React.FC = () => {
                       value={getConfig(key)}
                       onChange={e => handleConfigChange(key, e.target.value)}
                       placeholder={`輸入 ${placeholder}...`}
-                      className="w-full bg-black/60 border border-white/5 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-blue-500/30 transition-all placeholder:text-white/15"
+                      className="w-full bg-black/40 border border-white/[0.04] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500/25 focus:bg-black/60 transition-all placeholder:text-white/12"
                     />
                   </div>
                 ))}
@@ -682,7 +734,8 @@ const AdminPage: React.FC = () => {
             {/* ── 專業內容 ── */}
             <AccordionSection
               title="專業內容"
-              icon={<Zap size={16} className="text-amber-400" />}
+              icon={<Zap size={15} className="text-amber-400" />}
+              accent="border-l-amber-500/30"
               isOpen={configSections.resume_content}
               onToggle={() => toggleConfigSection('resume_content')}
               dirty={configDirty}
@@ -718,7 +771,8 @@ const AdminPage: React.FC = () => {
             {/* ── 結構化資料 ── */}
             <AccordionSection
               title="結構化資料 (JSON)"
-              icon={<Code size={16} className="text-violet-400" />}
+              icon={<Code size={15} className="text-violet-400" />}
+              accent="border-l-violet-500/30"
               isOpen={configSections.resume_data}
               onToggle={() => toggleConfigSection('resume_data')}
               dirty={configDirty}
@@ -751,46 +805,62 @@ const AdminPage: React.FC = () => {
       {/* ===== Modal Editor ===== */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl overflow-y-auto"
+          >
             <motion.div
-              initial={{ scale: 0.97, opacity: 0, y: 10 }}
+              initial={{ scale: 0.96, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.97, opacity: 0, y: 10 }}
-              className="w-full max-w-[1400px] h-[90vh] flex flex-col bg-[#0a0b10] border border-white/5 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden"
+              exit={{ scale: 0.96, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+              className="w-full max-w-[1400px] h-[90vh] flex flex-col bg-[#0a0b10] border border-white/[0.04] rounded-3xl shadow-[0_0_100px_-20px_rgba(0,0,0,0.9)] overflow-hidden"
             >
               {/* Modal Header */}
-              <div className="px-8 py-5 border-b border-white/5 flex items-center justify-between bg-black/30 shrink-0">
+              <div className="px-8 py-5 border-b border-white/[0.04] flex items-center justify-between bg-gradient-to-b from-white/[0.02] to-transparent shrink-0">
                 <div className="flex items-center gap-6">
                   <div>
-                    <h2 className="text-lg font-black text-white tracking-tight">
+                    <h2 className="text-base font-semibold text-white/90 tracking-tight">
                       {editingItem?.id ? '編輯內容' : '新增內容'}
                     </h2>
-                    <p className="text-[9px] font-bold text-white/25 uppercase tracking-wider mt-0.5">
-                      {modalType === 'project' ? '專案' : '文章'} · Ctrl+S 快速儲存
+                    <p className="text-[8px] font-medium text-white/20 uppercase tracking-wider mt-0.5">
+                      {modalType === 'project' ? '專案編輯' : '文章編輯'} · Ctrl+S 快速儲存
                     </p>
                   </div>
-                  <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                    <button onClick={() => setViewMode('edit')} className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'edit' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>編輯</button>
-                    <button onClick={() => setViewMode('split')} className={`hidden lg:block px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'split' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>雙欄</button>
-                    <button onClick={() => setViewMode('preview')} className={`px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${viewMode === 'preview' ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}>預覽</button>
+                  <div className="flex bg-white/[0.03] rounded-lg p-0.5 border border-white/5">
+                    {[
+                      { key: 'edit', label: '編輯' },
+                      { key: 'split', label: '雙欄', hide: 'lg' },
+                      { key: 'preview', label: '預覽' },
+                    ].map(({ key, label, hide }) => (
+                      <button
+                        key={key}
+                        onClick={() => setViewMode(key as any)}
+                        className={`px-4 py-2 rounded-md text-[9px] font-semibold uppercase tracking-wider transition-all ${hide === 'lg' ? 'hidden lg:block' : ''} ${viewMode === key ? 'bg-white text-black shadow-sm' : 'text-white/35 hover:text-white/70'}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="flex items-center gap-2 text-white/30 hover:text-white/70 transition-all text-[10px] font-bold uppercase tracking-wider"
+                    className="flex items-center gap-2 text-white/25 hover:text-white/60 transition-all text-[10px] font-medium uppercase tracking-wider"
                   >
-                    <X size={16} /> 取消
+                    <X size={15} /> 取消
                   </button>
                   <button
                     onClick={handleSaveItem}
-                    className={`px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-wider flex items-center gap-3 transition-all shadow-xl ${
+                    className={`px-6 py-2.5 rounded-xl font-semibold text-[10px] uppercase tracking-wider flex items-center gap-2.5 transition-all duration-200 ${
                       saveStatus === 'success'
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-white text-black hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/5'
                     }`}
                   >
-                    {saveStatus === 'saving' ? <Loader2 className="animate-spin" size={16} /> : saveStatus === 'success' ? <CheckCircle2 size={16} /> : <Save size={16} />}
+                    {saveStatus === 'saving' ? <Loader2 className="animate-spin" size={15} /> : saveStatus === 'success' ? <CheckCircle2 size={15} /> : <Save size={15} />}
                     {saveStatus === 'saving' ? '儲存中...' : saveStatus === 'success' ? '已儲存' : '儲存'}
                   </button>
                 </div>
@@ -799,7 +869,7 @@ const AdminPage: React.FC = () => {
               {/* Modal Body */}
               <div className="flex-1 flex overflow-hidden">
                 {/* Sidebar Metadata */}
-                <div className="w-[380px] shrink-0 border-r border-white/5 p-6 overflow-y-auto space-y-8 bg-black/20">
+                <div className="w-[340px] shrink-0 border-r border-white/[0.03] p-5 overflow-y-auto space-y-6 bg-white/[0.01]">
                   <Inp label="標題" value={editingItem.title} onChange={(v: string) => setEditingItem({...editingItem, title: v})} />
                   <Inp
                     label={modalType === 'project' ? '標籤 (逗號分隔)' : '分類'}
@@ -808,40 +878,45 @@ const AdminPage: React.FC = () => {
                   />
 
                   {/* Cover Image */}
-                  <div className="space-y-3">
-                    <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">封面圖片</label>
-                    <div className="aspect-[16/9] bg-black rounded-2xl border border-white/5 overflow-hidden relative group">
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em]">封面圖片</label>
+                      {editingItem.image && (
+                        <span className="text-[7px] font-medium text-white/15 uppercase tracking-wider">可點擊更換</span>
+                      )}
+                    </div>
+                    <div className="aspect-[16/9] bg-white/[0.02] rounded-xl border border-white/[0.04] overflow-hidden relative group">
                       {editingItem.image ? (
                         <img src={editingItem.image} alt="封面" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center"><ImageIcon size={36} className="text-white/10" /></div>
+                        <div className="w-full h-full flex items-center justify-center"><ImageIcon size={32} className="text-white/8" /></div>
                       )}
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 cursor-pointer"
+                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 cursor-pointer backdrop-blur-sm"
                       >
-                        <Upload size={20} className="text-white" />
-                        <span className="text-[9px] font-bold text-white tracking-wider uppercase">{isUploading ? '上傳中...' : '更換圖片'}</span>
+                        <Upload size={18} className="text-white/80" />
+                        <span className="text-[8px] font-semibold text-white/80 tracking-wider uppercase">{isUploading ? '上傳中...' : '更換圖片'}</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Media Gallery (projects only) */}
                   {modalType === 'project' && (
-                    <div className="space-y-3">
-                      <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">多媒體資產</label>
-                      <div className="space-y-2">
+                    <div className="space-y-2.5">
+                      <label className="text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em]">多媒體資產</label>
+                      <div className="space-y-1.5">
                         {(editingItem.media || []).map((m: any, idx: number) => (
-                          <div key={idx} className="bg-white/[0.03] rounded-xl p-3 border border-white/5 flex items-center gap-3">
-                            <img src={m.url} alt={m.type} className="w-10 h-10 rounded-lg object-cover bg-black shrink-0" />
+                          <div key={idx} className="bg-white/[0.015] rounded-lg p-2.5 border border-white/[0.04] flex items-center gap-2.5 group/media hover:border-white/10 transition-all">
+                            <img src={m.url} alt={m.type} className="w-8 h-8 rounded-md object-cover bg-black shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[9px] font-bold text-white/60 uppercase tracking-wider truncate">{m.type || 'image'}</p>
+                              <p className="text-[8px] font-medium text-white/40 uppercase tracking-wider truncate">{m.type || 'image'}</p>
                             </div>
-                            <button onClick={() => removeMediaItem(idx)} className="text-white/20 hover:text-rose-400 p-1"><Trash2 size={14} /></button>
+                            <button onClick={() => removeMediaItem(idx)} className="text-white/15 hover:text-rose-400 p-1 opacity-0 group-hover/media:opacity-100 transition-all"><Trash2 size={12} /></button>
                           </div>
                         ))}
-                        <button onClick={addMediaItem} className="w-full py-3 border border-dashed border-white/5 rounded-xl text-white/20 hover:text-white/50 hover:border-white/20 transition-all text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-2">
-                          <PlusCircle size={14} /> 新增媒體
+                        <button onClick={addMediaItem} className="w-full py-2.5 border border-dashed border-white/[0.04] rounded-lg text-white/15 hover:text-white/40 hover:border-white/15 transition-all text-[8px] font-semibold uppercase tracking-wider flex items-center justify-center gap-2">
+                          <PlusCircle size={12} /> 新增媒體
                         </button>
                       </div>
                     </div>
@@ -851,36 +926,36 @@ const AdminPage: React.FC = () => {
                 {/* Editor + Preview */}
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Toolbar */}
-                  <div className="px-6 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-3 shrink-0">
-                    <div className="flex items-center gap-1">
-                      <ToolBtn onClick={() => insertMarkdown('## ')} icon={<Heading2 size={14} />} title="標題 H2" />
-                      <ToolBtn onClick={() => insertMarkdown('### ')} icon={<Heading3 size={14} />} title="標題 H3" />
+                  <div className="px-5 py-2.5 border-b border-white/[0.03] bg-white/[0.01] flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-0.5">
+                      <ToolBtn onClick={() => insertMarkdown('## ')} icon={<Heading2 size={13} />} title="標題 H2" />
+                      <ToolBtn onClick={() => insertMarkdown('### ')} icon={<Heading3 size={13} />} title="標題 H3" />
                     </div>
-                    <div className="w-px h-5 bg-white/5" />
-                    <div className="flex items-center gap-1">
-                      <ToolBtn onClick={() => insertMarkdown('**', '**')} icon={<Bold size={14} />} title="粗體" />
-                      <ToolBtn onClick={() => insertMarkdown('- ')} icon={<List size={14} />} title="清單" />
+                    <div className="w-px h-4 bg-white/5" />
+                    <div className="flex items-center gap-0.5">
+                      <ToolBtn onClick={() => insertMarkdown('**', '**')} icon={<Bold size={13} />} title="粗體" />
+                      <ToolBtn onClick={() => insertMarkdown('- ')} icon={<List size={13} />} title="清單" />
                     </div>
-                    <div className="w-px h-5 bg-white/5" />
-                    <div className="flex items-center gap-1">
-                      <ToolBtn onClick={() => insertMarkdown('```\n', '\n```')} icon={<Code size={14} />} title="Code" />
-                      <ToolBtn onClick={() => insertMarkdown('[', '](url)')} icon={<LinkIcon size={14} />} title="Link" />
+                    <div className="w-px h-4 bg-white/5" />
+                    <div className="flex items-center gap-0.5">
+                      <ToolBtn onClick={() => insertMarkdown('```\n', '\n```')} icon={<Code size={13} />} title="Code" />
+                      <ToolBtn onClick={() => insertMarkdown('[', '](url)')} icon={<LinkIcon size={13} />} title="Link" />
                     </div>
-                    <div className="w-px h-5 bg-white/5" />
+                    <div className="w-px h-4 bg-white/5" />
                     <button
                       onClick={handleAiRewrite}
                       disabled={isAiProcessing}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all border ${
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[8px] font-semibold uppercase tracking-wider transition-all border ${
                         isAiProcessing
-                          ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                          : 'text-emerald-500/50 hover:text-emerald-400 border-transparent hover:border-emerald-500/20'
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
+                          : 'text-emerald-500/40 hover:text-emerald-400 border-transparent hover:border-emerald-500/15'
                       }`}
                     >
-                      {isAiProcessing ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      {isAiProcessing ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
                       AI
                     </button>
                     <div className="flex-1" />
-                    <span className="text-[8px] font-bold text-white/15 uppercase tracking-wider hidden sm:inline">Markdown</span>
+                    <span className="text-[7px] font-medium text-white/10 uppercase tracking-wider hidden sm:inline">Markdown</span>
                   </div>
 
                   {/* Textarea + Preview */}
@@ -891,13 +966,13 @@ const AdminPage: React.FC = () => {
                         value={modalType === 'project' ? editingItem.details : editingItem.content}
                         onScroll={handleScroll}
                         onChange={e => setEditingItem({...editingItem, [modalType === 'project' ? 'details' : 'content']: e.target.value})}
-                        className="flex-1 bg-transparent p-8 text-slate-300 font-mono text-sm leading-relaxed outline-none resize-none no-scrollbar selection:bg-emerald-500/30"
+                        className="flex-1 bg-transparent p-8 text-slate-300 font-mono text-sm leading-relaxed outline-none resize-none no-scrollbar selection:bg-emerald-500/25 placeholder:text-white/8"
                         placeholder="開始撰寫..."
                       />
                     )}
-                    {viewMode === 'split' && <div className="w-px bg-white/5" />}
+                    {viewMode === 'split' && <div className="w-px bg-white/[0.03]" />}
                     {(viewMode === 'preview' || viewMode === 'split') && (
-                      <div ref={previewRef} className="flex-1 p-8 overflow-y-auto no-scrollbar bg-black/15">
+                      <div ref={previewRef} className="flex-1 p-8 overflow-y-auto no-scrollbar bg-black/10">
                         <div className="max-w-3xl mx-auto">
                           {renderPreview(modalType === 'project' ? editingItem.details : editingItem.content)}
                         </div>
@@ -907,7 +982,7 @@ const AdminPage: React.FC = () => {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -922,30 +997,43 @@ const AdminPage: React.FC = () => {
    ============================================================ */
 
 // ─── Accordion Section ─────────────────────────────────
-const AccordionSection = ({ title, icon, isOpen, onToggle, children, dirty, keys }: {
+const AccordionSection = ({ title, icon, isOpen, onToggle, children, dirty, keys, accent }: {
   title: string; icon: React.ReactNode; isOpen: boolean; onToggle: () => void;
-  children: React.ReactNode; dirty?: Record<string, string>; keys?: string[];
+  children: React.ReactNode; dirty?: Record<string, string>; keys?: string[]; accent?: string;
 }) => {
   const hasDirty = keys?.some(k => dirty?.[k] !== undefined);
   return (
-    <div className="bg-black/40 border border-white/5 rounded-2xl overflow-hidden transition-all">
+    <div className={`bg-white/[0.01] border border-white/[0.04] rounded-2xl overflow-hidden transition-all duration-200 hover:border-white/[0.08] ${
+      isOpen ? 'border-white/[0.06]' : ''
+    }`}>
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors"
+        className={`w-full flex items-center justify-between px-5 py-3.5 transition-colors duration-150 ${
+          isOpen ? 'bg-white/[0.01]' : 'hover:bg-white/[0.01]'
+        }`}
       >
         <div className="flex items-center gap-3 min-w-0">
-          {icon}
-          <span className="text-sm font-bold text-white/80 tracking-tight">{title}</span>
+          <div className={`w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center shrink-0 transition-all duration-200 ${
+            isOpen ? 'bg-white/[0.05]' : ''
+          }`}>
+            {icon}
+          </div>
+          <span className="text-sm font-semibold text-white/70 tracking-tight">{title}</span>
           {hasDirty && (
-            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="有未儲存的變更" />
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="w-2 h-2 rounded-full bg-amber-400 shrink-0 shadow-[0_0_6px_rgba(251,191,36,0.4)]"
+              title="有未儲存的變更"
+            />
           )}
         </div>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-white/20 shrink-0"
+          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+          className="text-white/15 shrink-0"
         >
-          <ChevronDown size={18} />
+          <ChevronDown size={16} />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -958,7 +1046,7 @@ const AccordionSection = ({ title, icon, isOpen, onToggle, children, dirty, keys
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
-            <div className="px-6 pb-6">{children}</div>
+            <div className="px-5 pb-5 pt-1 border-t border-white/[0.02]">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -971,17 +1059,17 @@ const ConfigField = ({ label, value, onChange, placeholder, large, mono, hint }:
   label: string; value: string; onChange: (v: string) => void;
   placeholder?: string; large?: boolean; mono?: boolean; hint?: string;
 }) => (
-  <div className="space-y-2.5">
+  <div className="space-y-2">
     <div className="flex items-center justify-between">
-      <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">{label}</label>
-      {hint && <span className="text-[8px] text-white/20 tracking-wider">{hint}</span>}
+      <label className="text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em]">{label}</label>
+      {hint && <span className="text-[7px] text-white/15 tracking-wider font-medium">{hint}</span>}
     </div>
     {large ? (
       <textarea
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full bg-black/40 border border-white/5 rounded-xl p-4 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15 leading-relaxed resize-y ${
+        className={`w-full bg-black/30 border border-white/[0.04] rounded-xl p-3.5 text-sm text-white outline-none focus:border-white/15 focus:bg-black/40 transition-all placeholder:text-white/10 leading-relaxed resize-y ${
           mono ? 'font-mono text-xs' : ''
         } h-[140px]`}
       />
@@ -991,14 +1079,14 @@ const ConfigField = ({ label, value, onChange, placeholder, large, mono, hint }:
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-black/40 border border-white/5 rounded-xl p-4 text-xs text-white outline-none focus:border-white/20 transition-all font-mono placeholder:text-white/15 h-[100px] resize-y"
+          className="w-full bg-black/30 border border-white/[0.04] rounded-xl p-3.5 text-xs text-white outline-none focus:border-white/15 focus:bg-black/40 transition-all font-mono placeholder:text-white/10 h-[100px] resize-y"
         />
       ) : (
         <input
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-white/20 transition-all placeholder:text-white/15"
+          className="w-full bg-black/30 border border-white/[0.04] rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-white/15 focus:bg-black/40 transition-all placeholder:text-white/10"
         />
       )
     )}
@@ -1010,7 +1098,7 @@ const ToolBtn = ({ onClick, icon, title }: any) => (
   <button
     onClick={onClick}
     title={title}
-    className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white hover:bg-white/5 transition-all"
+    className="w-7 h-7 flex items-center justify-center rounded-md text-white/20 hover:text-white/60 hover:bg-white/5 transition-all"
   >
     {icon}
   </button>
@@ -1018,13 +1106,13 @@ const ToolBtn = ({ onClick, icon, title }: any) => (
 
 // ─── Input ─────────────────────────────────────────────
 const Inp = ({ label, value, onChange }: any) => (
-  <div className="space-y-2.5">
-    <label className="text-[9px] font-bold text-white/40 uppercase tracking-wider">{label}</label>
+  <div className="space-y-2">
+    <label className="block text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em]">{label}</label>
     <input
       type="text"
       value={value || ''}
       onChange={e => onChange(e.target.value)}
-      className="w-full bg-black/60 border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-white/20 transition-all"
+      className="w-full bg-black/30 border border-white/[0.04] rounded-xl px-3.5 py-2.5 text-sm text-white outline-none focus:border-white/15 focus:bg-black/40 transition-all placeholder:text-white/10"
     />
   </div>
 );
@@ -1035,10 +1123,10 @@ const QuickBtn = ({ icon, label, color, onClick }: {
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-xl px-4 py-3 transition-all text-left"
+    className="flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.04] rounded-xl px-3.5 py-3 transition-all text-left border border-white/[0.02] hover:border-white/10 group"
   >
-    <span className={`${color} shrink-0`}>{icon}</span>
-    <span className="text-xs font-bold text-white/70">{label}</span>
+    <span className={`w-7 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center ${color} group-hover:scale-110 group-hover:bg-white/10 transition-all duration-200 shrink-0`}>{icon}</span>
+    <span className="text-[11px] font-medium text-white/50 group-hover:text-white/80 transition-colors">{label}</span>
   </button>
 );
 
