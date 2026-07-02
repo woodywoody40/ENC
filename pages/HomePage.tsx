@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { ArrowRight, ArrowUpRight, Server, Shield, Database, Globe, Terminal, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { ConfigAPI } from '../services/apiClient';
 /* ================================================================== */
 /*  Editorial infrastructure portfolio — magazine-grade, atmospheric    */
 /*  Large serif display, technical grid, asymmetric editorial blocks.  */
-/*  Pure CSS motion — no JS animation libraries.                       */
+/*  Scroll-driven parallax + smooth reveals — pure CSS + minimal JS.   */
 /* ================================================================== */
 
 /* ---------- Scroll reveal ---------- */
@@ -134,6 +134,7 @@ function CompetencyRow({ icon, title, desc, tags, index }: { icon: React.ReactNo
 const HomePage: React.FC = () => {
   const [configs, setConfigs] = useState<any>({});
   const [loading, setLoading] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const fetchConfigs = async () => {
@@ -147,6 +148,22 @@ const HomePage: React.FC = () => {
       }
     };
     fetchConfigs();
+  }, []);
+
+  /* Scroll-driven parallax — update on every frame via requestAnimationFrame */
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   if (loading) {
@@ -175,11 +192,26 @@ const HomePage: React.FC = () => {
 
       <div className="relative overflow-x-hidden bg-[#08090c] text-white">
 
-        {/* ===== Fixed atmospheric background ===== */}
+        {/* ===== Scroll progress bar ===== */}
+        <div
+          className="scroll-progress"
+          style={{ '--scroll-progress': `${Math.min(scrollY / (document.documentElement.scrollHeight - window.innerHeight), 1)}` } as React.CSSProperties}
+        />
+
+        {/* ===== Fixed atmospheric background — parallax depth ===== */}
         <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute inset-0 bg-grid" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_0%,rgba(245,158,11,0.06)_0%,transparent_45%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_90%,rgba(56,189,248,0.03)_0%,transparent_45%)]" />
+          <div
+            className="absolute inset-0 bg-grid parallax-layer-slow"
+            style={{ transform: `translateY(${scrollY * 0.06}px)` }}
+          />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_0%,rgba(245,158,11,0.06)_0%,transparent_45%)] parallax-layer-medium"
+            style={{ transform: `translateY(${scrollY * 0.03}px)` }}
+          />
+          <div
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_90%,rgba(56,189,248,0.03)_0%,transparent_45%)] parallax-layer-fast"
+            style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+          />
           <div className="absolute inset-0 bg-noise opacity-[0.015] mix-blend-overlay" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)]" />
         </div>
@@ -205,17 +237,26 @@ const HomePage: React.FC = () => {
               </p>
             </Reveal>
             <Reveal delay={200}>
-              <h1 className="font-serif-editorial text-[clamp(3rem,11vw,9rem)] leading-[0.92] tracking-[-0.02em] text-white/95 mb-2">
+              <h1
+                className="font-serif-editorial text-[clamp(3rem,11vw,9rem)] leading-[0.92] tracking-[-0.02em] text-white/95 mb-2 parallax-layer-slow"
+                style={{ transform: `translateY(${scrollY * -0.04}px)` }}
+              >
                 {heroTitle}
               </h1>
             </Reveal>
             <Reveal delay={300}>
-              <h2 className="font-serif-editorial italic text-[clamp(1.5rem,5vw,3.5rem)] leading-[1] tracking-[-0.01em] text-white/30 mb-10">
+              <h2
+                className="font-serif-editorial italic text-[clamp(1.5rem,5vw,3.5rem)] leading-[1] tracking-[-0.01em] text-white/30 mb-10 parallax-layer-medium"
+                style={{ transform: `translateY(${scrollY * -0.02}px)` }}
+              >
                 Architecture of Reliability
               </h2>
             </Reveal>
             <Reveal delay={400}>
-              <p className="text-sm sm:text-base text-slate-400/80 leading-relaxed max-w-xl font-light mb-12">
+              <p
+                className="text-sm sm:text-base text-slate-400/80 leading-relaxed max-w-xl font-light mb-12 parallax-layer-fast"
+                style={{ transform: `translateY(${scrollY * -0.01}px)` }}
+              >
                 {heroIntro}
               </p>
             </Reveal>

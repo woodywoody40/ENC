@@ -50,6 +50,10 @@ html.light {
   --card-shadow: 0 10px 40px -10px rgba(45, 52, 54, 0.15);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -159,3 +163,26 @@ html.light .text-glow {
   to { transform: translateX(-50%); }
 }
 .animate-marquee { animation: marquee 40s linear infinite; }
+
+/* Scroll progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 9999;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, rgba(245,158,11,0.6), rgba(245,158,11,0.15));
+  transform: scaleX(var(--scroll-progress, 0));
+  transition: transform 75ms ease-out;
+}
+
+/* Perspective depth effect for hero parallax */
+.perspective-container {
+  perspective: 1200px;
+}
+
+.parallax-layer-slow { will-change: transform; }
+.parallax-layer-medium { will-change: transform; }
+.parallax-layer-fast { will-change: transform; }
