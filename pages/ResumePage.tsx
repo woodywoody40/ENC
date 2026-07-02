@@ -85,6 +85,121 @@ const ResumePage: React.FC = () => {
   const extraLinks = getParsedArray('resume_extra_links');
   const educationList = getParsedArray('resume_education_list');
 
+  const handlePrintResume = () => {
+    const name = configs.resume_name || '吳東謙';
+    const title = configs.resume_title || '系統維運工程師';
+    const email = configs.resume_email || '';
+    const location = configs.resume_location || '';
+    const github = configs.resume_github || '';
+    const linkedin = configs.resume_linkedin || '';
+    const summary = configs.resume_summary || '';
+    const experience = configs.resume_experience || '';
+    const skills = parseSkills(configs.resume_skills);
+    const education = educationList.length > 0 ? educationList : [];
+
+    // 解析經歷文字 → 結構化物件
+    const expItems: { title: string; date: string; bullets: string[] }[] = [];
+    const expLines = experience.split('\n').filter(l => l.trim());
+    let cur: any = null;
+    expLines.forEach(line => {
+      if (line.startsWith('### ')) {
+        if (cur) expItems.push(cur);
+        cur = { title: line.replace('### ', '').trim(), date: '', bullets: [] };
+      } else if (line.startsWith('- ')) {
+        if (cur) cur.bullets.push(line.replace('- ', '').trim());
+      } else if (line.trim() && cur && !cur.date) {
+        cur.date = line.trim();
+      }
+    });
+    if (cur) expItems.push(cur);
+
+    const expHTML = expItems.map(item => `
+    <div class="exp-item">
+      <h3>${item.title}</h3>
+      <div class="date">${item.date}</div>
+      ${item.bullets.length ? '<ul>' + item.bullets.map(b => '<li>' + b + '</li>').join('') + '</ul>' : ''}
+    </div>`).join('');
+
+    const skillsHTML = skills.map(s =>
+      `<div class="skill-row"><span class="name">${s.name}</span><span class="level">${s.level}</span></div>`
+    ).join('');
+
+    const eduHTML = education.length > 0
+      ? education.map((e: any) => `
+    <div class="edu-item">
+      <h4>${e.school}</h4>
+      <div class="date">${e.year}</div>
+      <div class="degree">${e.degree}</div>
+    </div>`).join('')
+      : '<p style="font-size:9pt;color:#555;">國立臺灣海洋大學 — 資工系碩士專班 (2024 - Present)</p>';
+
+    const win = window.open('', '_blank');
+    if (!win) { window.print(); return; }
+
+    win.document.write(`<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${name} 履歷</title>
+<style>
+  @page { margin: 18mm 20mm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', 'Noto Sans TC', system-ui, sans-serif; color: #1a1a1a; background: #fff; line-height: 1.5; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .header { text-align: center; padding-bottom: 14pt; border-bottom: 2px solid #222; margin-bottom: 16pt; }
+  .header h1 { font-size: 22pt; font-weight: 900; letter-spacing: 1pt; text-transform: uppercase; margin-bottom: 3pt; }
+  .header .title { font-size: 11pt; color: #555; letter-spacing: 1.5pt; margin-bottom: 6pt; }
+  .header .contact { font-size: 8.5pt; color: #666; display: flex; justify-content: center; flex-wrap: wrap; gap: 4pt 14pt; }
+  .header .contact span { white-space: nowrap; }
+  .section { margin-bottom: 14pt; }
+  .section-title { font-size: 11pt; font-weight: 800; text-transform: uppercase; letter-spacing: 2pt; padding-bottom: 3pt; border-bottom: 1px solid #ccc; margin-bottom: 8pt; color: #222; }
+  .summary p { font-size: 9.5pt; line-height: 1.6; color: #333; text-align: justify; }
+  .exp-item { margin-bottom: 10pt; page-break-inside: avoid; }
+  .exp-item h3 { font-size: 10.5pt; font-weight: 700; color: #111; }
+  .exp-item .date { font-size: 9pt; color: #666; font-weight: 600; margin-bottom: 3pt; }
+  .exp-item ul { list-style: none; padding-left: 4pt; }
+  .exp-item ul li { font-size: 9pt; color: #333; line-height: 1.55; padding-left: 12pt; position: relative; margin-bottom: 1.5pt; }
+  .exp-item ul li::before { content: '–'; position: absolute; left: 0; color: #888; }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 14pt; }
+  .skill-row { display: flex; justify-content: space-between; align-items: center; padding: 2pt 0; font-size: 9pt; border-bottom: 1px dotted #ddd; }
+  .skill-row .name { font-weight: 600; color: #222; }
+  .skill-row .level { font-size: 8pt; color: #888; text-transform: uppercase; letter-spacing: 1pt; }
+  .edu-item { margin-bottom: 6pt; page-break-inside: avoid; }
+  .edu-item h4 { font-size: 10pt; font-weight: 700; color: #111; }
+  .edu-item .date { font-size: 8.5pt; color: #666; font-weight: 500; }
+  .edu-item .degree { font-size: 9pt; color: #444; }
+  .footer { text-align: center; font-size: 7.5pt; color: #aaa; border-top: 1px solid #eee; padding-top: 8pt; margin-top: 10pt; }
+  @media print { body { -webkit-print-color-adjust: exact; } }
+</style></head>
+<body>
+  <div class="header">
+    <h1>${name}</h1>
+    <div class="title">${title}</div>
+    <div class="contact">
+      ${email ? `<span>✉ ${email}</span>` : ''}
+      ${location ? `<span>✦ ${location}</span>` : ''}
+      ${github ? `<span>⬡ ${github.replace('https://', '')}</span>` : ''}
+      ${linkedin ? `<span>◈ ${linkedin.replace('https://', '')}</span>` : ''}
+    </div>
+  </div>
+
+  ${summary ? `<div class="section"><div class="section-title">專業總結</div><div class="summary"><p>${summary.replace(/\n/g, '<br>')}</p></div></div>` : ''}
+
+  ${expItems.length ? `<div class="section"><div class="section-title">工作經歷</div>${expHTML}</div>` : ''}
+
+  <div class="section">
+    <div class="section-title">核心技能</div>
+    <div class="skills-grid">${skillsHTML}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">學歷經歷</div>
+    ${eduHTML}
+  </div>
+
+  <div class="footer">基於 enc.moe22.com 資料自動生成 · ${new Date().toLocaleDateString('zh-TW')}</div>
+  <script>window.onload = function() { window.print(); window.close(); }<\/script>
+</body></html>`);
+    win.document.close();
+  };
+
   return (
     <>
       <SEOMeta
@@ -173,7 +288,7 @@ const ResumePage: React.FC = () => {
 
           <div className="pt-10">
             <button
-              onClick={() => window.print()}
+              onClick={handlePrintResume}
               className="w-full py-5 bg-morandi-slate dark:bg-white text-white dark:text-black rounded-[40px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all duration-500 shadow-xl border border-white/15"
             >
               <FileText size={18} /> 下載 PDF 履歷
