@@ -92,7 +92,7 @@ const ResumePage: React.FC = () => {
         >
           <span className="dark:text-white text-morandi-slate font-black text-[9px] tracking-[0.8em] uppercase">技術履歷 - Curriculum Vitae</span>
         </motion.div>
-        <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter heading-gradient text-glow uppercase">
+        <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter dark:text-white text-morandi-slate uppercase">
           {configs.resume_name || "Woody Wu"}
         </h1>
         <p className="text-base md:text-lg dark:text-slate-400 text-morandi-stone font-light tracking-[0.1em] mb-12">

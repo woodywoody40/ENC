@@ -67,7 +67,7 @@ const AboutPage: React.FC = () => {
             {configs.about_hero_subtitle || "The Infrastructure Guardian"}
           </p>
         </div>
-        <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter heading-gradient leading-none text-glow uppercase">
+        <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter dark:text-white text-morandi-slate uppercase">
           {configs.about_hero_title_left || "關於"}<span className="opacity-30 italic font-light">{configs.about_hero_title_right || "Woody"}</span>
         </h2>
         <div className="w-32 h-1 bg-gradient-to-r from-transparent via-morandi-slate/40 to-transparent mx-auto mt-12" />

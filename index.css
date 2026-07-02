@@ -75,19 +75,6 @@ body {
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.heading-gradient {
-  background: linear-gradient(180deg, var(--text-main) 0%, var(--text-sub) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-glow {
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
-}
-html.light .text-glow {
-  text-shadow: 0 0 20px rgba(45, 52, 54, 0.1);
-}
-
 /* ==============================
    Homepage — editorial premium system
    ============================== */

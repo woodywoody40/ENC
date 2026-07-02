@@ -277,7 +277,7 @@ const ProjectDetailPage: React.FC = () => {
 
         <div className="relative px-6 pb-16 max-w-7xl mx-auto w-full z-10">
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 tracking-tighter uppercase text-glow leading-[0.95] max-w-5xl">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.95] max-w-5xl">
               {project.title}
             </h1>
             <div className="flex flex-wrap gap-2.5">

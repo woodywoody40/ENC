@@ -244,7 +244,7 @@ const BlogPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-[900] dark:text-white text-morandi-slate mb-4 leading-[1.15] group-hover:text-glow transition-all tracking-tight line-clamp-3">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-[900] dark:text-white text-morandi-slate mb-4 leading-[1.15] transition-all tracking-tight line-clamp-3">
                           {featuredPost.title}
                         </h2>
 
@@ -320,7 +320,7 @@ const BlogPage: React.FC = () => {
                                 </span>
                               </div>
 
-                              <h3 className="text-lg sm:text-xl font-[900] dark:text-white text-morandi-slate mb-3 leading-[1.2] group-hover:text-glow transition-all tracking-tight line-clamp-2">
+                              <h3 className="text-lg sm:text-xl font-[900] dark:text-white text-morandi-slate mb-3 leading-[1.2] transition-all tracking-tight line-clamp-2">
                                 {post.title}
                               </h3>
 

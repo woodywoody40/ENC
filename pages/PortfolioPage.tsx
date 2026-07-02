@@ -364,7 +364,7 @@ const PortfolioPage: React.FC = () => {
 
                           <h3 className={`
                             font-[900] dark:text-white text-morandi-slate
-                            group-hover:text-glow transition-all tracking-tight leading-tight
+                            group-hover:dark:text-white group-hover:text-morandi-slate transition-all tracking-tight leading-tight
                             ${isFeatured ? 'text-2xl sm:text-3xl lg:text-4xl mb-4' : 'text-xl sm:text-2xl mb-3'}
                             line-clamp-2
                           `}>
