@@ -307,7 +307,7 @@ const ContactItem: React.FC<{ icon: React.ReactNode, text: string, href?: string
 const SkillTag: React.FC<{ name: string, level: string }> = ({ name, level }) => (
   <div className="p-5 rounded-[40px] dark:border-white/5 border-black/10 flex justify-between items-center group hover:bg-morandi-slate hover:text-white dark:hover:bg-white dark:hover:text-black transition-all dark:bg-white/5 bg-white/60 shadow-xl backdrop-blur-[40px] border">
     <span className="text-xs font-black dark:text-white text-morandi-slate group-hover:text-white dark:group-hover:text-black uppercase tracking-widest">{name}</span>
-    <span className="text-[8px] font-black dark:text-slate-500 text-morandi-stone group-hover:text-white/80 uppercase tracking-widest dark:bg-white/5 bg-black/5 px-2 py-1 rounded-md">{level}</span>
+    <span className="text-[8px] font-black dark:text-slate-500 text-morandi-stone group-hover:text-white/80 dark:group-hover:text-black uppercase tracking-widest dark:bg-white/5 bg-black/5 px-2 py-1 rounded-md">{level}</span>
   </div>
 );
 
