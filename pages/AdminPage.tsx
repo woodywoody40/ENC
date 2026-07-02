@@ -55,7 +55,7 @@ const AdminPage: React.FC = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [configSections, setConfigSections] = useState({
-    homepage: false, resume_basic: false, resume_content: false, resume_data: false,
+    homepage: false, about_page: false, resume_basic: false, resume_content: false, resume_data: false,
   });
   const [configDirty, setConfigDirty] = useState<Record<string, string>>({});
   const toastId = useRef(0);
@@ -706,6 +706,107 @@ const AdminPage: React.FC = () => {
                     large={key === 'hero_intro'}
                   />
                 ))}
+              </div>
+            </AccordionSection>
+
+            {/* ── 關於頁面設定 ── */}
+            <AccordionSection
+              title="關於頁面設定"
+              icon={<User size={15} className="text-sky-400" />}
+              accent="border-l-sky-500/30"
+              isOpen={configSections.about_page}
+              onToggle={() => toggleConfigSection('about_page')}
+              dirty={configDirty}
+              keys={['about_hero_subtitle', 'about_bio_heading', 'about_content', 'about_skill1_title', 'about_skill1_desc', 'about_skill2_title', 'about_skill2_desc', 'about_skill3_title', 'about_skill3_desc']}
+            >
+              <div className="space-y-5">
+                {/* Hero */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <ConfigField
+                    label="頁面副標"
+                    value={getConfig('about_hero_subtitle')}
+                    onChange={v => handleConfigChange('about_hero_subtitle', v)}
+                    placeholder="系統維運 · 資安監控 · 基隆在地"
+                  />
+                  <ConfigField
+                    label="左側大標"
+                    value={getConfig('about_hero_title_left')}
+                    onChange={v => handleConfigChange('about_hero_title_left', v)}
+                    placeholder="關於"
+                  />
+                  <ConfigField
+                    label="右側大標"
+                    value={getConfig('about_hero_title_right')}
+                    onChange={v => handleConfigChange('about_hero_title_right', v)}
+                    placeholder="Woody"
+                  />
+                </div>
+
+                {/* Bio heading */}
+                <ConfigField
+                  label="自傳主標"
+                  value={getConfig('about_bio_heading')}
+                  onChange={v => handleConfigChange('about_bio_heading', v)}
+                  placeholder="讓基礎設施沉默地運轉，就是最好的工程。"
+                />
+
+                {/* Bio content */}
+                <ConfigField
+                  label="自傳內文"
+                  value={getConfig('about_content')}
+                  onChange={v => handleConfigChange('about_content', v)}
+                  placeholder="我是吳東謙，現就讀國立臺灣海洋大學..."
+                  large
+                />
+
+                {/* Skill cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/10">
+                  <div className="space-y-3">
+                    <ConfigField
+                      label="技能一：標題"
+                      value={getConfig('about_skill1_title')}
+                      onChange={v => handleConfigChange('about_skill1_title', v)}
+                      placeholder="儲存與備份"
+                    />
+                    <ConfigField
+                      label="技能一：敘述"
+                      value={getConfig('about_skill1_desc')}
+                      onChange={v => handleConfigChange('about_skill1_desc', v)}
+                      placeholder="設計並維運異地備援架構..."
+                      large
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <ConfigField
+                      label="技能二：標題"
+                      value={getConfig('about_skill2_title')}
+                      onChange={v => handleConfigChange('about_skill2_title', v)}
+                      placeholder="資安監控"
+                    />
+                    <ConfigField
+                      label="技能二：敘述"
+                      value={getConfig('about_skill2_desc')}
+                      onChange={v => handleConfigChange('about_skill2_desc', v)}
+                      placeholder="執行系統弱點掃描與漏洞修補..."
+                      large
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <ConfigField
+                      label="技能三：標題"
+                      value={getConfig('about_skill3_title')}
+                      onChange={v => handleConfigChange('about_skill3_title', v)}
+                      placeholder="虛擬化與雲端"
+                    />
+                    <ConfigField
+                      label="技能三：敘述"
+                      value={getConfig('about_skill3_desc')}
+                      onChange={v => handleConfigChange('about_skill3_desc', v)}
+                      placeholder="維運 VMware vSphere 8.0 叢集..."
+                      large
+                    />
+                  </div>
+                </div>
               </div>
             </AccordionSection>
 
