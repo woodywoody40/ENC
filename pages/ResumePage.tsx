@@ -103,9 +103,10 @@ const ResumePage: React.FC = () => {
         <motion.div 
           initial={{ y: 20, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }}
-          className="inline-block px-5 py-2 glass-panel dark:border-white/10 border-black/10 dark:bg-white/5 bg-white/40 mb-8"
         >
+          <div className="inline-block px-5 py-2 rounded-[40px] dark:bg-white/5 bg-white/40 dark:border-white/10 border-black/10 shadow-xl mb-8 backdrop-blur-[40px]">
           <span className="dark:text-white text-morandi-slate font-black text-[9px] tracking-[0.8em] uppercase">技術履歷 - Curriculum Vitae</span>
+          </div>
         </motion.div>
         <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter dark:text-white text-morandi-slate uppercase">
           {configs.resume_name || "吳東謙"}
@@ -157,7 +158,7 @@ const ResumePage: React.FC = () => {
             <div className="space-y-6">
               {educationList.length > 0 ? (
                 educationList.map((edu: any, idx: number) => (
-                  <div key={idx} className="glass-panel p-6 dark:border-white/5 border-black/10 hover:border-morandi-slate transition-all dark:bg-white/5 bg-white/60">
+                  <div key={idx} className="p-6 rounded-[40px] dark:border-white/5 border-black/10 hover:border-morandi-slate transition-all dark:bg-white/5 bg-white/60 shadow-xl backdrop-blur-[40px] border">
                     <p className="text-xs font-black dark:text-white/40 text-morandi-stone uppercase tracking-widest mb-2">{edu.year}</p>
                     <h4 className="text-lg font-black dark:text-white text-morandi-slate mb-1 tracking-tight">{edu.school}</h4>
                     <p className="text-sm dark:text-slate-400 text-morandi-stone font-medium">{edu.degree}</p>
@@ -172,8 +173,11 @@ const ResumePage: React.FC = () => {
           </section>
 
           <div className="pt-10">
-            <button className="w-full py-5 glass-panel dark:bg-white dark:text-black bg-morandi-slate text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-xl">
-              <FileText size={18} /> 索取完整 PDF 履歷
+            <button
+              onClick={() => window.print()}
+              className="w-full py-5 bg-morandi-slate dark:bg-white text-white dark:text-black rounded-[40px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all duration-500 shadow-xl border border-white/15"
+            >
+              <FileText size={18} /> 下載 PDF 履歷
             </button>
           </div>
         </div>
@@ -302,7 +306,7 @@ const ContactItem: React.FC<{ icon: React.ReactNode, text: string, href?: string
 );
 
 const SkillTag: React.FC<{ name: string, level: string }> = ({ name, level }) => (
-  <div className="glass-panel p-5 dark:border-white/5 border-black/10 flex justify-between items-center group hover:bg-morandi-slate hover:text-white dark:hover:bg-white dark:hover:text-black transition-all dark:bg-white/5 bg-white/60">
+  <div className="p-5 rounded-[40px] dark:border-white/5 border-black/10 flex justify-between items-center group hover:bg-morandi-slate hover:text-white dark:hover:bg-white dark:hover:text-black transition-all dark:bg-white/5 bg-white/60 shadow-xl backdrop-blur-[40px] border">
     <span className="text-xs font-black dark:text-white text-morandi-slate group-hover:text-white dark:group-hover:text-black uppercase tracking-widest">{name}</span>
     <span className="text-[8px] font-black dark:text-slate-500 text-morandi-stone group-hover:text-white/80 uppercase tracking-widest dark:bg-white/5 bg-black/5 px-2 py-1 rounded-md">{level}</span>
   </div>
