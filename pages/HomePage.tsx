@@ -231,8 +231,8 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Right side — floating abstract accent */}
-          <div className="absolute top-32 md:top-40 right-0 h-[100dvh] w-[60vw] md:w-[45vw] flex items-start justify-end pointer-events-none">
-            <div className="relative h-[90vh] aspect-[3/4] origin-center translate-x-1/6 pointer-events-auto">
+          <div className="absolute top-16 md:top-20 right-0 h-[100dvh] w-[55vw] md:w-[40vw] flex items-start justify-end pointer-events-none">
+            <div className="relative h-[80vh] aspect-[3/4] origin-center -translate-x-[5%] pointer-events-auto">
               <img
                 src="/hero-accent.jpg"
                 alt="Infrastructure abstract"
