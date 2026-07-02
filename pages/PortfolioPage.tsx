@@ -6,24 +6,67 @@ import { ProjectsAPI } from '../services/apiClient';
 import {
   ArrowRight, Loader2, Boxes, AlertCircle,
   Server, Shield, HardDrive, Network, Cloud,
-  Terminal, Hash, Activity, Cpu
+  Terminal, Activity, Cpu,
+  Code2, Database, Globe, Smartphone, Zap,
+  Palette, LayoutDashboard, Users, Sparkles,
+  Gamepad2, Video, MessageCircle, FileText,
+  Map, Image, Calculator, Cog, Monitor,
+  TrendingUp, Code, MapPin, Crosshair
 } from 'lucide-react';
 
 // ─── Tag visuals ─────────────────────────────────────────────
 const tagVisuals: Record<string, { icon: React.ReactNode; accent: string; dot: string }> = {
-  VMware:     { icon: <Server size={11} />,     accent: 'from-amber-500/40',  dot: 'bg-amber-400' },
-  Linux:      { icon: <Terminal size={11} />,   accent: 'from-sky-500/40',    dot: 'bg-sky-400' },
-  Ubuntu:     { icon: <Terminal size={11} />,   accent: 'from-orange-500/40', dot: 'bg-orange-400' },
-  Fortinet:   { icon: <Shield size={11} />,     accent: 'from-red-500/40',    dot: 'bg-red-400' },
-  HPE:        { icon: <HardDrive size={11} />,  accent: 'from-blue-500/40',   dot: 'bg-blue-400' },
-  Networking: { icon: <Network size={11} />,    accent: 'from-purple-500/40', dot: 'bg-purple-400' },
-  Cloud:      { icon: <Cloud size={11} />,      accent: 'from-cyan-500/40',   dot: 'bg-cyan-400' },
-  Security:   { icon: <Shield size={11} />,     accent: 'from-rose-500/40',   dot: 'bg-rose-400' },
-  Storage:    { icon: <HardDrive size={11} />,  accent: 'from-indigo-500/40', dot: 'bg-indigo-400' },
-  DevOps:     { icon: <Activity size={11} />,   accent: 'from-emerald-500/40',dot: 'bg-emerald-400' },
+  // Infrastructure
+  VMware:       { icon: <Server size={11} />,      accent: 'from-amber-500/40',  dot: 'bg-amber-400' },
+  Linux:        { icon: <Terminal size={11} />,     accent: 'from-sky-500/40',    dot: 'bg-sky-400' },
+  Ubuntu:       { icon: <Terminal size={11} />,     accent: 'from-orange-500/40', dot: 'bg-orange-400' },
+  'Ubuntu 24.04':{ icon: <Terminal size={11} />,    accent: 'from-orange-500/40', dot: 'bg-orange-400' },
+  Fortinet:     { icon: <Shield size={11} />,       accent: 'from-red-500/40',    dot: 'bg-red-400' },
+  HPE:          { icon: <HardDrive size={11} />,    accent: 'from-blue-500/40',   dot: 'bg-blue-400' },
+  Networking:   { icon: <Network size={11} />,      accent: 'from-purple-500/40', dot: 'bg-purple-400' },
+  Cloud:        { icon: <Cloud size={11} />,        accent: 'from-cyan-500/40',   dot: 'bg-cyan-400' },
+  Security:     { icon: <Shield size={11} />,       accent: 'from-rose-500/40',   dot: 'bg-rose-400' },
+  Storage:      { icon: <HardDrive size={11} />,    accent: 'from-indigo-500/40', dot: 'bg-indigo-400' },
+  DevOps:       { icon: <Activity size={11} />,     accent: 'from-emerald-500/40',dot: 'bg-emerald-400' },
+  vSphere:      { icon: <Monitor size={11} />,      accent: 'from-blue-500/40',   dot: 'bg-blue-400' },
+  Automation:   { icon: <Cog size={11} />,          accent: 'from-zinc-500/40',   dot: 'bg-zinc-400' },
+  // Frontend & Frameworks
+  React:        { icon: <Code2 size={11} />,        accent: 'from-sky-500/40',    dot: 'bg-sky-400' },
+  'Next.js':    { icon: <FileText size={11} />,     accent: 'from-white/30',      dot: 'bg-white/50' },
+  TypeScript:   { icon: <Code size={11} />,         accent: 'from-blue-500/40',   dot: 'bg-blue-400' },
+  'Tailwind CSS':{ icon: <Palette size={11} />,     accent: 'from-cyan-500/40',   dot: 'bg-cyan-400' },
+  Vite:         { icon: <Zap size={11} />,          accent: 'from-yellow-500/40', dot: 'bg-yellow-400' },
+  Canvas:       { icon: <Code2 size={11} />,        accent: 'from-purple-500/40', dot: 'bg-purple-400' },
+  HTML5:        { icon: <Globe size={11} />,        accent: 'from-orange-500/40', dot: 'bg-orange-400' },
+  Game:         { icon: <Gamepad2 size={11} />,     accent: 'from-rose-500/40',   dot: 'bg-rose-400' },
+  Recharts:     { icon: <TrendingUp size={11} />,   accent: 'from-emerald-500/40',dot: 'bg-emerald-400' },
+  // Cloud / Platform
+  'Cloudflare D1':{ icon: <Database size={11} />,   accent: 'from-orange-500/40', dot: 'bg-orange-400' },
+  'Cloudflare Pages':{icon: <Globe size={11} />,    accent: 'from-orange-500/40', dot: 'bg-orange-400' },
+  PWA:          { icon: <Smartphone size={11} />,   accent: 'from-indigo-500/40', dot: 'bg-indigo-400' },
+  WebAssembly:  { icon: <Cpu size={11} />,          accent: 'from-purple-500/40', dot: 'bg-purple-400' },
+  HLS:          { icon: <Video size={11} />,        accent: 'from-green-500/40',  dot: 'bg-green-400' },
+  // APIs & Services
+  'YouTube API':{ icon: <Video size={11} />,        accent: 'from-red-500/40',    dot: 'bg-red-400' },
+  'Twitch API': { icon: <MessageCircle size={11} />,accent: 'from-purple-500/40', dot: 'bg-purple-400' },
+  'LINE API':   { icon: <MessageCircle size={11} />,accent: 'from-green-500/40',  dot: 'bg-green-400' },
+  'Gemini API': { icon: <Sparkles size={11} />,     accent: 'from-blue-500/40',   dot: 'bg-blue-400' },
+  'Google Maps API':{icon: <MapPin size={11} />,    accent: 'from-green-500/40',  dot: 'bg-green-400' },
+  'Exchange Rate API':{icon: <TrendingUp size={11} />,accent:'from-yellow-500/40',dot:'bg-yellow-400'},
+  TWSE:         { icon: <TrendingUp size={11} />,   accent: 'from-green-500/40',  dot: 'bg-green-400' },
+  Leaflet:      { icon: <Map size={11} />,          accent: 'from-amber-500/40',  dot: 'bg-amber-400' },
+  Geolocation:  { icon: <Crosshair size={11} />,    accent: 'from-cyan-500/40',   dot: 'bg-cyan-400' },
+  // Applications & Features
+  Dashboard:    { icon: <LayoutDashboard size={11} />,accent:'from-blue-500/40',  dot:'bg-blue-400' },
+  CRM:          { icon: <Users size={11} />,        accent: 'from-violet-500/40', dot: 'bg-violet-400' },
+  AI:           { icon: <Sparkles size={11} />,     accent: 'from-rose-500/40',   dot: 'bg-rose-400' },
+  'Image Processing':{ icon: <Image size={11} />,   accent:'from-pink-500/40',   dot:'bg-pink-400' },
+  OCR:          { icon: <FileText size={11} />,     accent: 'from-sky-500/40',    dot: 'bg-sky-400' },
+  Calculator:   { icon: <Calculator size={11} />,   accent:'from-zinc-500/40',   dot:'bg-zinc-400' },
+  'PDF.js':     { icon: <FileText size={11} />,     accent: 'from-red-500/40',    dot: 'bg-red-400' },
 };
 
-const defaultVis = { icon: <Hash size={11} />, accent: 'from-white/20', dot: 'bg-white/30' };
+const defaultVis = { icon: null as React.ReactNode | null, accent: 'from-white/20', dot: 'bg-white/30' };
 const getVis = (tag: string) => tagVisuals[tag] ?? defaultVis;
 
 // ─── Animation ───────────────────────────────────────────────
@@ -42,6 +85,7 @@ const PortfolioPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('全部');
   const [error, setError] = useState<string | null>(null);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -131,31 +175,43 @@ const PortfolioPage: React.FC = () => {
         </div>
 
         {/* ── Tag filter ────────────────────────────────── */}
-        <div className="mt-10 sm:mt-14 overflow-x-auto pb-2 -mx-5 sm:-mx-8 px-5 sm:px-8">
-          <div className="flex gap-2.5 min-w-max">
-            {allTags.map(tag => {
+        <div className="mt-8 sm:mt-12">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2.5">
+            {allTags.slice(0, showAllTags ? allTags.length : 7).map(tag => {
               const isActive = filter === tag;
               const vis = tag !== '全部' ? getVis(tag) : null;
+              const hasIcon = vis?.icon != null;
               return (
                 <motion.button
                   key={tag}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
+                  layout
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setFilter(tag)}
                   className={`
-                    relative px-4 py-2.5 rounded-xl text-[10px] font-black tracking-[0.15em] uppercase
-                    transition-all duration-300 border whitespace-nowrap flex items-center gap-2
+                    text-[10px] font-black tracking-[0.12em] uppercase
+                    transition-all duration-300 flex items-center gap-1.5
                     ${isActive
-                      ? 'dark:bg-emerald-500/20 bg-emerald-500/90 dark:text-emerald-300 text-white border-emerald-500/40 dark:shadow-[0_0_30px_-8px_rgba(16,185,129,0.3)]'
-                      : 'dark:bg-white/[0.04] bg-white/70 dark:text-white/40 text-morandi-stone/60 dark:border-white/8 border-black/8 hover:dark:border-white/20 hover:border-morandi-slate/30'
+                      ? 'dark:text-emerald-300 text-emerald-700 dark:bg-emerald-500/15 bg-emerald-500/80 px-3 py-1.5 rounded-lg'
+                      : 'dark:text-white/25 text-morandi-stone/40 hover:dark:text-white/50 hover:text-morandi-slate/60 px-2 py-1.5'
                     }
                   `}
                 >
-                  {vis?.icon}
+                  {hasIcon && vis?.icon}
                   {tag}
                 </motion.button>
               );
             })}
+            {allTags.length > 7 && (
+              <motion.button
+                layout
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowAllTags(!showAllTags)}
+                className="text-[9px] font-mono dark:text-white/15 text-morandi-stone/30 hover:dark:text-white/40 hover:text-morandi-slate/50 transition-colors px-2 py-1.5"
+              >
+                {showAllTags ? '— 收合' : `+ ${allTags.length - 7} 更多`}
+              </motion.button>
+            )}
           </div>
         </div>
       </header>
