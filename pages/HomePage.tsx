@@ -234,12 +234,12 @@ const HomePage: React.FC = () => {
           <div className="absolute top-12 md:top-16 right-0 h-[100dvh] w-[55vw] md:w-[40vw] flex items-start justify-end pointer-events-none">
             <div className="relative h-[80vh] aspect-[3/4] origin-center -translate-x-[8%] pointer-events-auto animate-image-enter">
               <img
-                src="/hero-accent.jpg"
+                src="/hero-accent.webp"
                 alt="Infrastructure abstract"
-                className="w-full h-full object-cover drop-shadow-2xl brightness-[0.6] saturate-[0.6] transition-all duration-700 hover:brightness-[0.75] hover:saturate-[0.9] mix-blend-screen opacity-80"
+                className="w-full h-full object-cover drop-shadow-2xl brightness-[0.65] transition-all duration-700 hover:brightness-[0.85] mix-blend-screen opacity-80"
               />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/40 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/30 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
 
