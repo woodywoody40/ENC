@@ -186,3 +186,12 @@ html.light .text-glow {
 .parallax-layer-slow { will-change: transform; }
 .parallax-layer-medium { will-change: transform; }
 .parallax-layer-fast { will-change: transform; }
+
+/* Hero accent image entrance */
+@keyframes image-enter {
+  0% { opacity: 0; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-image-enter {
+  animation: image-enter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

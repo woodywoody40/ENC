@@ -231,15 +231,15 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Right side — floating abstract accent */}
-          <div className="absolute top-16 md:top-20 right-0 h-[100dvh] w-[55vw] md:w-[40vw] flex items-start justify-end pointer-events-none">
-            <div className="relative h-[80vh] aspect-[3/4] origin-center -translate-x-[5%] pointer-events-auto">
+          <div className="absolute top-12 md:top-16 right-0 h-[100dvh] w-[55vw] md:w-[40vw] flex items-start justify-end pointer-events-none">
+            <div className="relative h-[80vh] aspect-[3/4] origin-center -translate-x-[8%] pointer-events-auto animate-image-enter">
               <img
                 src="/hero-accent.jpg"
                 alt="Infrastructure abstract"
-                className="w-full h-full object-cover drop-shadow-2xl brightness-[0.35] saturate-[0.3] transition-all duration-700 hover:brightness-[0.5] hover:saturate-[0.5] mix-blend-screen opacity-70"
+                className="w-full h-full object-cover drop-shadow-2xl brightness-[0.6] saturate-[0.6] transition-all duration-700 hover:brightness-[0.75] hover:saturate-[0.9] mix-blend-screen opacity-80"
               />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/70 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/40 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
 
