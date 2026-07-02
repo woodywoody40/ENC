@@ -446,7 +446,7 @@ const AdminPage: React.FC = () => {
             </div>
           </div>
 
-          <nav className="flex items-center bg-white/[0.04] rounded-2xl p-0.5 border border-white/5 shrink-0 relative">
+          <nav className="flex items-center bg-white/[0.06] rounded-2xl p-0.5 border border-white/[0.08] shrink-0 relative">
             {([
               { key: 'dashboard' as TabKey, icon: <LayoutDashboard size={14} />, label: '概覽' },
               { key: 'projects' as TabKey, icon: <Briefcase size={14} />, label: '作品' },
@@ -459,13 +459,13 @@ const AdminPage: React.FC = () => {
                 className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
                   activeTab === t.key
                     ? 'text-black'
-                    : 'text-white/35 hover:text-white/70'
+                    : 'text-white/50 hover:text-white/90 hover:bg-white/[0.04]'
                 }`}
               >
                 {activeTab === t.key && (
                   <motion.div
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-white rounded-xl shadow-lg shadow-white/10"
+                    className="absolute inset-0 bg-white rounded-xl shadow-lg shadow-white/15"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -495,34 +495,46 @@ const AdminPage: React.FC = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {([
-                { icon: <Briefcase size={20} />, label: '部署專案', value: projects.length, gradient: 'from-blue-500/20 via-blue-500/5', border: 'hover:border-blue-500/30', tab: 'projects' as TabKey },
-                { icon: <BookOpen size={20} />, label: '技術文章', value: posts.length, gradient: 'from-violet-500/20 via-violet-500/5', border: 'hover:border-violet-500/30', tab: 'blog' as TabKey },
-                { icon: <Activity size={20} />, label: '核心狀態', value: '連線中', gradient: 'from-emerald-500/20 via-emerald-500/5', border: 'hover:border-emerald-500/30', tab: null },
+                { icon: <Briefcase size={20} />, label: '部署專案', value: projects.length, gradient: 'from-blue-500/20 via-blue-500/5', border: 'hover:border-blue-500/40', iconBg: 'group-hover:bg-blue-500/15 group-hover:border-blue-500/30 group-hover:text-blue-300', tab: 'projects' as TabKey },
+                { icon: <BookOpen size={20} />, label: '技術文章', value: posts.length, gradient: 'from-violet-500/20 via-violet-500/5', border: 'hover:border-violet-500/40', iconBg: 'group-hover:bg-violet-500/15 group-hover:border-violet-500/30 group-hover:text-violet-300', tab: 'blog' as TabKey },
+                { icon: <Activity size={20} />, label: '核心狀態', value: '連線中', gradient: 'from-emerald-500/8 via-emerald-500/2', border: 'border-emerald-500/10', iconBg: 'text-emerald-400', tab: null },
               ]).map((stat, i) => (
                 <button
                   key={i}
                   onClick={() => stat.tab && setActiveTab(stat.tab!)}
                   disabled={!stat.tab}
-                  className={`relative bg-gradient-to-b ${stat.gradient} to-transparent border border-white/[0.06] rounded-2xl p-7 text-center group transition-all duration-300 overflow-hidden ${
-                    stat.tab ? `${stat.border} cursor-pointer hover:shadow-[0_0_30px_-10px_rgba(255,255,255,0.05)]` : 'cursor-default'
+                  className={`relative bg-gradient-to-b ${stat.gradient} to-transparent border rounded-2xl p-7 text-center group transition-all duration-300 overflow-hidden ${
+                    stat.tab
+                      ? `${stat.border} cursor-pointer border-white/[0.08] hover:shadow-[0_0_40px_-15px_rgba(255,255,255,0.08)] hover:-translate-y-0.5`
+                      : 'cursor-default border-white/[0.04] opacity-60'
                   }`}
                 >
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className={`w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3.5 border border-white/5 group-hover:scale-110 group-hover:border-white/20 transition-all duration-300 ${
-                    stat.tab ? 'group-hover:shadow-lg' : ''
+                  {stat.tab && (
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  )}
+                  <div className={`w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-3.5 border border-white/5 transition-all duration-300 ${
+                    stat.tab
+                      ? `${stat.iconBg} group-hover:scale-110 group-hover:shadow-lg`
+                      : 'text-emerald-400'
                   }`}>
-                    <span className={stat.tab ? 'text-white/60 group-hover:text-white transition-colors' : 'text-emerald-400'}>{stat.icon}</span>
+                    <span className={stat.tab ? 'text-white/50' : ''}>{stat.icon}</span>
                   </div>
-                  <div className="text-[28px] font-bold tracking-tight text-white/90 mb-1.5">{stat.value}</div>
-                  <div className="text-[9px] font-semibold text-white/25 uppercase tracking-[0.2em]">{stat.label}</div>
+                  <div className={`text-[28px] font-bold tracking-tight mb-1.5 ${stat.tab ? 'text-white' : 'text-white/60'}`}>{stat.value}</div>
+                  <div className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${stat.tab ? 'text-white/30' : 'text-white/20'}`}>{stat.label}</div>
+                  {stat.tab && (
+                    <div className="mt-3 text-[7px] font-semibold text-white/15 uppercase tracking-[0.15em] opacity-0 group-hover:opacity-100 transition-opacity">
+                      點擊管理 →
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 space-y-4 hover:border-white/10 transition-all">
-                <h3 className="text-[9px] font-semibold text-white/25 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Zap size={12} className="text-blue-400/60" /> 快速操作
+              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 space-y-4">
+                <h3 className="text-[9px] font-semibold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-blue-500/10 flex items-center justify-center"><Zap size={11} className="text-blue-400" /></span>
+                  快速操作
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <QuickBtn icon={<Plus size={13} />} label="新增專案" color="text-blue-400" onClick={() => openEditor('project')} />
@@ -583,7 +595,7 @@ const AdminPage: React.FC = () => {
               {(activeTab === 'projects' ? filteredProjects : filteredPosts).map((item, idx) => (
                 <div
                   key={item.id}
-                  className="group relative bg-white/[0.015] border border-white/[0.04] rounded-xl px-4 py-3.5 flex items-center gap-4 hover:bg-white/[0.03] hover:border-white/10 transition-all duration-200"
+                  className="group relative bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-3.5 flex items-center gap-4 hover:bg-white/[0.04] hover:border-white/15 hover:shadow-[0_0_20px_-10px_rgba(255,255,255,0.03)] transition-all duration-200 cursor-default"
                 >
                   <div className="w-10 h-10 rounded-lg overflow-hidden bg-black border border-white/5 shrink-0">
                     <img
@@ -609,17 +621,17 @@ const AdminPage: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <div className="flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-all duration-200">
                     <button
                       onClick={() => openEditor(activeTab === 'projects' ? 'project' : 'blog', item)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/30 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/50 hover:text-blue-400 hover:bg-blue-500/15 hover:shadow-sm transition-all"
                       title="編輯"
                     >
                       <Edit3 size={13} />
                     </button>
                     <button
                       onClick={() => handleDeleteItem(activeTab === 'projects' ? 'project' : 'blog', item.id, item.title)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/5 text-rose-400/30 hover:text-rose-400 hover:bg-rose-500/12 transition-all"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/8 text-rose-400/40 hover:text-rose-400 hover:bg-rose-500/20 hover:shadow-sm transition-all"
                       title="刪除"
                     >
                       <Trash2 size={13} />
@@ -638,8 +650,8 @@ const AdminPage: React.FC = () => {
             {/* Save All Toolbar */}
             <div className={`sticky top-24 z-40 rounded-2xl px-5 py-3.5 flex items-center justify-between transition-all duration-300 ${
               Object.keys(configDirty).length > 0
-                ? 'bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/15 shadow-[0_0_30px_-10px_rgba(251,191,36,0.15)]'
-                : 'bg-white/[0.02] border border-white/[0.04]'
+                ? 'bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/20 shadow-[0_0_30px_-8px_rgba(251,191,36,0.15)]'
+                : 'bg-white/[0.03] border border-white/[0.06]'
             }`}>
               <div className="flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -1003,18 +1015,18 @@ const AccordionSection = ({ title, icon, isOpen, onToggle, children, dirty, keys
 }) => {
   const hasDirty = keys?.some(k => dirty?.[k] !== undefined);
   return (
-    <div className={`bg-white/[0.01] border border-white/[0.04] rounded-2xl overflow-hidden transition-all duration-200 hover:border-white/[0.08] ${
-      isOpen ? 'border-white/[0.06]' : ''
+    <div className={`bg-white/[0.015] border border-white/[0.06] rounded-2xl overflow-hidden transition-all duration-200 hover:border-white/[0.12] ${
+      isOpen ? 'border-white/[0.10]' : ''
     }`}>
       <button
         onClick={onToggle}
-        className={`w-full flex items-center justify-between px-5 py-3.5 transition-colors duration-150 ${
-          isOpen ? 'bg-white/[0.01]' : 'hover:bg-white/[0.01]'
+        className={`w-full flex items-center justify-between px-5 py-3.5 transition-all duration-150 cursor-pointer ${
+          isOpen ? 'bg-white/[0.02]' : 'hover:bg-white/[0.03]'
         }`}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`w-8 h-8 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center shrink-0 transition-all duration-200 ${
-            isOpen ? 'bg-white/[0.05]' : ''
+          <div className={`w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0 transition-all duration-200 ${
+            isOpen ? 'bg-white/[0.08] border-white/15' : 'group-hover:bg-white/[0.06]'
           }`}>
             {icon}
           </div>
@@ -1123,10 +1135,10 @@ const QuickBtn = ({ icon, label, color, onClick }: {
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.04] rounded-xl px-3.5 py-3 transition-all text-left border border-white/[0.02] hover:border-white/10 group"
+    className="flex items-center gap-3 bg-white/[0.04] hover:bg-white/[0.08] rounded-xl px-3.5 py-3 transition-all duration-200 text-left border border-white/[0.06] hover:border-white/20 group cursor-pointer"
   >
-    <span className={`w-7 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center ${color} group-hover:scale-110 group-hover:bg-white/10 transition-all duration-200 shrink-0`}>{icon}</span>
-    <span className="text-[11px] font-medium text-white/50 group-hover:text-white/80 transition-colors">{label}</span>
+    <span className={`w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center ${color} group-hover:scale-110 group-hover:bg-white/15 transition-all duration-200 shrink-0`}>{icon}</span>
+    <span className="text-[11px] font-medium text-white/60 group-hover:text-white/90 transition-colors">{label}</span>
   </button>
 );
 
