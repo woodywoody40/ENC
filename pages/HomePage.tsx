@@ -216,77 +216,86 @@ const HomePage: React.FC = () => {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)]" />
         </div>
 
-        {/* ===== HERO ===== */}
-        <section className="relative z-10 min-h-[100dvh] flex flex-col justify-between pt-20 pb-12 px-6 sm:px-12 lg:px-20 overflow-hidden">
-
-          {/* Right-to-left gradient image layer */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-            <div className="absolute -right-20 -top-20 w-[80%] h-[140%] opacity-[0.10]"
+        {/* ===== HERO — Floria-style ===== */}
+        <section className="relative min-h-[100dvh] w-full flex items-center pt-24 pb-12 bg-black z-20">
+          {/* Background layer — right-to-left gradient atmosphere */}
+          <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-25"
               style={{
-                background: 'radial-gradient(ellipse at 70% 40%, rgba(245,158,11,1) 0%, transparent 60%)',
-                filter: 'blur(100px)',
+                background: 'linear-gradient(270deg, rgba(245,158,11,0.12) 0%, rgba(56,189,248,0.04) 25%, transparent 45%)',
               }}
             />
-            <div className="absolute -right-40 bottom-0 w-[60%] aspect-square opacity-[0.05]"
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(56,189,248,1) 0%, transparent 60%)',
-                filter: 'blur(120px)',
-              }}
-            />
-            <div className="absolute right-0 top-0 w-3/5 h-full opacity-[0.020] mix-blend-overlay"
-              style={{
-                background: 'linear-gradient(270deg, rgba(245,158,11,0.5) 0%, rgba(56,189,248,0.2) 30%, transparent 55%)',
-                mask: 'linear-gradient(270deg, rgba(0,0,0,1) 0%, transparent 50%)',
-                WebkitMask: 'linear-gradient(270deg, rgba(0,0,0,1) 0%, transparent 50%)',
-              }}
-            />
-            {/* Fade transition to clean left */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[#08090c]/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-[1]" />
+            <div className="absolute bottom-0 inset-x-0 h-32 md:h-48 bg-gradient-to-t from-[#08090c] to-transparent pointer-events-none z-[1]" />
           </div>
 
-          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl">
-            <Reveal delay={100}>
-              <h1
-                className="font-sans text-[clamp(2.8rem,10vw,8rem)] leading-[1.08] tracking-[-0.04em] text-white/95 mb-6 parallax-layer-slow"
-                style={{ transform: `translateY(${scrollY * -0.04}px)` }}
-              >
-                {heroTitle}
-              </h1>
-            </Reveal>
-            <Reveal delay={300}>
-              <h2
-                className="font-sans text-[clamp(1.2rem,3.5vw,2.5rem)] leading-[1.3] tracking-[0.02em] text-white/25 font-light mb-12 parallax-layer-medium"
-                style={{ transform: `translateY(${scrollY * -0.02}px)` }}
-              >
-                Architecture of Reliability
-              </h2>
-            </Reveal>
-            <Reveal delay={400}>
-              <p
-                className="text-base sm:text-lg text-slate-400/80 leading-relaxed max-w-xl font-light mb-16 parallax-layer-fast"
-                style={{ transform: `translateY(${scrollY * -0.01}px)` }}
-              >
-                {heroIntro}
-              </p>
-            </Reveal>
-            <Reveal delay={500}>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/portfolio"
-                  className="group inline-flex items-center gap-3 bg-white text-[#08090c] px-8 py-4 text-sm font-semibold tracking-wide hover:bg-amber-50 transition-all duration-300 active:scale-[0.97]"
-                >
-                  查看維運實績
-                  <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-                <Link
-                  to="/blog"
-                  className="group inline-flex items-center gap-3 border border-white/[0.1] text-white/70 px-8 py-4 text-sm font-semibold tracking-wide hover:border-amber-400/30 hover:text-white hover:bg-white/[0.02] transition-all duration-300 active:scale-[0.97]"
-                >
-                  <Terminal size={15} className="opacity-50 group-hover:opacity-100 transition-opacity" />
-                  閱讀技術筆記
-                </Link>
-              </div>
-            </Reveal>
+          {/* Right side — floating abstract accent */}
+          <div className="absolute top-24 md:top-32 right-0 h-[100dvh] w-[90vw] md:w-[60vw] flex items-center justify-end pointer-events-none">
+            <div className="relative h-[120vh] aspect-square origin-center translate-x-1/4 pointer-events-auto">
+              <div className="absolute inset-0 opacity-[0.10] mix-blend-screen"
+                style={{
+                  background: 'radial-gradient(ellipse at 35% 50%, rgba(245,158,11,0.8) 0%, rgba(56,189,248,0.2) 25%, transparent 50%)',
+                  filter: 'blur(80px)',
+                }}
+              />
+              <div className="absolute inset-0 opacity-[0.020]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 30% 40%, rgba(255,255,255,0.4) 0%, transparent 1px)',
+                  backgroundSize: '60px 60px',
+                }}
+              />
+              <div className="absolute -bottom-20 -left-20 w-3/4 aspect-square opacity-[0.06] mix-blend-screen"
+                style={{
+                  background: 'radial-gradient(ellipse at center, rgba(56,189,248,0.6) 0%, transparent 50%)',
+                  filter: 'blur(100px)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="relative w-full max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-center z-10">
+            <div className="md:col-span-7 flex flex-col items-start pointer-events-auto">
+              <Reveal delay={100}>
+                <span className="inline-block py-1.5 px-4 rounded-full border border-white/15 bg-white/[0.06] text-white/80 text-[11px] font-semibold tracking-[0.15em] mb-8 backdrop-blur-sm">
+                  INFRASTRUCTURE &amp; SECURITY
+                </span>
+              </Reveal>
+              <Reveal delay={200}>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9] text-white mb-8 text-balance">
+                  {heroTitle}<br />
+                  <span className="text-white/60 italic font-normal">Engineering.</span>
+                </h1>
+              </Reveal>
+              <Reveal delay={300}>
+                <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-[40ch] mb-10 text-balance font-light">
+                  {heroIntro}
+                </p>
+              </Reveal>
+              <Reveal delay={400}>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Link
+                    to="/portfolio"
+                    className="relative inline-flex items-center justify-center font-medium overflow-hidden rounded-full transition-all duration-300 bg-white text-black px-8 py-4 text-sm hover:bg-white/90 active:scale-[0.97]"
+                  >
+                    <span className="relative z-10 flex items-center gap-2 font-semibold">
+                      查看維運實績
+                      <ArrowRight size={15} />
+                    </span>
+                  </Link>
+                  <Link
+                    to="/blog"
+                    className="relative inline-flex items-center justify-center font-medium overflow-hidden rounded-full transition-all duration-300 border border-white/20 text-white/80 px-8 py-4 text-sm hover:bg-white/[0.06] hover:text-white active:scale-[0.97]"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Terminal size={15} />
+                      閱讀技術筆記
+                    </span>
+                  </Link>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </section>
 
