@@ -39,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleTheme }) => {
 
   return (
     <>
-      <nav className="fixed top-0 inset-x-0 z-50 flex justify-center px-4 md:px-8 py-4 md:py-6">
+      <nav className="navbar-wrapper fixed top-0 inset-x-0 z-50 flex justify-center px-4 md:px-8 py-4 md:py-6">
         <div
           className={`w-full max-w-7xl flex items-center justify-between rounded-full transition-all duration-700 px-2 md:px-1 py-1 md:py-1.5 ${
             isScrolled || isMenuOpen
@@ -100,7 +100,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleTheme }) => {
 
       {/* Mobile menu overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center px-8">
+        <div className="navbar-mobile-overlay fixed inset-0 z-40 md:hidden bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center px-8">
           <div className="flex flex-col items-center gap-6 w-full">
             {navItems.map((item, i) => (
               <Link

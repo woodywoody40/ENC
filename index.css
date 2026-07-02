@@ -195,3 +195,140 @@ html.light .text-glow {
 .animate-image-enter {
   animation: image-enter 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==============================
+   HomePage — Light mode support
+   Override hardcoded dark colors when html.light
+   ============================== */
+html.light .homepage-wrapper {
+  background: #f0eae6;
+}
+html.light .homepage-wrapper .bg-grid {
+  background-image:
+    linear-gradient(rgba(45,52,54,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,52,54,0.03) 1px, transparent 1px);
+}
+
+/* --- text-white opacity overrides --- */
+html.light .homepage-wrapper .text-white { color: #2D3436; }
+html.light .homepage-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
+html.light .homepage-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
+html.light .homepage-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
+html.light .homepage-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
+html.light .homepage-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
+html.light .homepage-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
+html.light .homepage-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .homepage-wrapper .text-white\/25 { color: rgba(45,52,54,0.25); }
+html.light .homepage-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .homepage-wrapper .text-white\/15 { color: rgba(45,52,54,0.15); }
+html.light .homepage-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+
+/* --- border-white opacity overrides --- */
+html.light .homepage-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.08); }
+html.light .homepage-wrapper .border-white\/15 { border-color: rgba(45,52,54,0.15); }
+html.light .homepage-wrapper .border-white\/20 { border-color: rgba(45,52,54,0.2); }
+
+/* --- amber text kept as-is (works in both modes) --- */
+
+/* --- Keep hero section dark in light mode (editorial accent) --- */
+html.light .homepage-wrapper .hero-section,
+html.light .homepage-wrapper .hero-section .text-white { color: #fff; }
+html.light .homepage-wrapper .hero-section .text-white\/90 { color: rgba(255,255,255,0.9); }
+html.light .homepage-wrapper .hero-section .text-white\/80 { color: rgba(255,255,255,0.8); }
+html.light .homepage-wrapper .hero-section .text-white\/70 { color: rgba(255,255,255,0.7); }
+html.light .homepage-wrapper .hero-section .text-white\/60 { color: rgba(255,255,255,0.6); }
+html.light .homepage-wrapper .hero-section .text-white\/40 { color: rgba(255,255,255,0.4); }
+html.light .homepage-wrapper .hero-section .text-white\/30 { color: rgba(255,255,255,0.3); }
+html.light .homepage-wrapper .hero-section .text-white\/25 { color: rgba(255,255,255,0.25); }
+html.light .homepage-wrapper .hero-section .text-white\/15 { color: rgba(255,255,255,0.15); }
+html.light .homepage-wrapper .hero-section .text-white\/10 { color: rgba(255,255,255,0.1); }
+html.light .homepage-wrapper .hero-section .border-white\/15 { border-color: rgba(255,255,255,0.15); }
+html.light .homepage-wrapper .hero-section .border-white\/20 { border-color: rgba(255,255,255,0.2); }
+html.light .homepage-wrapper .hero-section .bg-white\/\[0\.06\] { background: rgba(255,255,255,0.06); }
+html.light .homepage-wrapper .hero-section .bg-white\/\[0\.008\] { background: rgba(255,255,255,0.008); }
+
+/* ==============================
+   Navbar — Light mode support
+   ============================== */
+html.light .navbar-wrapper {
+  --navbar-bg: rgba(255,255,255,0.7);
+  --navbar-border: rgba(45,52,54,0.1);
+  --navbar-text: #2D3436;
+  --navbar-text-dim: rgba(45,52,54,0.5);
+  --navbar-text-dimmer: rgba(45,52,54,0.3);
+  --navbar-text-faint: rgba(45,52,54,0.15);
+  --navbar-icon-bg: rgba(45,52,54,0.08);
+}
+
+/* Override Navbar light mode colors */
+html.light .navbar-wrapper .text-white { color: var(--navbar-text); }
+html.light .navbar-wrapper .text-white\/60 { color: var(--navbar-text-dim); }
+html.light .navbar-wrapper .text-white\/50 { color: var(--navbar-text-dim); }
+html.light .navbar-wrapper .text-white\/40 { color: var(--navbar-text-dim); }
+html.light .navbar-wrapper .text-white\/30 { color: var(--navbar-text-dimmer); }
+html.light .navbar-wrapper .text-white\/25 { color: var(--navbar-text-dimmer); }
+html.light .navbar-wrapper .text-white\/20 { color: var(--navbar-text-faint); }
+html.light .navbar-wrapper .text-white\/10 { color: var(--navbar-text-faint); }
+html.light .navbar-wrapper .border-white\/\[0\.06\] { border-color: var(--navbar-border); }
+html.light .navbar-wrapper .border-white\/10 { border-color: var(--navbar-border); }
+html.light .navbar-wrapper .bg-white\/10 { background: var(--navbar-icon-bg); }
+html.light .navbar-wrapper .bg-white\/5 { background: var(--navbar-icon-bg); }
+html.light .navbar-wrapper .bg-black\/50 {
+  background: var(--navbar-bg);
+  border-color: var(--navbar-border);
+}
+html.light .navbar-wrapper .bg-black\/90 {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(32px);
+}
+html.light .navbar-mobile-overlay {
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(32px);
+}
+html.light .navbar-mobile-overlay .text-white { color: #2D3436; }
+html.light .navbar-mobile-overlay .text-white\/25 { color: rgba(45,52,54,0.25); }
+html.light .navbar-mobile-overlay .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .navbar-mobile-overlay .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .navbar-mobile-overlay .bg-white\/10 { background: rgba(45,52,54,0.08); }
+
+/* ==============================
+   AdminPage — Light mode support
+   ============================== */
+html.light .admin-wrapper { background: #f0eae6; }
+html.light .admin-wrapper .text-white { color: #2D3436; }
+html.light .admin-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
+html.light .admin-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
+html.light .admin-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
+html.light .admin-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .admin-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .admin-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+html.light .admin-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.12); }
+html.light .admin-wrapper .border-white\/10 { border-color: rgba(45,52,54,0.12); }
+html.light .admin-wrapper .bg-white\/5 { background: rgba(45,52,54,0.05); }
+html.light .admin-wrapper .bg-white\/10 { background: rgba(45,52,54,0.08); }
+html.light .admin-wrapper .bg-black\/60 { background: rgba(255,255,255,0.7); backdrop-filter: blur(24px); }
+
+/* ==============================
+   ProjectDetailPage — Light mode support
+   ============================== */
+html.light .project-detail-wrapper { background: #f0eae6; }
+html.light .project-detail-wrapper .text-white { color: #2D3436; }
+html.light .project-detail-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
+html.light .project-detail-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
+html.light .project-detail-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
+html.light .project-detail-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
+html.light .project-detail-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
+html.light .project-detail-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
+html.light .project-detail-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
+html.light .project-detail-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
+html.light .project-detail-wrapper .text-white\/15 { color: rgba(45,52,54,0.15); }
+html.light .project-detail-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+html.light .project-detail-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.08); }
+html.light .project-detail-wrapper .border-white\/10 { border-color: rgba(45,52,54,0.12); }
+html.light .project-detail-wrapper .border-white\/5 { border-color: rgba(45,52,54,0.06); }
+html.light .project-detail-wrapper .bg-white\/5 { background: rgba(45,52,54,0.05); }
+html.light .project-detail-wrapper .bg-white\/10 { background: rgba(45,52,54,0.08); }
+/* Project detail hero banner — keep header text white + selection fix */
+html.light .project-detail-wrapper section:first-of-type .text-white { color: #fff; }
+html.light .project-detail-wrapper section:first-of-type .text-white\/70 { color: rgba(255,255,255,0.7); }
+html.light .project-detail-wrapper ::selection { background: rgba(45,52,54,0.15); color: #2D3436; }

@@ -23,8 +23,8 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const PageLoader: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="flex flex-col items-center gap-4">
-      <div className="w-8 h-8 border-2 border-white/10 border-t-white rounded-full animate-spin" />
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Loading...</span>
+      <div className="w-8 h-8 border-2 dark:border-white/10 border-morandi-stone/20 dark:border-t-white border-t-morandi-stone rounded-full animate-spin" />
+      <span className="text-[10px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-morandi-stone/60">Loading...</span>
     </div>
   </div>
 );
@@ -55,8 +55,8 @@ class ErrorBoundary extends React.Component<
             <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-6">
               <span className="text-2xl">⚠️</span>
             </div>
-            <h2 className="text-xl font-black text-white mb-4">系統發生未預期錯誤</h2>
-            <p className="text-sm text-slate-400 mb-6 font-mono break-all">
+            <h2 className="text-xl font-black dark:text-white text-morandi-slate mb-4">系統發生未預期錯誤</h2>
+            <p className="text-sm dark:text-slate-400 text-morandi-stone mb-6 font-mono break-all">
               {this.state.error?.message || 'Unknown error'}
             </p>
             <button

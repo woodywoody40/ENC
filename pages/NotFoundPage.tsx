@@ -11,7 +11,7 @@ const NotFoundPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-screen flex items-center justify-center px-6"
+        className="not-found-wrapper min-h-screen flex items-center justify-center px-6"
       >
         <div className="text-center max-w-lg">
           <motion.div
@@ -22,8 +22,8 @@ const NotFoundPage: React.FC = () => {
             <div className="text-[6rem] sm:text-[8rem] font-black heading-gradient leading-none mb-4 select-none">
               404
             </div>
-            <div className="w-16 h-1 bg-white/10 mx-auto rounded-full mb-8" />
-            <h2 className="text-xl sm:text-2xl font-black text-white/80 mb-4 tracking-tight">
+            <div className="w-16 h-1 dark:bg-white/10 bg-morandi-slate/10 mx-auto rounded-full mb-8" />
+            <h2 className="text-xl sm:text-2xl font-black dark:text-white/80 text-morandi-slate mb-4 tracking-tight">
               Page Not Found
             </h2>
             <p className="text-sm text-slate-500 font-light mb-12 leading-relaxed">
@@ -40,7 +40,7 @@ const NotFoundPage: React.FC = () => {
               </Link>
               <button
                 onClick={() => window.history.back()}
-                className="group px-8 py-4 glass-panel text-white/80 rounded-2xl font-black text-[11px] tracking-[0.18em] flex items-center gap-3 transition-all hover:bg-white/5"
+                className="group px-8 py-4 glass-panel dark:text-white/80 text-morandi-slate rounded-2xl font-black text-[11px] tracking-[0.18em] flex items-center gap-3 transition-all dark:hover:bg-white/5 hover:bg-black/5"
               >
                 <ArrowLeft size={16} />
                 回上一頁

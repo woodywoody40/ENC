@@ -259,7 +259,7 @@ const ProjectDetailPage: React.FC = () => {
     <>
       <SEOMeta title={project.title} description={project.description} path={`/projects/${id}`} ogImage={project.image} keywords={project.tags?.join(', ')} />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '維運實績', path: '/portfolio' }, { name: project.title, path: `/projects/${id}` }]} />
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black overflow-x-hidden">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="project-detail-wrapper min-h-screen bg-[#0a0b10] selection:bg-white selection:text-black overflow-x-hidden">
       <section className="relative h-[60vh] sm:h-[75vh] w-full overflow-hidden flex flex-col justify-end">
         <motion.img 
           initial={{ scale: 1.05 }}
