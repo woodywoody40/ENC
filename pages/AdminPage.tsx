@@ -520,7 +520,7 @@ const AdminPage: React.FC = () => {
                     <span className={stat.tab ? 'text-white/70 group-hover:text-white transition-colors' : ''}>{stat.icon}</span>
                   </div>
                   <div className={`text-[28px] font-bold tracking-tight mb-1.5 ${stat.tab ? 'text-white' : 'text-white/80'}`}>{stat.value}</div>
-                  <div className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${stat.tab ? 'text-white/50' : 'text-white/40'}`}>{stat.label}</div>
+                  <div className={`text-[9px] font-semibold uppercase tracking-[0.2em] ${stat.tab ? 'text-white/70' : 'text-white/50'}`}>{stat.label}</div>
                   {stat.tab && (
                     <div className="mt-3 text-[8px] font-semibold text-white/30 uppercase tracking-[0.15em] transition-all duration-200 group-hover:text-white/60">
                       點擊管理 →
@@ -532,7 +532,7 @@ const AdminPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white/[0.05] border border-white/10 rounded-2xl p-5 space-y-4">
-                <h3 className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.2em] flex items-center gap-2">
+                <h3 className="text-[9px] font-semibold text-white/70 uppercase tracking-[0.2em] flex items-center gap-2">
                   <span className="w-5 h-5 rounded-md bg-blue-500/15 flex items-center justify-center"><Zap size={11} className="text-blue-400" /></span>
                   快速操作
                 </h3>
@@ -544,7 +544,7 @@ const AdminPage: React.FC = () => {
                 </div>
               </div>
               <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-5 space-y-4 hover:border-white/15 transition-all">
-                <h3 className="text-[9px] font-semibold text-white/50 uppercase tracking-[0.2em] flex items-center gap-2">
+                <h3 className="text-[9px] font-semibold text-white/70 uppercase tracking-[0.2em] flex items-center gap-2">
                   <Activity size={12} className="text-emerald-400" /> 系統資訊
                 </h3>
                 <div className="space-y-2 text-xs">
@@ -555,7 +555,7 @@ const AdminPage: React.FC = () => {
                     ['部署平台', 'Cloudflare Pages'],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-center justify-between py-1.5 border-b border-white/[0.04] last:border-0">
-                      <span className="text-white/40 text-[10px] font-medium uppercase tracking-wider">{label}</span>
+                      <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">{label}</span>
                       <span className="text-white/75 text-[10px] font-semibold truncate ml-4">{value}</span>
                     </div>
                   ))}
@@ -608,12 +608,12 @@ const AdminPage: React.FC = () => {
                     <div className="flex items-center gap-2.5">
                       <span className="text-sm font-bold text-white group-hover:text-white transition-colors truncate">{item.title}</span>
                       <span className="w-[3px] h-[3px] rounded-full bg-white/20 shrink-0" />
-                      <span className="text-[8px] font-semibold text-white/35 uppercase tracking-wider whitespace-nowrap shrink-0">
+                      <span className="text-[8px] font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap shrink-0">
                         #{idx + 1}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[9px] font-semibold text-white/40 uppercase tracking-wider truncate">
+                      <span className="text-[9px] font-semibold text-white/55 uppercase tracking-wider truncate">
                         {activeTab === 'projects'
                           ? (item.tags?.join(' · ') || '')
                           : `${item.category || ''}${item.category && item.date ? ' · ' : ''}${item.date || ''}`
@@ -727,8 +727,8 @@ const AdminPage: React.FC = () => {
                 ]).map(({ key, icon, placeholder }) => (
                   <div key={key} className="bg-white/[0.03] border border-white/10 rounded-xl p-3.5 space-y-2 hover:border-white/20 transition-all">
                     <div className="flex items-center gap-2">
-                      <span className="text-white/40">{icon}</span>
-                      <span className="text-[8px] font-semibold text-white/50 uppercase tracking-[0.15em]">
+                      <span className="text-white/60">{icon}</span>
+                      <span className="text-[8px] font-semibold text-white/80 uppercase tracking-[0.15em]">
                         {key.replace('resume_', '').replace(/_/g, ' ')}
                       </span>
                     </div>
@@ -892,9 +892,9 @@ const AdminPage: React.FC = () => {
                   {/* Cover Image */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[8px] font-semibold text-white/50 uppercase tracking-[0.15em]">封面圖片</label>
+                      <label className="text-[8px] font-semibold text-white/80 uppercase tracking-[0.15em]">封面圖片</label>
                       {editingItem.image && (
-                        <span className="text-[7px] font-semibold text-white/25 uppercase tracking-wider">可點擊更換</span>
+                        <span className="text-[7px] font-semibold text-white/40 uppercase tracking-wider">可點擊更換</span>
                       )}
                     </div>
                     <div className="aspect-[16/9] bg-white/[0.03] rounded-xl border border-white/10 overflow-hidden relative group">
@@ -916,7 +916,7 @@ const AdminPage: React.FC = () => {
                   {/* Media Gallery (projects only) */}
                   {modalType === 'project' && (
                     <div className="space-y-2.5">
-                      <label className="text-[8px] font-semibold text-white/50 uppercase tracking-[0.15em]">多媒體資產</label>
+                      <label className="text-[8px] font-semibold text-white/80 uppercase tracking-[0.15em]">多媒體資產</label>
                       <div className="space-y-1.5">
                         {(editingItem.media || []).map((m: any, idx: number) => (
                           <div key={idx} className="bg-white/[0.03] rounded-lg p-2.5 border border-white/10 flex items-center gap-2.5 group/media hover:border-white/20 transition-all">
@@ -1073,7 +1073,7 @@ const ConfigField = ({ label, value, onChange, placeholder, large, mono, hint }:
 }) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between">
-      <label className="text-[8px] font-semibold text-white/50 uppercase tracking-[0.15em]">{label}</label>
+      <label className="text-[8px] font-semibold text-white/80 uppercase tracking-[0.15em]">{label}</label>
       {hint && <span className="text-[7px] text-white/25 tracking-wider font-medium">{hint}</span>}
     </div>
     {large ? (
@@ -1119,7 +1119,7 @@ const ToolBtn = ({ onClick, icon, title }: any) => (
 // ─── Input ─────────────────────────────────────────────
 const Inp = ({ label, value, onChange }: any) => (
   <div className="space-y-2">
-    <label className="block text-[8px] font-semibold text-white/50 uppercase tracking-[0.15em]">{label}</label>
+    <label className="block text-[8px] font-semibold text-white/80 uppercase tracking-[0.15em]">{label}</label>
     <input
       type="text"
       value={value || ''}
