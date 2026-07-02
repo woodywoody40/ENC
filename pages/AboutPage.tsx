@@ -62,7 +62,7 @@ const AboutPage: React.FC = () => {
       </div>
 
       <motion.div variants={itemVariants} className="text-center mb-32 relative z-10">
-        <div className="inline-block px-6 py-2 glass-panel dark:border-white/10 border-slate-900/10 dark:bg-white/5 bg-white/40 mb-8">
+        <div className="inline-block px-6 py-2 dark:border-white/10 border-slate-900/10 dark:bg-white/5 bg-white/40 mb-8 rounded-[40px] shadow-xl backdrop-blur-[40px] border">
           <p className="dark:text-white text-morandi-slate font-black text-[10px] tracking-[0.8em] uppercase">
             {configs.about_hero_subtitle || "系統維運 · 資安監控 · 基隆在地"}
           </p>
@@ -75,7 +75,7 @@ const AboutPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10">
         <motion.div variants={itemVariants} className="lg:col-span-8">
-          <div className="glass-panel p-10 md:p-20 h-full dark:border-white/10 border-slate-900/10 relative overflow-hidden group dark:bg-black/40 bg-white/40 shadow-xl">
+          <div className="p-10 md:p-20 h-full dark:border-white/10 border-slate-900/10 relative overflow-hidden group dark:bg-black/40 bg-white/40 shadow-xl rounded-[40px] backdrop-blur-[40px] border">
             <div className="absolute top-0 right-0 p-10 opacity-[0.03] select-none pointer-events-none group-hover:opacity-[0.07] transition-opacity duration-1000">
               <Terminal size={300} strokeWidth={0.5} className="dark:text-white text-morandi-slate" />
             </div>
@@ -99,7 +99,7 @@ const AboutPage: React.FC = () => {
                   <a 
                     key={social.label}
                     href={social.href}
-                    className="px-8 py-5 glass-panel rounded-2xl flex items-center gap-4 dark:text-slate-400 text-morandi-slate dark:border-white/5 border-slate-900/5 hover:border-morandi-slate transition-all hover:scale-105 active:scale-95 bg-white/20"
+                    className="px-8 py-5 rounded-2xl flex items-center gap-4 dark:text-slate-400 text-morandi-slate dark:border-white/5 border-slate-900/5 hover:border-morandi-slate transition-all hover:scale-105 active:scale-95 bg-white/20 backdrop-blur-[40px] border"
                     aria-label={social.label}
                   >
                     {social.icon}
@@ -112,7 +112,7 @@ const AboutPage: React.FC = () => {
         </motion.div>
 
         <motion.div variants={itemVariants} className="lg:col-span-4 space-y-10">
-          <div className="glass-panel p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative">
+          <div className="p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative rounded-[40px] backdrop-blur-[40px] border">
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
             <div className="relative">
               <div className="absolute inset-0 dark:bg-white/10 bg-morandi-slate/5 blur-3xl rounded-full scale-150 group-hover:scale-125 transition-all duration-1000" />
@@ -126,7 +126,7 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="glass-panel p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative">
+          <div className="p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative rounded-[40px] backdrop-blur-[40px] border">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent" />
             <div className="w-24 h-24 rounded-[2.5rem] dark:bg-white/5 bg-black/5 border dark:border-white/10 border-slate-900/10 dark:text-white text-morandi-slate flex items-center justify-center group-hover:border-morandi-slate transition-all">
               <ShieldCheck size={40} strokeWidth={1.5} />
@@ -167,7 +167,7 @@ const AboutPage: React.FC = () => {
 const SkillCard: React.FC<{ icon: React.ReactNode, title: string, desc: string, accentColor: string }> = ({ icon, title, desc, accentColor }) => (
   <motion.div 
     variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } } as any}
-    className="glass-panel p-12 dark:border-white/5 border-slate-900/5 group hover:bg-white/40 dark:hover:bg-white/5 bg-white/20 dark:bg-black/20 transition-all duration-700 relative overflow-hidden shadow-sm"
+    className="p-12 dark:border-white/5 border-slate-900/5 group hover:bg-white/40 dark:hover:bg-white/5 bg-white/20 dark:bg-black/20 transition-all duration-700 relative overflow-hidden shadow-sm rounded-[40px] backdrop-blur-[40px] border"
   >
     <div className="absolute top-0 right-0 w-32 h-32 blur-[80px] rounded-full pointer-events-none transition-all duration-700 group-hover:scale-150" style={{ backgroundColor: accentColor }} />
     <div className="w-16 h-16 rounded-2xl dark:bg-white/5 bg-morandi-slate/5 flex items-center justify-center mb-10 dark:text-white text-morandi-slate group-hover:scale-110 group-hover:bg-morandi-slate dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-all duration-500 shadow-sm border border-slate-900/5 dark:border-white/5">
