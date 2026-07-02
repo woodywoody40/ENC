@@ -69,6 +69,23 @@ const tagVisuals: Record<string, { icon: React.ReactNode; accent: string; dot: s
 const defaultVis = { icon: null as React.ReactNode | null, accent: 'from-white/20', dot: 'bg-white/30' };
 const getVis = (tag: string) => tagVisuals[tag] ?? defaultVis;
 
+// ─── Tag categories (editorial taxonomy) ───────────────────
+const TAG_CATEGORIES = [
+  { id: '全部',     label: 'ALL PROJECTS' },
+  { id: 'frontend', label: 'FRONTEND' },
+  { id: 'infra',    label: 'INFRASTRUCTURE' },
+  { id: 'apis',     label: 'APIS & SERVICES' },
+  { id: 'platform', label: 'PLATFORM & APPS' },
+] as const;
+
+const CATEGORY_TAGS: Record<string, string[]> = {
+  '全部':      [],
+  frontend:   ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Canvas', 'HTML5', 'Vite', 'Recharts', 'Game'],
+  infra:      ['VMware', 'Linux', 'Ubuntu 24.04', 'vSphere', 'Automation', 'Fortinet', 'HPE', 'Networking', 'Cloud', 'Security', 'Storage', 'DevOps'],
+  apis:       ['YouTube API', 'Twitch API', 'LINE API', 'Gemini API', 'Google Maps API', 'Exchange Rate API', 'TWSE', 'Leaflet', 'Geolocation'],
+  platform:   ['Cloudflare D1', 'Cloudflare Pages', 'PWA', 'WebAssembly', 'HLS', 'Dashboard', 'CRM', 'AI', 'Image Processing', 'OCR', 'Calculator', 'PDF.js'],
+};
+
 // ─── Animation ───────────────────────────────────────────────
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -83,9 +100,8 @@ const itemVariants = {
 const PortfolioPage: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('全部');
+  const [activeCategory, setActiveCategory] = useState('全部');
   const [error, setError] = useState<string | null>(null);
-  const [showAllTags, setShowAllTags] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -104,8 +120,9 @@ const PortfolioPage: React.FC = () => {
     fetchProjects();
   }, []);
 
-  const allTags = ['全部', ...Array.from(new Set(projects.flatMap(p => p.tags || [])))];
-  const filteredProjects = filter === '全部' ? projects : projects.filter(p => p.tags?.includes(filter));
+  const filteredProjects = activeCategory === '全部'
+    ? projects
+    : projects.filter(p => p.tags?.some((t: string) => (CATEGORY_TAGS[activeCategory] || []).includes(t)));
 
   // ── Loading ──────────────────────────────────────────────
   if (loading) {
@@ -174,45 +191,28 @@ const PortfolioPage: React.FC = () => {
           </p>
         </div>
 
-        {/* ── Tag filter ────────────────────────────────── */}
-        <div className="mt-8 sm:mt-12">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-2.5">
-            {allTags.slice(0, showAllTags ? allTags.length : 7).map(tag => {
-              const isActive = filter === tag;
-              const vis = tag !== '全部' ? getVis(tag) : null;
-              const hasIcon = vis?.icon != null;
-              return (
-                <motion.button
-                  key={tag}
-                  layout
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setFilter(tag)}
-                  className={`
-                    text-[10px] font-black tracking-[0.12em] uppercase
-                    transition-all duration-300 flex items-center gap-1.5
-                    ${isActive
-                      ? 'dark:text-emerald-300 text-emerald-700 dark:bg-emerald-500/15 bg-emerald-500/80 px-3 py-1.5 rounded-lg'
-                      : 'dark:text-white/25 text-morandi-stone/40 hover:dark:text-white/50 hover:text-morandi-slate/60 px-2 py-1.5'
-                    }
-                  `}
-                >
-                  {hasIcon && vis?.icon}
-                  {tag}
-                </motion.button>
-              );
-            })}
-            {allTags.length > 7 && (
-              <motion.button
-                layout
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setShowAllTags(!showAllTags)}
-                className="text-[9px] font-mono dark:text-white/15 text-morandi-stone/30 hover:dark:text-white/40 hover:text-morandi-slate/50 transition-colors px-2 py-1.5"
+        {/* ── Category filter ──────────────────────────── */}
+        <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-x-2 gap-y-2">
+          {TAG_CATEGORIES.map((cat, i) => (
+            <React.Fragment key={cat.id}>
+              {i > 0 && (
+                <span className="dark:text-white/8 text-morandi-stone/[0.07] mx-0.5 select-none text-xs font-extralight">/</span>
+              )}
+              <button
+                onClick={() => setActiveCategory(cat.id)}
+                className={`
+                  text-[10px] sm:text-[11px] font-mono font-black tracking-[0.2em] uppercase
+                  transition-all duration-300 py-1 relative
+                  ${activeCategory === cat.id
+                    ? 'dark:text-emerald-300 text-emerald-700'
+                    : 'dark:text-white/15 text-morandi-stone/25 hover:dark:text-white/35 hover:text-morandi-slate/45'
+                  }
+                `}
               >
-                {showAllTags ? '— 收合' : `+ ${allTags.length - 7} 更多`}
-              </motion.button>
-            )}
-          </div>
+                {cat.label}
+              </button>
+            </React.Fragment>
+          ))}
         </div>
       </header>
 
@@ -261,7 +261,7 @@ const PortfolioPage: React.FC = () => {
             </motion.div>
           ) : (
             <motion.div
-              key={filter}
+              key={activeCategory}
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -270,7 +270,7 @@ const PortfolioPage: React.FC = () => {
               {filteredProjects.map((project, idx) => {
                 const primaryTag = project.tags?.[0] || '';
                 const vis = getVis(primaryTag);
-                const isFeatured = idx === 0 && filter === '全部' && !error;
+                const isFeatured = idx === 0 && activeCategory === '全部' && !error;
 
                 return (
                   <motion.div
