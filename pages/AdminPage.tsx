@@ -8,7 +8,8 @@ import {
   Upload, Settings, PlusCircle,
   Bold, Heading2, Heading3, List, Code, Link as LinkIcon, Minus, Type, Info,
   Zap, Sparkles, Search, ChevronDown,
-  Globe, Mail, MapPin, User, AtSign, AlertCircle, Eye, AlertTriangle
+  Globe, Mail, MapPin, User, AtSign, AlertCircle, Eye, AlertTriangle,
+  FileText, GraduationCap
 } from 'lucide-react';
 import { Card } from '@astryxdesign/core/Card';
 import { Section } from '@astryxdesign/core/Section';
@@ -16,6 +17,7 @@ import { HStack, VStack, StackItem } from '@astryxdesign/core/Stack';
 import { Text, Heading } from '@astryxdesign/core/Text';
 import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
 import { SEOMeta } from '../lib/seo';
+import ResumeEditor from '../components/ResumeEditor';
 import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/geminiService';
 
 /*
@@ -25,7 +27,7 @@ import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/
  */
 
 // ─── Types ────────────────────────────────────────────
-type TabKey = 'dashboard' | 'projects' | 'blog' | 'site_config';
+type TabKey = 'dashboard' | 'projects' | 'blog' | 'site_config' | 'resume_editor';
 type SaveStatusExt = 'idle' | 'saving' | 'success';
 interface Toast { id: number; type: 'success' | 'error' | 'info'; message: string; }
 
@@ -452,6 +454,7 @@ const AdminPage: React.FC = () => {
               { key: 'projects' as TabKey, icon: <Briefcase size={14} />, label: '作品' },
               { key: 'blog' as TabKey, icon: <BookOpen size={14} />, label: '文章' },
               { key: 'site_config' as TabKey, icon: <Settings size={14} />, label: '設定' },
+            { key: 'resume_editor' as TabKey, icon: <FileText size={14} />, label: '履歷' },
             ]).map(t => (
               <button
                 key={t.key}
@@ -811,6 +814,15 @@ const AdminPage: React.FC = () => {
             </AccordionSection>
 
           </div>
+        )}
+
+        {/* ─── RESUME EDITOR ────────────────────────────────── */}
+        {activeTab === 'resume_editor' && (
+          <ResumeEditor
+            siteConfigs={siteConfigs}
+            addToast={addToast}
+            onSaved={fetchAllData}
+          />
         )}
       </main>
 
