@@ -232,13 +232,18 @@ const HomePage: React.FC = () => {
 
           {/* Right side — floating abstract accent */}
           <div className="absolute top-0 right-0 h-[100dvh] w-[70vw] md:w-[55vw] flex items-start justify-end pointer-events-none">
-            <div className="relative h-[110vh] aspect-[3/4] origin-center -translate-x-[2%] pointer-events-auto animate-image-enter">
+            <div
+              className="relative h-[110vh] aspect-[3/4] origin-center -translate-x-[2%] pointer-events-auto animate-image-enter"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent 0%, black 35%, black 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 35%, black 100%)',
+              }}
+            >
               <img
                 src="/hero-accent.webp"
                 alt="Infrastructure abstract"
                 className="w-full h-full object-cover drop-shadow-2xl brightness-[0.65] transition-all duration-700 hover:brightness-[0.85] mix-blend-screen opacity-80"
               />
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent via-60% to-black/20 pointer-events-none" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
