@@ -133,10 +133,7 @@ const ResumePage: React.FC = () => {
     </div>`).join('')
       : '<p style="font-size:9pt;color:#555;">國立臺灣海洋大學 — 資工系碩士專班 (2024 - Present)</p>';
 
-    const win = window.open('', '_blank');
-    if (!win) { window.print(); return; }
-
-    win.document.write(`<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><title>${name} 履歷</title>
 <style>
@@ -156,7 +153,7 @@ const ResumePage: React.FC = () => {
   .exp-item .date { font-size: 9pt; color: #666; font-weight: 600; margin-bottom: 3pt; }
   .exp-item ul { list-style: none; padding-left: 4pt; }
   .exp-item ul li { font-size: 9pt; color: #333; line-height: 1.55; padding-left: 12pt; position: relative; margin-bottom: 1.5pt; }
-  .exp-item ul li::before { content: '–'; position: absolute; left: 0; color: #888; }
+  .exp-item ul li::before { content: '\\2013'; position: absolute; left: 0; color: #888; }
   .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 14pt; }
   .skill-row { display: flex; justify-content: space-between; align-items: center; padding: 2pt 0; font-size: 9pt; border-bottom: 1px dotted #ddd; }
   .skill-row .name { font-weight: 600; color: #222; }
@@ -166,38 +163,55 @@ const ResumePage: React.FC = () => {
   .edu-item .date { font-size: 8.5pt; color: #666; font-weight: 500; }
   .edu-item .degree { font-size: 9pt; color: #444; }
   .footer { text-align: center; font-size: 7.5pt; color: #aaa; border-top: 1px solid #eee; padding-top: 8pt; margin-top: 10pt; }
-  @media print { body { -webkit-print-color-adjust: exact; } }
 </style></head>
 <body>
   <div class="header">
     <h1>${name}</h1>
     <div class="title">${title}</div>
     <div class="contact">
-      ${email ? `<span>✉ ${email}</span>` : ''}
-      ${location ? `<span>✦ ${location}</span>` : ''}
-      ${github ? `<span>⬡ ${github.replace('https://', '')}</span>` : ''}
-      ${linkedin ? `<span>◈ ${linkedin.replace('https://', '')}</span>` : ''}
+      ${email ? '<span>\u2709 ' + email + '</span>' : ''}
+      ${location ? '<span>\u2726 ' + location + '</span>' : ''}
+      ${github ? '<span>\u2B21 ' + github.replace('https://', '') + '</span>' : ''}
+      ${linkedin ? '<span>\u25C8 ' + linkedin.replace('https://', '') + '</span>' : ''}
     </div>
   </div>
 
-  ${summary ? `<div class="section"><div class="section-title">專業總結</div><div class="summary"><p>${summary.replace(/\n/g, '<br>')}</p></div></div>` : ''}
+  ${summary ? '<div class="section"><div class="section-title">\u5C08\u696D\u7E3D\u7D50</div><div class="summary"><p>' + summary.replace(/\n/g, '<br>') + '</p></div></div>' : ''}
 
-  ${expItems.length ? `<div class="section"><div class="section-title">工作經歷</div>${expHTML}</div>` : ''}
+  ${expItems.length ? '<div class="section"><div class="section-title">\u5DE5\u4F5C\u7D93\u6B77</div>' + expHTML + '</div>' : ''}
 
   <div class="section">
-    <div class="section-title">核心技能</div>
+    <div class="section-title">\u6838\u5FC3\u6280\u80FD</div>
     <div class="skills-grid">${skillsHTML}</div>
   </div>
 
   <div class="section">
-    <div class="section-title">學歷經歷</div>
+    <div class="section-title">\u5B78\u6B77\u7D93\u6B77</div>
     ${eduHTML}
   </div>
 
-  <div class="footer">基於 enc.moe22.com 資料自動生成 · ${new Date().toLocaleDateString('zh-TW')}</div>
-  <script>window.onload = function() { window.print(); window.close(); }<\/script>
-</body></html>`);
-    win.document.close();
+  <div class="footer">\u57FA\u65BC enc.moe22.com \u8CC7\u6599\u81EA\u52D5\u751F\u6210 \u00B7 ${new Date().toLocaleDateString('zh-TW')}</div>
+</body></html>`;
+
+    // 第一優先：Blob URL 方式（最可靠，無快顯封鎖問題）
+    const blob = new Blob([html], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(blobUrl, '_blank');
+    if (printWindow) {
+      // 視窗載入完成後自動觸發列印
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+      // 列印完成後自動關閉視窗
+      printWindow.onafterprint = () => {
+        URL.revokeObjectURL(blobUrl);
+        printWindow.close();
+      };
+    } else {
+      // 若快顯被封鎖，降級為當前頁面 print
+      window.print();
+    }
   };
 
   return (
