@@ -58,6 +58,7 @@ function parseSkills(str: string): { name: string; level: string }[] {
 
 function parseExperience(md: string): { title: string; date: string; bullets: string[] }[] {
   const items: { title: string; date: string; bullets: string[] }[] = [];
+  if (!md) return items;
   const lines = md.split('\n').map(l => l.trim()).filter(Boolean);
   let cur: any = null;
   for (const line of lines) {
