@@ -221,11 +221,6 @@ const HomePage: React.FC = () => {
 
           <div className="flex-1 flex flex-col justify-center max-w-6xl">
             <Reveal delay={100}>
-              <p className="text-[10px] font-mono-tech uppercase tracking-[0.4em] text-amber-400/50 mb-8">
-                Infrastructure · Security · Operations
-              </p>
-            </Reveal>
-            <Reveal delay={200}>
               <h1
                 className="font-serif-editorial text-[clamp(3rem,11vw,9rem)] leading-[0.92] tracking-[-0.02em] text-white/95 mb-2 parallax-layer-slow"
                 style={{ transform: `translateY(${scrollY * -0.04}px)` }}
@@ -268,20 +263,6 @@ const HomePage: React.FC = () => {
               </div>
             </Reveal>
           </div>
-
-          <Reveal delay={600}>
-            <div className="flex items-end justify-between">
-              <div className="flex items-center gap-3 text-[10px] font-mono-tech uppercase tracking-[0.3em] text-white/15">
-                <div className="w-px h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
-                Scroll
-              </div>
-              <div className="hidden sm:flex items-center gap-8 text-[10px] font-mono-tech uppercase tracking-[0.2em] text-white/15">
-                <span>UPTIME <span className="text-emerald-400/60">{configs.stat_uptime || '99.9%'}</span></span>
-                <span>VMs <span className="text-amber-400/60">{statVm}</span></span>
-                <span>MONITORING <span className="text-emerald-400/60">24/7</span></span>
-              </div>
-            </div>
-          </Reveal>
         </section>
 
         {/* ===== TECH MARQUEE ===== */}
