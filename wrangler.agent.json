@@ -1,0 +1,17 @@
+{
+  "name": "woody-blog-agent",
+  "main": "src/agents/worker.ts",
+  "compatibility_date": "2026-06-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      { "name": "BlogWriterAgent", "class_name": "BlogWriterAgent" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["BlogWriterAgent"] }
+  ],
+  "vars": {
+    "BLOG_BASE_URL": "https://woody-portfolio.pages.dev"
+  }
+}

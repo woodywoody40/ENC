@@ -157,6 +157,7 @@ const BlogDetailPage: React.FC = () => {
     const lines = text.split('\n');
     const nodes: React.ReactNode[] = [];
     let listItems: React.ReactNode[] = [];
+    let tableRows: string[] = [];
 
     const flushList = () => {
       if (!listItems.length) return;
@@ -168,8 +169,55 @@ const BlogDetailPage: React.FC = () => {
       listItems = [];
     };
 
+    const flushTable = () => {
+      if (tableRows.length < 2) { tableRows = []; return; }
+      // First row = header, second row = separator (|--|--|), rest = body
+      const headerCells = tableRows[0].split('|').filter(c => c.trim().length > 0).map(c => c.trim());
+      const bodyRows = tableRows.slice(2).filter(r => r.trim().length > 0 && !r.match(/^\|?\s*[-:]+\s*\|/));
+
+      nodes.push(
+        <div key={`${blockKey}-table-${nodes.length}`} className="my-10 overflow-x-auto rounded-xl border border-zinc-200 dark:border-white/10">
+          <table className="w-full border-collapse text-[0.95rem]">
+            <thead>
+              <tr className="border-b border-zinc-300 bg-zinc-50 dark:border-white/20 dark:bg-white/[0.04]">
+                {headerCells.map((cell, i) => (
+                  <th key={i} className="px-5 py-3.5 text-left text-[13px] font-bold uppercase tracking-[0.05em] text-zinc-700 dark:text-zinc-300">{renderInline(cell)}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((row, ri) => {
+                const cells = row.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
+                return (
+                  <tr key={ri} className="border-b border-zinc-200 transition hover:bg-zinc-50 dark:border-white/5 dark:hover:bg-white/[0.02]">
+                    {cells.map((cell, ci) => (
+                      <td key={ci} className="px-5 py-3.5 text-[0.95rem] leading-7 text-zinc-700 dark:text-zinc-300">{renderInline(cell)}</td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      );
+      tableRows = [];
+    };
+
+    // Pre-scan: detect table blocks by checking each line for | pattern
+    // A table starts with a line beginning with | and has a separator line (|---|) shortly after
+    const isTableLine = (l: string) => l.trim().startsWith('|') && l.trim().endsWith('|') && l.trim().length > 2;
+
     lines.forEach((line, index) => {
       const trimmed = line.trim();
+
+      // --- Table detection ---
+      if (isTableLine(trimmed)) {
+        tableRows.push(trimmed);
+        return;
+      }
+
+      // If we were collecting table lines and hit a non-table line, flush the table
+      flushTable();
 
       if (!trimmed) {
         flushList();
@@ -241,6 +289,7 @@ const BlogDetailPage: React.FC = () => {
       );
     });
 
+    flushTable();
     flushList();
     return nodes;
   };
