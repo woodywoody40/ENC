@@ -137,6 +137,7 @@ function buildArticleLd(
   datePublished?: string,
   dateModified?: string,
   category?: string,
+  articleBody?: string,
 ): string {
   const ld: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -156,6 +157,7 @@ function buildArticleLd(
   if (datePublished) ld.datePublished = datePublished;
   if (dateModified) ld.dateModified = dateModified;
   if (category) ld.articleSection = category;
+  if (articleBody) ld.articleBody = articleBody;
   return JSON.stringify(ld);
 }
 
@@ -268,9 +270,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
               result.date || undefined,
               result.date || undefined,
               result.category || undefined,
+              result.content || undefined,
             ),
           );
-          // SSR content for Googlebot / search engines
+          // SSR content for search engines (hidden div)
           if (result.content) {
             ssrContent = `# ${result.title}\n\n${result.excerpt ? result.excerpt + '\n\n' : ''}${result.content}`;
           }
