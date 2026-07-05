@@ -19,17 +19,25 @@ const ResumePage = lazy(() => import('./pages/ResumePage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// 全域載入指示器
+// 全域載入指示器（含進度條視覺效果）
 const PageLoader: React.FC = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-8 h-8 border-2 dark:border-white/10 border-morandi-stone/20 dark:border-t-white border-t-morandi-stone rounded-full animate-spin" />
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] dark:text-white/20 text-morandi-stone/60">Loading...</span>
+    <div className="flex flex-col items-center gap-6">
+      {/* 旋轉圈 */}
+      <div className="relative w-10 h-10">
+        <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-amber-400/70 animate-spin" />
+      </div>
+      {/* 進度條 */}
+      <div className="w-24 h-[2px] rounded-full bg-white/5 overflow-hidden">
+        <div className="h-full w-1/3 rounded-full bg-amber-400/50 animate-pulse-slow" style={{ animation: 'shimmer 1.5s ease-in-out infinite' }} />
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Loading...</span>
     </div>
   </div>
 );
 
-// Error Boundary 元件
+// Error Boundary 元件（含重試機制）
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: Error | null }
@@ -47,24 +55,45 @@ class ErrorBoundary extends React.Component<
     console.error('React Error Boundary caught:', error, errorInfo);
   }
 
+  handleRetry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-8">
-          <div className="glass-panel p-12 max-w-lg text-center">
-            <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-6">
-              <span className="text-2xl">⚠️</span>
+        <div className="min-h-screen flex items-center justify-center p-8 bg-[#0a0b10]">
+          <div className="glass-panel p-10 max-w-lg w-full text-center">
+            {/* 圖示 */}
+            <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-red-500/20">
+              <span className="text-xl">!</span>
             </div>
-            <h2 className="text-xl font-black dark:text-white text-morandi-slate mb-4">系統發生未預期錯誤</h2>
-            <p className="text-sm dark:text-slate-400 text-morandi-stone mb-6 font-mono break-all">
-              {this.state.error?.message || 'Unknown error'}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-8 py-4 bg-white text-black rounded-2xl font-black text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all"
-            >
-              重新載入
-            </button>
+            {/* 標題 */}
+            <h2 className="text-lg font-bold text-white mb-2">系統發生未預期錯誤</h2>
+            <p className="text-xs text-white/40 mb-2">請稍後再試，或重新載入頁面</p>
+            {/* 錯誤訊息 */}
+            {this.state.error?.message && (
+              <div className="mb-6 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
+                <p className="text-[11px] text-white/30 font-mono break-all leading-relaxed">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
+            {/* 操作按鈕 */}
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={this.handleRetry}
+                className="px-6 py-3 bg-white text-black rounded-2xl font-bold text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all"
+              >
+                重試
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-white/5 text-white/60 rounded-2xl font-bold text-[11px] tracking-widest hover:bg-white/10 hover:text-white/80 active:scale-95 transition-all"
+              >
+                重新載入
+              </button>
+            </div>
           </div>
         </div>
       );
