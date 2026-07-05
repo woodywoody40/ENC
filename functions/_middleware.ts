@@ -226,18 +226,21 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
   let meta: MetaTags;
   let ldScripts: string[] = [buildWebSiteLd()]; // always add WebSite schema
 
+  let ssrContent: string | null = null;
+
   if (path.startsWith('/blog/') && path.length > '/blog/'.length) {
     const postId = path.replace('/blog/', '');
     if (/^[0-9a-f-]{36}$/.test(postId)) {
       try {
         const result = await env.DB.prepare(
-          'SELECT title, excerpt, image, date, category FROM blog_posts WHERE id = ?'
+          'SELECT title, excerpt, image, date, category, content FROM blog_posts WHERE id = ?'
         ).bind(postId).first<{
           title: string;
           excerpt: string | null;
           image: string | null;
           date: string | null;
           category: string | null;
+          content: string | null;
         }>();
 
         if (result) {
@@ -267,6 +270,10 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
               result.category || undefined,
             ),
           );
+          // SSR content for Googlebot / search engines
+          if (result.content) {
+            ssrContent = `# ${result.title}\n\n${result.excerpt ? result.excerpt + '\n\n' : ''}${result.content}`;
+          }
         } else {
           meta = { ...DEFAULT_META, title: `文章未找到 | ${SITE_NAME}` };
           ldScripts.push(buildBreadcrumbLd(path));
@@ -313,6 +320,21 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
     '<meta charset="UTF-8">',
     `<meta charset="UTF-8">\n    ${metaHtml}\n    ${jsonLdHtml}`,
   );
+
+  // Step 3.5: inject article content for search engines (SPA workaround)
+  // Googlebot sees full text without needing JS rendering
+  if (ssrContent) {
+    const escaped = ssrContent
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    modified = modified.replace(
+      '<div id="root">',
+      `<div id="root"><div style="display:none" id="ssr-content">${escaped}</div>`,
+    );
+  }
 
   // Step 4: clean up excess blank lines
   modified = modified.replace(/\n\s*\n\s*\n/g, '\n  \n');
