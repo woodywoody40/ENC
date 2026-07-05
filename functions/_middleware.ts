@@ -331,8 +331,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
     modified = modified.replace(
-      '<div id="root">',
-      `<div id="root"><div style="display:none" id="ssr-content">${escaped}</div>`,
+      '</body>',
+      `<div style="display:none">${escaped}</div></body>`,
     );
   }
 
