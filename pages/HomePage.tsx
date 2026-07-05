@@ -106,7 +106,7 @@ const HomePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#08090c]">
+      <div className="homepage-wrapper min-h-[100dvh] flex flex-col items-center justify-center bg-[#08090c]">
         <div className="w-4 h-4 rounded-full border border-white/[0.08] border-t-amber-400/50 animate-spin mb-4" />
         <span className="text-[9px] font-semibold uppercase tracking-[0.4em] text-white/15">Loading</span>
       </div>
@@ -138,7 +138,7 @@ const HomePage: React.FC = () => {
       />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }]} />
 
-      <div className="relative overflow-x-hidden bg-[#08090c] text-white">
+      <div className="homepage-wrapper relative overflow-x-hidden bg-[#08090c] text-white">
 
         {/* ===== Atmospheric background ===== */}
         <div className="fixed inset-0 pointer-events-none z-0">
