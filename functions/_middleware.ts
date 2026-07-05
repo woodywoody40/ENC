@@ -10,17 +10,16 @@ interface MetaTags {
   ogType?: string;
 }
 
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=1200&h=630';
+
 const DEFAULT_META: MetaTags = {
   title: 'Woody | 網管與資安維運實踐',
   description: 'Woody Wu — 網管與資安維運實踐。151+ VM 叢集管理、Fortinet HA 部署、HPE 儲存架構調校、Ubuntu 24.04 自動化運維。',
-  image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=1200&h=630',
+  image: DEFAULT_IMAGE,
 };
 
-const ROUTE_META: Record<string, MetaTags> = {
-  '/': {
-    title: 'Woody | 網管與資安維運實踐',
-    description: 'Woody Wu — 151+ VM 叢集管理、Fortinet HA 部署、HPE 儲存架構調校、Ubuntu 24.04 自動化運維。',
-  },
+// Static page meta (used when no dynamic data is needed)
+const STATIC_META: Record<string, MetaTags> = {
   '/blog': {
     title: '技術筆記 | Woody 維運實踐',
     description: '開源專案深度分析、AI 開發者工具評測、系統維運經驗分享。每日更新 GitHub Trending 精選。',
@@ -39,39 +38,52 @@ const ROUTE_META: Record<string, MetaTags> = {
   },
 };
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function buildMetaTags(meta: MetaTags, path: string): string {
-  const title = escapeHtml(meta.title);
-  const desc = escapeHtml(meta.description);
-  const image = meta.image ? escapeHtml(meta.image) : '';
-  const ogType = meta.ogType || 'website';
+/** Generate all meta tags as a single HTML string. */
+function buildMeta(meta: MetaTags, path: string): string {
+  const title = esc(meta.title);
+  const desc = esc(meta.description);
+  const image = meta.image ? esc(meta.image) : esc(DEFAULT_IMAGE);
   const fullUrl = `${SITE_URL}${path}`;
+  const ogType = meta.ogType || 'website';
 
-  return `<title>${title}</title>
-    <meta name="description" content="${desc}" />
-    <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${desc}" />
-    <meta property="og:url" content="${fullUrl}" />
-    <meta property="og:type" content="${ogType}" />
-    <meta property="og:image" content="${image}" />
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${desc}" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="canonical" href="${fullUrl}" />`;
+  return [
+    `<title>${title}</title>`,
+    `<meta name="description" content="${desc}" />`,
+    `<meta property="og:title" content="${title}" />`,
+    `<meta property="og:description" content="${desc}" />`,
+    `<meta property="og:url" content="${fullUrl}" />`,
+    `<meta property="og:type" content="${ogType}" />`,
+    `<meta property="og:image" content="${image}" />`,
+    `<meta property="og:site_name" content="Woody 維運實踐" />`,
+    `<meta property="og:locale" content="zh_TW" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${title}" />`,
+    `<meta name="twitter:description" content="${desc}" />`,
+    `<link rel="canonical" href="${fullUrl}" />`,
+  ].join('\n    ');
 }
+
+/** Remove old SEO meta tags (so we can replace them cleanly). */
+const STRIP_PATTERNS = [
+  /<title>.*?<\/title>/g,
+  /<meta name="description"[^>]*\/?>/gi,
+  /<meta property="og:[a-z_]+"[^>]*\/?>/gi,
+  /<meta name="twitter:[a-z_]+"[^>]*\/?>/gi,
+  /<meta name="twitter:card"[^>]*\/?>/gi,
+  /<link rel="canonical"[^>]*\/?>/gi,
+  /<meta property="og:site_name"[^>]*\/?>/gi,
+  /<meta property="og:locale"[^>]*\/?>/gi,
+];
 
 export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Skip non-SPA routes (API, static assets)
+  // Skip non-SPA routes
   if (
     path.startsWith('/api/') ||
     path.startsWith('/media/') ||
@@ -86,21 +98,17 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
 
   const response = await next();
   const contentType = response.headers.get('content-type') || '';
-
-  // Only modify HTML responses
   if (!contentType.includes('text/html')) {
     return response;
   }
 
   const html = await response.text();
 
-  // Determine meta tags based on path
+  // Determine meta tags
   let meta: MetaTags;
 
   if (path.startsWith('/blog/') && path.length > '/blog/'.length) {
-    // Blog detail page — fetch post data from D1
     const postId = path.replace('/blog/', '');
-    // Validate UUID format
     if (/^[0-9a-f-]{36}$/.test(postId)) {
       try {
         const result = await env.DB.prepare(
@@ -111,7 +119,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
           meta = {
             title: `${result.title} | Woody 維運實踐`,
             description: result.excerpt || result.title,
-            image: result.image || DEFAULT_META.image,
+            image: result.image || DEFAULT_IMAGE,
             ogType: 'article',
           };
         } else {
@@ -121,39 +129,26 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
         meta = DEFAULT_META;
       }
     } else {
-      meta = { ...ROUTE_META['/blog'] || DEFAULT_META, image: DEFAULT_META.image };
+      meta = STATIC_META['/blog'] || DEFAULT_META;
     }
-  } else if (ROUTE_META[path]) {
-    meta = { ...ROUTE_META[path], image: DEFAULT_META.image };
+  } else if (STATIC_META[path]) {
+    meta = { ...STATIC_META[path], image: DEFAULT_IMAGE };
   } else {
-    meta = DEFAULT_META;
+    meta = { ...DEFAULT_META };
   }
 
-  const metaHtml = buildMetaTags(meta, path);
-
-  // Replace <title> with full meta block, remove old meta that we're replacing
-  let modified = html
-    .replace(/<title>.*?<\/title>/, metaHtml)
-    .replace(/<meta name="description"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:title"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:description"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:url"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:type"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:image"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:site_name"[^>]*\/?>/g, '')
-    .replace(/<meta property="og:locale"[^>]*\/?>/g, '')
-    .replace(/<meta name="twitter:title"[^>]*\/?>/g, '')
-    .replace(/<meta name="twitter:description"[^>]*\/?>/g, '')
-    .replace(/<meta name="twitter:card"[^>]*\/?>/g, '')
-    .replace(/<link rel="canonical"[^>]*\/?>/g, '');
-
-  // Inject image fallback in OG meta if none present
-  if (!modified.includes('property="og:image"')) {
-    modified = modified.replace(
-      '<meta property="og:type"',
-      `<meta property="og:image" content="${escapeHtml(meta.image || DEFAULT_META.image || '')}" />\n    <meta property="og:type"`
-    );
+  // Step 1: strip all old SEO tags
+  let modified = html;
+  for (const re of STRIP_PATTERNS) {
+    modified = modified.replace(re, '');
   }
+
+  // Step 2: insert new meta block right after <head> (or <meta charset>)
+  const metaHtml = buildMeta(meta, path);
+  modified = modified.replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n    ${metaHtml}`);
+
+  // Step 3: clean up excessive blank lines left from stripping
+  modified = modified.replace(/\n\s*\n\s*\n/g, '\n  \n');
 
   return new Response(modified, {
     status: response.status,
