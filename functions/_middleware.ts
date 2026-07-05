@@ -97,7 +97,7 @@ function buildWebSiteLd(): string {
   });
 }
 
-function buildBreadcrumbLd(path: string): string {
+function buildBreadcrumbLd(path: string, articleTitle?: string): string {
   const segments = path.split('/').filter(Boolean);
   if (segments.length === 0) return '';
 
@@ -114,7 +114,7 @@ function buildBreadcrumbLd(path: string): string {
     else if (name === 'portfolio') name = '作品集';
     else if (name === 'about') name = '關於';
     else if (name === 'resume') name = '履歷';
-    else if (name.match(/^[0-9a-f-]{36}$/)) name = '(文章)'; // will be replaced if we have article meta
+    else if (name.match(/^[0-9a-f-]{36}$/)) name = articleTitle || '(文章)';
     items.push({
       '@type': 'ListItem',
       position: i + 2,
@@ -254,10 +254,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
             },
           };
           // Breadcrumb: 首頁 > 技術筆記 > 文章標題
-          const bc = buildBreadcrumbLd('/blog/' + postId);
-          // Replace "(文章)" placeholder with actual title
-          const bcWithTitle = bc.replace(/"(文章)"/, `"${escJson(result.title)}"`);
-          ldScripts.push(bcWithTitle);
+          const bc = buildBreadcrumbLd('/blog/' + postId, result.title);
+          ldScripts.push(bc);
           ldScripts.push(
             buildArticleLd(
               result.title,
