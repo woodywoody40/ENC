@@ -27,6 +27,8 @@
   --color-morandi-slate: #2D3436;
   --color-morandi-stone: #434C5E;
   --color-morandi-cream: #E9E5E3;
+  --font-heading: 'Instrument Serif', serif;
+  --font-body: 'Barlow', 'Noto Sans TC', sans-serif;
 }
 
 :root {
@@ -57,9 +59,9 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg-base);
-  color: var(--text-sub);
-  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+  background: #000;
+  color: #fff;
+  font-family: 'Barlow', 'Noto Sans TC', 'Outfit', sans-serif;
   overflow-x: hidden;
   /* 禁止手機端下拉重新整理（若需要 PWA 感更強烈） */
   overscroll-behavior-y: contain;
@@ -120,7 +122,92 @@ body {
 
 /* Editorial serif */
 .font-serif-editorial { font-family: 'Instrument Serif', 'Noto Sans TC', serif; }
+.font-heading { font-family: var(--font-heading); }
+.font-body { font-family: var(--font-body); }
 .font-mono-tech { font-family: 'JetBrains Mono', monospace; }
+
+/* ==============================
+   Liquid Glass morphism
+   ============================== */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  box-shadow:
+    4px 4px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-strong::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0.2) 80%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Blog cinematic shell — pure black + glass */
+.blog-cinematic {
+  background: #000;
+  color: #fff;
+  font-family: var(--font-body);
+}
+
+.blog-cinematic ::selection {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
 
 /* Premium grid background */
 .bg-grid {
@@ -315,15 +402,20 @@ html.light .not-found-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
 html.light .not-found-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
 
 /* ==============================
-   BlogDetailPage — Light mode support
+   Blog cinematic — always dark liquid-glass
+   (design intent: pure black + white glass)
    ============================== */
-html.light .blog-detail-wrapper { background: #f0eae6; color: #2D3436; }
-html.light .blog-detail-wrapper .text-white { color: #2D3436; }
-html.light .blog-detail-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
-html.light .blog-detail-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
-html.light .blog-detail-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
-html.light .blog-detail-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
-html.light .blog-detail-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
-html.light .blog-detail-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .blog-detail-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .blog-detail-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+html.light .blog-cinematic {
+  background: #000 !important;
+  color: #fff !important;
+}
+html.light .blog-cinematic .text-white { color: #fff; }
+html.light .blog-cinematic .text-white\/90 { color: rgba(255,255,255,0.9); }
+html.light .blog-cinematic .text-white\/80 { color: rgba(255,255,255,0.8); }
+html.light .blog-cinematic .text-white\/70 { color: rgba(255,255,255,0.7); }
+html.light .blog-cinematic .text-white\/60 { color: rgba(255,255,255,0.6); }
+html.light .blog-cinematic .text-white\/50 { color: rgba(255,255,255,0.5); }
+html.light .blog-cinematic .text-white\/40 { color: rgba(255,255,255,0.4); }
+html.light .blog-cinematic .text-white\/30 { color: rgba(255,255,255,0.3); }
+html.light .blog-cinematic .text-white\/25 { color: rgba(255,255,255,0.25); }
+html.light .blog-cinematic .text-white\/20 { color: rgba(255,255,255,0.2); }

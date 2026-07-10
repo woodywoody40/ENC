@@ -21,18 +21,17 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // 全域載入指示器（含進度條視覺效果）
 const PageLoader: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black">
     <div className="flex flex-col items-center gap-6">
-      {/* 旋轉圈 */}
-      <div className="relative w-10 h-10">
-        <div className="absolute inset-0 rounded-full border-2 border-white/5" />
-        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-amber-400/70 animate-spin" />
+      <div className="liquid-glass flex h-14 w-14 items-center justify-center rounded-full">
+        <div className="relative h-6 w-6">
+          <div className="absolute inset-0 rounded-full border border-white/10" />
+          <div className="absolute inset-0 animate-spin rounded-full border border-transparent border-t-white/60" />
+        </div>
       </div>
-      {/* 進度條 */}
-      <div className="w-24 h-[2px] rounded-full bg-white/5 overflow-hidden">
-        <div className="h-full w-1/3 rounded-full bg-amber-400/50 animate-pulse-slow" style={{ animation: 'shimmer 1.5s ease-in-out infinite' }} />
-      </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Loading...</span>
+      <span className="font-body text-[11px] font-light tracking-[0.3em] uppercase text-white/30">
+        Loading
+      </span>
     </div>
   </div>
 );
@@ -62,34 +61,34 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center p-8 bg-[#0a0b10]">
-          <div className="glass-panel p-10 max-w-lg w-full text-center">
-            {/* 圖示 */}
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-red-500/20">
-              <span className="text-xl">!</span>
+        <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black p-8">
+          <div className="liquid-glass w-full max-w-lg rounded-[1.25rem] p-10 text-center">
+            <div className="liquid-glass mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-[0.85rem]">
+              <span className="text-xl text-white/70">!</span>
             </div>
-            {/* 標題 */}
-            <h2 className="text-lg font-bold text-white mb-2">系統發生未預期錯誤</h2>
-            <p className="text-xs text-white/40 mb-2">請稍後再試，或重新載入頁面</p>
-            {/* 錯誤訊息 */}
+            <h2 className="mb-2 font-heading italic text-2xl tracking-tight text-white">
+              系統發生未預期錯誤
+            </h2>
+            <p className="mb-2 font-body text-sm font-light text-white/50">請稍後再試，或重新載入頁面</p>
             {this.state.error?.message && (
-              <div className="mb-6 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
-                <p className="text-[11px] text-white/30 font-mono break-all leading-relaxed">
+              <div className="liquid-glass mb-6 rounded-[0.75rem] px-4 py-3">
+                <p className="break-all font-mono text-[11px] leading-relaxed text-white/30">
                   {this.state.error.message}
                 </p>
               </div>
             )}
-            {/* 操作按鈕 */}
             <div className="flex items-center justify-center gap-3">
               <button
+                type="button"
                 onClick={this.handleRetry}
-                className="px-6 py-3 bg-white text-black rounded-2xl font-bold text-[11px] tracking-widest hover:scale-105 active:scale-95 transition-all"
+                className="liquid-glass-strong rounded-full px-6 py-3 font-body text-sm font-medium text-white transition active:scale-95"
               >
                 重試
               </button>
               <button
+                type="button"
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-white/5 text-white/60 rounded-2xl font-bold text-[11px] tracking-widest hover:bg-white/10 hover:text-white/80 active:scale-95 transition-all"
+                className="liquid-glass rounded-full px-6 py-3 font-body text-sm font-medium text-white/70 transition hover:text-white active:scale-95"
               >
                 重新載入
               </button>
@@ -137,17 +136,9 @@ const App: React.FC = () => {
       <PersonSchema />
       <OrganizationSchema />
       <WebSiteSchema />
-      <div className={`relative min-h-screen transition-colors duration-700 ${isDarkMode ? 'dark bg-[#0a0b10]' : 'light bg-[#f0eae6]'}`}>
-        {/* 2D 莫蘭迪科技背景 */}
-        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-          {/* 動態柔和光暈 */}
-          <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] opacity-10 transition-colors duration-1000 ${isDarkMode ? 'bg-white' : 'bg-morandi-sage'}`} />
-          <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[100px] opacity-5 transition-colors duration-1000 ${isDarkMode ? 'bg-slate-500' : 'bg-morandi-rose'}`} />
-          
-          {/* 精密點狀/線條網格 */}
-          <div className={`absolute inset-0 opacity-[0.03] ${isDarkMode ? 'invert-0' : 'invert'}`} 
-               style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        </div>
+      <div className="relative min-h-screen bg-black text-white transition-colors duration-700">
+        {/* Cinematic black canvas — pages own their atmospheric layers */}
+        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-black" />
 
         <Navbar isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 

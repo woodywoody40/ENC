@@ -2,21 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 import { motion } from 'framer-motion';
 import { SOCIAL_LINKS } from '../constants';
-import { 
-  Shield, HardDrive, Server, Terminal, Network, 
-  ShieldCheck, Activity, Loader2, Cpu, Globe, Zap 
+import {
+  HardDrive, Server, Terminal, ShieldCheck, Activity, Loader2,
 } from 'lucide-react';
 import { ConfigAPI } from '../services/apiClient';
+import BlurText from '../components/BlurText';
+import FadingVideo from '../components/FadingVideo';
+
+const CAP_VIDEO =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4';
+
+const blurIn = {
+  initial: { filter: 'blur(10px)', opacity: 0, y: 20 },
+  animate: { filter: 'blur(0px)', opacity: 1, y: 0 },
+  transition: { duration: 0.8, ease: 'easeOut' as const },
+};
 
 const AboutPage: React.FC = () => {
-  const [configs, setConfigs] = useState<any>({});
+  const [configs, setConfigs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchConfigs = async () => {
       try {
         const data = await ConfigAPI.all();
-        setConfigs(data);
+        setConfigs(data || {});
       } catch (err) {
         console.error('Fetch configs error:', err);
       } finally {
@@ -26,21 +36,42 @@ const AboutPage: React.FC = () => {
     fetchConfigs();
   }, []);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
+  if (loading) {
+    return (
+      <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black">
+        <div className="liquid-glass flex h-16 w-16 items-center justify-center rounded-full">
+          <Loader2 className="animate-spin text-white/50" size={24} />
+        </div>
+      </div>
+    );
+  }
 
-  const itemVariants: any = {
-    hidden: { y: 30, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.8 } }
-  };
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="animate-spin dark:text-white text-morandi-slate" size={40} />
-    </div>
-  );
+  const skills = [
+    {
+      icon: <HardDrive size={22} />,
+      title: configs.about_skill1_title || '儲存 & 備份',
+      desc:
+        configs.about_skill1_desc ||
+        '規劃異地備援架構，設計自動化 VM 備份策略，管理 HPE Storage 與 QNAP NAS 儲存集群。',
+      tags: ['HPE', 'QNAP', 'Backup'],
+    },
+    {
+      icon: <ShieldCheck size={22} />,
+      title: configs.about_skill2_title || '資安 & 弱掃',
+      desc:
+        configs.about_skill2_desc ||
+        '執行系統弱點掃描與漏洞修補，監控 TANet 異常流量，持有 CEH 國際資安認證。',
+      tags: ['CEH', 'TANet', 'Hardening'],
+    },
+    {
+      icon: <Server size={22} />,
+      title: configs.about_skill3_title || 'VM & 雲端管理',
+      desc:
+        configs.about_skill3_desc ||
+        '維運 VMware vSphere 集群（150+ VM），制定標準化部署流程，管理 Google Workspace 網域。',
+      tags: ['vSphere', 'SOP', 'Workspace'],
+    },
+  ];
 
   return (
     <>
@@ -51,131 +82,162 @@ const AboutPage: React.FC = () => {
         keywords="關於吳東謙,系統維運,資安工程師,Storage,VMware,CEH"
       />
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '關於', path: '/about' }]} />
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="min-h-screen pt-[160px] pb-32 px-6 max-w-7xl mx-auto relative overflow-x-hidden"
-      >
-      <div className="fixed inset-0 pointer-events-none dark:opacity-[0.03] opacity-[0.05] overflow-hidden">
-        <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(#2D3436 1px, transparent 1px), linear-gradient(90deg, #2D3436 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      </div>
 
-      <motion.div variants={itemVariants} className="text-center mb-32 relative z-10">
-        <div className="inline-block px-6 py-2 dark:border-white/10 border-slate-900/10 dark:bg-white/5 bg-white/40 mb-8 rounded-[40px] shadow-xl backdrop-blur-[40px] border">
-          <p className="dark:text-white text-morandi-slate font-black text-[10px] tracking-[0.8em] uppercase">
-            {configs.about_hero_subtitle || "系統維運 · 資安監控 · 基隆在地"}
-          </p>
+      <div className="blog-cinematic relative min-h-screen overflow-hidden bg-black">
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-30">
+          <FadingVideo src={CAP_VIDEO} className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/80 to-black" />
         </div>
-        <h2 className="text-5xl md:text-6xl font-black mb-8 tracking-tighter dark:text-white text-morandi-slate uppercase">
-          {configs.about_hero_title_left || "關於"}<span className="opacity-30 italic font-light">{configs.about_hero_title_right || "東謙"}</span>
-        </h2>
-        <div className="w-32 h-1 bg-gradient-to-r from-transparent via-morandi-slate/40 to-transparent mx-auto mt-12" />
-      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative z-10">
-        <motion.div variants={itemVariants} className="lg:col-span-8">
-          <div className="p-10 md:p-20 h-full dark:border-white/10 border-slate-900/10 relative overflow-hidden group dark:bg-black/40 bg-white/40 shadow-xl rounded-[40px] backdrop-blur-[40px] border">
-            <div className="absolute top-0 right-0 p-10 opacity-[0.03] select-none pointer-events-none group-hover:opacity-[0.07] transition-opacity duration-1000">
-              <Terminal size={300} strokeWidth={0.5} className="dark:text-white text-morandi-slate" />
-            </div>
-            
-            <div className="relative">
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]" />
-                <span className="text-[10px] font-black dark:text-slate-500 text-morandi-stone uppercase tracking-[0.5em]">Identity Verified</span>
-              </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-5 pb-32 pt-[120px] sm:px-8 sm:pt-[140px] lg:px-16">
+          <header className="mb-16 text-center sm:mb-24">
+            <motion.div
+              {...blurIn}
+              className="liquid-glass mb-8 inline-flex items-center gap-2 rounded-full px-4 py-2"
+            >
+              <span className="rounded-full bg-white px-2.5 py-0.5 font-body text-[10px] font-semibold uppercase tracking-wider text-black">
+                Studio
+              </span>
+              <span className="font-body text-sm font-light text-white/90">
+                {configs.about_hero_subtitle || '系統維運 · 資安監控 · 基隆在地'}
+              </span>
+            </motion.div>
 
-              <h3 className="text-2xl md:text-4xl font-black dark:text-white text-morandi-slate mb-12 leading-tight tracking-tighter">
-                {configs.about_bio_heading || "從基隆出發，\n守護教育數位基礎。"}
-              </h3>
-              
-              <div className="space-y-10 dark:text-slate-300 text-morandi-slate text-base md:text-lg leading-relaxed font-light tracking-wide whitespace-pre-line border-l dark:border-white/10 border-slate-900/10 pl-10 md:pl-16">
-                {configs.about_content || "我是吳東謙，現就讀國立臺灣海洋大學資訊工程碩士專班，同時任職於基隆市教育網路中心。學術與實戰並行的雙軌節奏，讓我能將理論帶進機房，也把第一線維運經驗反芻為研究深度。\n\n在教網中心，我負責 TANet 學術網路的資安監控與流量分析，確保全市教育網路服務穩定運行。從零建置的自動化 VM 備份系統與異地備援架構，結合 HPE Storage 與 QNAP NAS 的整合調度，為超過 150 台虛擬主機提供了可驗證的資料韌性。\n\n除技術實務外，公關產業的實習背景給了我另一種視野——跨部門溝通、需求轉譯、利害關係人協調，讓我在技術團隊中不只是執行者，更是連結者。"}
-              </div>
+            <BlurText
+              text={`${configs.about_hero_title_left || '關於'} ${configs.about_hero_title_right || '東謙'}`}
+              className="font-heading italic text-6xl leading-[0.85] tracking-[-3px] text-white md:text-7xl lg:text-[5.5rem]"
+              delay={0.15}
+            />
+          </header>
 
-              <div className="flex flex-wrap gap-5 pt-20">
-                {SOCIAL_LINKS.map((social) => (
-                  <a 
-                    key={social.label}
-                    href={social.href}
-                    className="px-8 py-5 rounded-2xl flex items-center gap-4 dark:text-slate-400 text-morandi-slate dark:border-white/5 border-slate-900/5 hover:border-morandi-slate transition-all hover:scale-105 active:scale-95 bg-white/20 backdrop-blur-[40px] border"
-                    aria-label={social.label}
-                  >
-                    {social.icon}
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">{social.label}</span>
-                  </a>
-                ))}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <motion.div
+              {...blurIn}
+              transition={{ ...blurIn.transition, delay: 0.3 }}
+              className="lg:col-span-8"
+            >
+              <div className="liquid-glass relative h-full overflow-hidden rounded-[1.25rem] p-8 md:p-12">
+                <div className="pointer-events-none absolute top-6 right-6 opacity-[0.06]">
+                  <Terminal size={200} strokeWidth={0.5} />
+                </div>
+                <div className="relative">
+                  <div className="mb-8 flex items-center gap-3">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-white/70" />
+                    <span className="font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white/50">
+                      Identity Verified
+                    </span>
+                  </div>
+
+                  <h3 className="mb-8 whitespace-pre-line font-heading italic text-3xl leading-[1.05] tracking-[-1px] text-white md:text-4xl">
+                    {configs.about_bio_heading || '從基隆出發，\n守護教育數位基礎。'}
+                  </h3>
+
+                  <div className="max-w-[48ch] space-y-6 border-l border-white/15 pl-6 font-body text-base font-light leading-relaxed text-white/80 md:pl-10 md:text-lg">
+                    {(
+                      configs.about_content ||
+                      '我是吳東謙，現就讀國立臺灣海洋大學資訊工程碩士專班，同時任職於基隆市教育網路中心。學術與實戰並行的雙軌節奏，讓我能將理論帶進機房，也把第一線維運經驗反芻為研究深度。\n\n在教網中心，我負責 TANet 學術網路的資安監控與流量分析，確保全市教育網路服務穩定運行。從零建置的自動化 VM 備份系統與異地備援架構，結合 HPE Storage 與 QNAP NAS 的整合調度，為超過 150 台虛擬主機提供了可驗證的資料韌性。\n\n除技術實務外，公關產業的實習背景給了我另一種視野——跨部門溝通、需求轉譯、利害關係人協調，讓我在技術團隊中不只是執行者，更是連結者。'
+                    )
+                      .split('\n\n')
+                      .map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                  </div>
+
+                  <div className="mt-12 flex flex-wrap gap-3">
+                    {SOCIAL_LINKS.map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.href}
+                        className="liquid-glass inline-flex items-center gap-3 rounded-full px-5 py-3 font-body text-[11px] font-medium uppercase tracking-[0.2em] text-white/70 transition hover:text-white"
+                        aria-label={social.label}
+                      >
+                        {social.icon}
+                        {social.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
+            </motion.div>
+
+            <div className="flex flex-col gap-6 lg:col-span-4">
+              <motion.div
+                {...blurIn}
+                transition={{ ...blurIn.transition, delay: 0.4 }}
+                className="liquid-glass flex flex-1 flex-col items-center justify-center gap-6 rounded-[1.25rem] p-10 text-center"
+              >
+                <div className="liquid-glass flex h-16 w-16 items-center justify-center rounded-[1rem]">
+                  <Activity size={28} className="text-white/80" />
+                </div>
+                <div>
+                  <p className="font-heading italic text-5xl tracking-[-1px] text-white">
+                    {configs.stat_uptime || '99.9%'}
+                  </p>
+                  <p className="mt-3 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white/40">
+                    System Reliability
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                {...blurIn}
+                transition={{ ...blurIn.transition, delay: 0.5 }}
+                className="liquid-glass flex flex-1 flex-col items-center justify-center gap-6 rounded-[1.25rem] p-10 text-center"
+              >
+                <div className="liquid-glass flex h-16 w-16 items-center justify-center rounded-[1rem]">
+                  <ShieldCheck size={28} className="text-white/80" />
+                </div>
+                <div>
+                  <p className="font-heading italic text-5xl tracking-[-1px] text-white">
+                    {configs.stat_vm || '151+'}
+                  </p>
+                  <p className="mt-3 font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white/40">
+                    Secure Nodes Managed
+                  </p>
+                </div>
+              </motion.div>
             </div>
           </div>
-        </motion.div>
 
-        <motion.div variants={itemVariants} className="lg:col-span-4 space-y-10">
-          <div className="p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative rounded-[40px] backdrop-blur-[40px] border">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-            <div className="relative">
-              <div className="absolute inset-0 dark:bg-white/10 bg-morandi-slate/5 blur-3xl rounded-full scale-150 group-hover:scale-125 transition-all duration-1000" />
-              <div className="relative w-24 h-24 rounded-[2.5rem] dark:bg-white dark:text-black bg-morandi-slate text-white flex items-center justify-center shadow-xl">
-                <Activity size={40} strokeWidth={2.5} />
-              </div>
-            </div>
-            <div>
-              <p className="text-4xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_uptime || "99.9%"}</p>
-              <p className="text-[10px] dark:text-slate-500 text-morandi-stone font-black uppercase tracking-[0.5em] mt-6">System Reliability</p>
-            </div>
+          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+            {skills.map((skill, i) => (
+              <motion.div
+                key={skill.title}
+                initial={{ filter: 'blur(10px)', opacity: 0, y: 24 }}
+                whileInView={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: i * 0.1 }}
+                className="liquid-glass flex min-h-[320px] flex-col rounded-[1.25rem] p-6"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="liquid-glass flex h-11 w-11 items-center justify-center rounded-[0.75rem] text-white/80">
+                    {skill.icon}
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-1.5">
+                    {skill.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="liquid-glass whitespace-nowrap rounded-full px-3 py-1 font-body text-[11px] text-white/90"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex-1" />
+                <h4 className="font-heading italic text-3xl leading-none tracking-[-1px] text-white">
+                  {skill.title}
+                </h4>
+                <p className="mt-3 max-w-[32ch] font-body text-sm font-light leading-snug text-white/80">
+                  {skill.desc}
+                </p>
+              </motion.div>
+            ))}
           </div>
-
-          <div className="p-12 dark:border-white/10 border-slate-900/10 flex flex-col items-center justify-center text-center gap-10 group dark:bg-black/40 bg-white/40 overflow-hidden relative rounded-[40px] backdrop-blur-[40px] border">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent" />
-            <div className="w-24 h-24 rounded-[2.5rem] dark:bg-white/5 bg-black/5 border dark:border-white/10 border-slate-900/10 dark:text-white text-morandi-slate flex items-center justify-center group-hover:border-morandi-slate transition-all">
-              <ShieldCheck size={40} strokeWidth={1.5} />
-            </div>
-            <div>
-              <p className="text-4xl font-black dark:text-white text-morandi-slate leading-none tracking-tighter">{configs.stat_vm || "151+"}</p>
-              <p className="text-[10px] dark:text-slate-500 text-morandi-stone font-black uppercase tracking-[0.5em] mt-6">Secure Nodes Managed</p>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10 relative z-10">
-        <SkillCard 
-          icon={<HardDrive size={32} />} 
-          title={configs.about_skill1_title || "儲存 & 備份"}
-          desc={configs.about_skill1_desc || "規劃異地備援架構，設計自動化 VM 備份策略，管理 HPE Storage 與 QNAP NAS 儲存集群。"}
-          accentColor="rgba(52, 211, 153, 0.2)"
-        />
-        <SkillCard 
-          icon={<ShieldCheck size={32} />} 
-          title={configs.about_skill2_title || "資安 & 弱掃"}
-          desc={configs.about_skill2_desc || "執行系統弱點掃描與漏洞修補，監控 TANet 異常流量，持有 CEH 國際資安認證。"}
-          accentColor="rgba(56, 189, 248, 0.2)"
-        />
-        <SkillCard 
-          icon={<Server size={32} />} 
-          title={configs.about_skill3_title || "VM & 雲端管理"}
-          desc={configs.about_skill3_desc || "維運 VMware vSphere 集群（150+ VM），制定標準化部署流程，管理 Google Workspace 網域。"}
-          accentColor="rgba(168, 85, 247, 0.2)"
-        />
-      </div>
-    </motion.div>
     </>
   );
 };
-
-const SkillCard: React.FC<{ icon: React.ReactNode, title: string, desc: string, accentColor: string }> = ({ icon, title, desc, accentColor }) => (
-  <motion.div 
-    variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } } as any}
-    className="p-12 dark:border-white/5 border-slate-900/5 group hover:bg-white/40 dark:hover:bg-white/5 bg-white/20 dark:bg-black/20 transition-all duration-700 relative overflow-hidden shadow-sm rounded-[40px] backdrop-blur-[40px] border"
-  >
-    <div className="absolute top-0 right-0 w-32 h-32 blur-[80px] rounded-full pointer-events-none transition-all duration-700 group-hover:scale-150" style={{ backgroundColor: accentColor }} />
-    <div className="w-16 h-16 rounded-2xl dark:bg-white/5 bg-morandi-slate/5 flex items-center justify-center mb-10 dark:text-white text-morandi-slate group-hover:scale-110 group-hover:bg-morandi-slate dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-black transition-all duration-500 shadow-sm border border-slate-900/5 dark:border-white/5">
-      {icon}
-    </div>
-    <h4 className="dark:text-white text-morandi-slate font-black text-2xl mb-6 uppercase tracking-tight">{title}</h4>
-    <p className="dark:text-slate-400 text-morandi-stone text-base leading-relaxed font-normal">{desc}</p>
-  </motion.div>
-);
 
 export default AboutPage;

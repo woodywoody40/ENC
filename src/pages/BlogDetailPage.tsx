@@ -4,9 +4,11 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import { BlogAPI } from '../services/apiClient';
 import type { BlogPost } from '../types';
 import { SEOMeta, BlogPostSchema, BreadcrumbSchema } from '../lib/seo';
+import BlurText from '../components/BlurText';
+import FadingVideo from '../components/FadingVideo';
 import {
   ArrowLeft,
-  ArrowRight,
+  ArrowUpRight,
   Calendar,
   Check,
   Clock,
@@ -21,6 +23,15 @@ import {
 } from 'lucide-react';
 
 type TocItem = { id: string; text: string; level: 2 | 3 };
+
+const CAP_VIDEO =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4';
+
+const blurIn = {
+  initial: { filter: 'blur(10px)', opacity: 0, y: 20 },
+  animate: { filter: 'blur(0px)', opacity: 1, y: 0 },
+  transition: { duration: 0.8, ease: 'easeOut' as const },
+};
 
 const escapeHtml = (value: string) =>
   value
@@ -41,10 +52,9 @@ const slugify = (text: string) => {
   return base || 'section';
 };
 
-/** Build unique slug ids for ## / ### headings (order-stable). */
 const buildHeadingSlugs = (content: string): Map<string, string> => {
   const used = new Map<string, number>();
-  const byKey = new Map<string, string>(); // "level|index|text" → id
+  const byKey = new Map<string, string>();
 
   const lines = content.replace(/```[\s\S]*?```/g, (block) => block.replace(/[^\n]/g, ' ')).split('\n');
   let headingIndex = 0;
@@ -104,11 +114,15 @@ const extractToc = (content: string, slugMap: Map<string, string>): TocItem[] =>
 };
 
 const renderInline = (text: string) =>
-  text.split(/(\*\*.*?\*\*)/g).map((part, idx) => (
-    part.startsWith('**') && part.endsWith('**')
-      ? <strong key={idx} className="font-semibold text-zinc-950 dark:text-white">{part.slice(2, -2)}</strong>
-      : <React.Fragment key={idx}>{part}</React.Fragment>
-  ));
+  text.split(/(\*\*.*?\*\*)/g).map((part, idx) =>
+    part.startsWith('**') && part.endsWith('**') ? (
+      <strong key={idx} className="font-medium text-white">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <React.Fragment key={idx}>{part}</React.Fragment>
+    )
+  );
 
 const getReadingMinutes = (content = '') => {
   const clean = content.replace(/```[\s\S]*?```/g, '').replace(/[#*`>-]/g, '');
@@ -153,28 +167,30 @@ const BlogDetailPage: React.FC = () => {
 
   useEffect(() => {
     if (!post?.id) return;
-
-    const fetchRelated = async () => {
+    let cancelled = false;
+    (async () => {
       try {
         const list = (await BlogAPI.list()) || [];
         const same = list
           .filter((p) => p.id !== post.id && p.category && p.category === post.category)
           .slice(0, 3);
-        // Fallback: other posts if not enough in same category
         const filled =
           same.length >= 2
             ? same
             : [
                 ...same,
-                ...list.filter((p) => p.id !== post.id && !same.some((s) => s.id === p.id)).slice(0, 3 - same.length),
+                ...list
+                  .filter((p) => p.id !== post.id && !same.some((s) => s.id === p.id))
+                  .slice(0, 3 - same.length),
               ].slice(0, 3);
-        setRelated(filled);
+        if (!cancelled) setRelated(filled);
       } catch (err) {
         console.error('Fetch related posts error:', err);
       }
+    })();
+    return () => {
+      cancelled = true;
     };
-
-    fetchRelated();
   }, [post?.id, post?.category]);
 
   const slugMap = useMemo(() => buildHeadingSlugs(post?.content || ''), [post?.content]);
@@ -184,7 +200,6 @@ const BlogDetailPage: React.FC = () => {
     const el = document.getElementById(headingId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Update hash without jump
       window.history.replaceState(null, '', `#${headingId}`);
     }
   };
@@ -194,13 +209,17 @@ const BlogDetailPage: React.FC = () => {
 
     return lines.map((line, idx) => {
       const tokens = [
-        { regex: /#.*$|\/\/.*$/g, cls: 'text-zinc-500 italic' },
-        { regex: /(['"])(?:(?!\1|\\).|\\.)*\1/g, cls: 'text-emerald-300' },
-        { regex: /\b(sudo|apt|install|systemctl|mkdir|cd|rm|cp|mv|echo|grep|sed|awk|export|ssh|ip|ls|cat|nano|vi|vim|docker|git|pve|qm|pct|ufw|netplan|nmcli|ping|curl|wget)\b/g, cls: 'text-rose-300 font-semibold' },
-        { regex: /\b-{1,2}[a-zA-Z0-9-]+\b/g, cls: 'text-zinc-300' },
-        { regex: /\$[A-Z_a-z0-9]+/g, cls: 'text-sky-300' },
-        { regex: /\b\d+\b/g, cls: 'text-amber-300' },
-        { regex: /[|&><!]+/g, cls: 'text-white/35' },
+        { regex: /#.*$|\/\/.*$/g, cls: 'text-white/35 italic' },
+        { regex: /(['"])(?:(?!\1|\\).|\\.)*\1/g, cls: 'text-emerald-300/90' },
+        {
+          regex:
+            /\b(sudo|apt|install|systemctl|mkdir|cd|rm|cp|mv|echo|grep|sed|awk|export|ssh|ip|ls|cat|nano|vi|vim|docker|git|pve|qm|pct|ufw|netplan|nmcli|ping|curl|wget)\b/g,
+          cls: 'text-rose-300/90 font-medium',
+        },
+        { regex: /\b-{1,2}[a-zA-Z0-9-]+\b/g, cls: 'text-white/70' },
+        { regex: /\$[A-Z_a-z0-9]+/g, cls: 'text-sky-300/90' },
+        { regex: /\b\d+\b/g, cls: 'text-amber-300/90' },
+        { regex: /[|&><!]+/g, cls: 'text-white/30' },
       ];
 
       let pos = 0;
@@ -230,8 +249,13 @@ const BlogDetailPage: React.FC = () => {
 
       return (
         <div key={idx} className="flex min-w-max gap-4 py-0.5">
-          <span className="w-8 shrink-0 select-none text-right font-mono text-[11px] leading-7 text-white/20">{idx + 1}</span>
-          <span className="font-mono text-[12px] leading-7 text-zinc-200 sm:text-[13px]" dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }} />
+          <span className="w-8 shrink-0 select-none text-right font-mono text-[11px] leading-7 text-white/20">
+            {idx + 1}
+          </span>
+          <span
+            className="font-mono text-[12px] leading-7 text-white/85 sm:text-[13px]"
+            dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }}
+          />
         </div>
       );
     });
@@ -274,7 +298,10 @@ const BlogDetailPage: React.FC = () => {
     const flushList = () => {
       if (!listItems.length) return;
       nodes.push(
-        <ul key={`${blockKey}-list-${nodes.length}`} className="my-7 space-y-3 border-l border-zinc-200 pl-5 dark:border-white/10 sm:pl-6">
+        <ul
+          key={`${blockKey}-list-${nodes.length}`}
+          className="my-7 space-y-3 border-l border-white/10 pl-5 sm:pl-6"
+        >
           {listItems}
         </ul>
       );
@@ -282,28 +309,54 @@ const BlogDetailPage: React.FC = () => {
     };
 
     const flushTable = () => {
-      if (tableRows.length < 2) { tableRows = []; return; }
-      // First row = header, second row = separator (|--|--|), rest = body
-      const headerCells = tableRows[0].split('|').filter(c => c.trim().length > 0).map(c => c.trim());
-      const bodyRows = tableRows.slice(2).filter(r => r.trim().length > 0 && !r.match(/^\|?\s*[-:]+\s*\|/));
+      if (tableRows.length < 2) {
+        tableRows = [];
+        return;
+      }
+      const headerCells = tableRows[0]
+        .split('|')
+        .filter((c) => c.trim().length > 0)
+        .map((c) => c.trim());
+      const bodyRows = tableRows
+        .slice(2)
+        .filter((r) => r.trim().length > 0 && !r.match(/^\|?\s*[-:]+\s*\|/));
 
       nodes.push(
-        <div key={`${blockKey}-table-${nodes.length}`} className="my-10 overflow-x-auto rounded-xl border border-zinc-200 dark:border-white/10">
+        <div
+          key={`${blockKey}-table-${nodes.length}`}
+          className="liquid-glass my-10 overflow-x-auto rounded-[1.25rem]"
+        >
           <table className="w-full border-collapse text-[0.95rem]">
             <thead>
-              <tr className="border-b border-zinc-300 bg-zinc-50 dark:border-white/20 dark:bg-white/[0.04]">
+              <tr className="border-b border-white/10 bg-white/[0.03]">
                 {headerCells.map((cell, i) => (
-                  <th key={i} className="px-5 py-3.5 text-left text-[13px] font-bold uppercase tracking-[0.05em] text-zinc-700 dark:text-zinc-300">{renderInline(cell)}</th>
+                  <th
+                    key={i}
+                    className="px-5 py-3.5 text-left font-body text-[12px] font-medium uppercase tracking-[0.08em] text-white/80"
+                  >
+                    {renderInline(cell)}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {bodyRows.map((row, ri) => {
-                const cells = row.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
+                const cells = row
+                  .split('|')
+                  .filter((c) => c.trim().length > 0)
+                  .map((c) => c.trim());
                 return (
-                  <tr key={ri} className="border-b border-zinc-200 transition hover:bg-zinc-50 dark:border-white/5 dark:hover:bg-white/[0.02]">
+                  <tr
+                    key={ri}
+                    className="border-b border-white/5 transition hover:bg-white/[0.02]"
+                  >
                     {cells.map((cell, ci) => (
-                      <td key={ci} className="px-5 py-3.5 text-[0.95rem] leading-7 text-zinc-700 dark:text-zinc-300">{renderInline(cell)}</td>
+                      <td
+                        key={ci}
+                        className="px-5 py-3.5 font-body text-[0.95rem] font-light leading-7 text-white/80"
+                      >
+                        {renderInline(cell)}
+                      </td>
                     ))}
                   </tr>
                 );
@@ -315,20 +368,17 @@ const BlogDetailPage: React.FC = () => {
       tableRows = [];
     };
 
-    // Pre-scan: detect table blocks by checking each line for | pattern
-    // A table starts with a line beginning with | and has a separator line (|---|) shortly after
-    const isTableLine = (l: string) => l.trim().startsWith('|') && l.trim().endsWith('|') && l.trim().length > 2;
+    const isTableLine = (l: string) =>
+      l.trim().startsWith('|') && l.trim().endsWith('|') && l.trim().length > 2;
 
     lines.forEach((line, index) => {
       const trimmed = line.trim();
 
-      // --- Table detection ---
       if (isTableLine(trimmed)) {
         tableRows.push(trimmed);
         return;
       }
 
-      // If we were collecting table lines and hit a non-table line, flush the table
       flushTable();
 
       if (!trimmed) {
@@ -338,8 +388,11 @@ const BlogDetailPage: React.FC = () => {
 
       if (trimmed.startsWith('- ')) {
         listItems.push(
-          <li key={`${blockKey}-li-${index}`} className="relative list-none text-[1rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-[1.0625rem]">
-            <span className="absolute -left-[1.35rem] top-3 h-2 w-2 rounded-full bg-emerald-500" />
+          <li
+            key={`${blockKey}-li-${index}`}
+            className="relative list-none font-body text-[1rem] font-light leading-8 text-white/85 [overflow-wrap:anywhere] sm:text-[1.0625rem]"
+          >
+            <span className="absolute -left-[1.35rem] top-3 h-1.5 w-1.5 rounded-full bg-white/50" />
             {renderInline(trimmed.replace('- ', ''))}
           </li>
         );
@@ -356,16 +409,11 @@ const BlogDetailPage: React.FC = () => {
           const caption = match[3] || alt;
           nodes.push(
             <figure key={`${blockKey}-fig-${index}`} className="my-12 sm:my-16">
-              <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-100 shadow-[0_24px_60px_-40px_rgba(24,24,27,0.6)] dark:border-white/10 dark:bg-white/[0.04]">
-                <img
-                  src={src}
-                  alt={alt}
-                  className="w-full object-cover"
-                  loading="lazy"
-                />
+              <div className="liquid-glass overflow-hidden rounded-[1.25rem]">
+                <img src={src} alt={alt} className="w-full object-cover" loading="lazy" />
               </div>
               {caption && (
-                <figcaption className="mt-4 text-center text-[13px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                <figcaption className="mt-4 text-center font-body text-[13px] font-light leading-relaxed text-white/50">
                   {caption}
                 </figcaption>
               )}
@@ -382,7 +430,7 @@ const BlogDetailPage: React.FC = () => {
           <h2
             key={`${blockKey}-h2-${index}`}
             id={headingId}
-            className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]"
+            className="mt-16 scroll-mt-28 border-t border-white/10 pt-10 font-heading italic text-[1.75rem] leading-tight tracking-[-1px] text-white sm:mt-20 sm:text-[2.25rem]"
           >
             {headingText}
           </h2>
@@ -397,7 +445,7 @@ const BlogDetailPage: React.FC = () => {
           <h3
             key={`${blockKey}-h3-${index}`}
             id={headingId}
-            className="mt-10 scroll-mt-28 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]"
+            className="mt-10 scroll-mt-28 font-heading italic text-[1.25rem] leading-snug tracking-tight text-white sm:text-[1.45rem]"
           >
             {headingText}
           </h3>
@@ -407,7 +455,10 @@ const BlogDetailPage: React.FC = () => {
 
       const cleanLine = trimmed.startsWith('# ') ? trimmed.replace('# ', '') : trimmed;
       nodes.push(
-        <p key={`${blockKey}-p-${index}`} className="my-6 text-[1rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-[1.0625rem] sm:leading-9">
+        <p
+          key={`${blockKey}-p-${index}`}
+          className="my-6 font-body text-[1rem] font-light leading-8 text-white/85 [overflow-wrap:anywhere] sm:text-[1.0625rem] sm:leading-9"
+        >
           {renderInline(cleanLine)}
         </p>
       );
@@ -439,19 +490,24 @@ const BlogDetailPage: React.FC = () => {
       const copied = copiedBlock === index;
 
       return (
-        <section key={`code-${index}`} className="my-10 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_24px_70px_-40px_rgba(0,0,0,0.9)] dark:bg-[#0f1117] sm:my-12">
-          <div className="flex min-h-12 items-center justify-between gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 sm:px-5">
+        <section
+          key={`code-${index}`}
+          className="liquid-glass-strong my-10 overflow-hidden rounded-[1.25rem] sm:my-12"
+        >
+          <div className="flex min-h-12 items-center justify-between gap-3 border-b border-white/10 px-4 py-3 sm:px-5">
             <div className="flex min-w-0 items-center gap-3">
-              <Terminal size={16} className="shrink-0 text-emerald-400" />
-              <span className="truncate text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-300">{lang}</span>
+              <Terminal size={16} className="shrink-0 text-white/60" />
+              <span className="truncate font-body text-[11px] font-medium uppercase tracking-[0.18em] text-white/70">
+                {lang}
+              </span>
             </div>
             <button
               type="button"
               onClick={() => handleCopy(code, index)}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-300 transition duration-200 hover:border-white/20 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/70 active:scale-[0.98]"
+              className="liquid-glass inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-3 font-body text-[11px] font-medium uppercase tracking-[0.12em] text-white/80 transition hover:text-white focus:outline-none focus:ring-1 focus:ring-white/30 active:scale-[0.98]"
               aria-label="複製程式碼"
             >
-              {copied ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} />}
+              {copied ? <Check size={15} className="text-white" /> : <Copy size={15} />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
@@ -463,39 +519,50 @@ const BlogDetailPage: React.FC = () => {
     });
   };
 
-  if (loading) return (
-    <div className="blog-detail-wrapper min-h-screen px-6 pt-32">
-      <div className="mx-auto max-w-3xl animate-pulse space-y-8">
-        <div className="h-11 w-32 rounded-2xl bg-black/5 dark:bg-white/10" />
-        <div className="space-y-4">
-          <div className="h-6 w-44 rounded-full bg-black/5 dark:bg-white/10" />
-          <div className="h-12 w-full rounded-2xl bg-black/5 dark:bg-white/10" />
-          <div className="h-12 w-4/5 rounded-2xl bg-black/5 dark:bg-white/10" />
-        </div>
-        <div className="h-72 rounded-[2rem] bg-black/5 dark:bg-white/10" />
-        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.3em] dark:text-white/30 text-morandi-stone/50">
-          <Loader2 className="animate-spin" size={16} /> Loading article
+  if (loading) {
+    return (
+      <div className="blog-cinematic min-h-screen bg-black px-6 pt-32">
+        <div className="mx-auto max-w-3xl animate-pulse space-y-8">
+          <div className="liquid-glass h-11 w-32 rounded-full" />
+          <div className="space-y-4">
+            <div className="liquid-glass h-6 w-44 rounded-full" />
+            <div className="liquid-glass h-12 w-full rounded-[1.25rem]" />
+            <div className="liquid-glass h-12 w-4/5 rounded-[1.25rem]" />
+          </div>
+          <div className="liquid-glass h-72 rounded-[1.25rem]" />
+          <div className="flex items-center gap-3 font-body text-[11px] font-light tracking-wide text-white/40">
+            <Loader2 className="animate-spin" size={16} /> Loading article
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!post) return (
-    <div className="blog-detail-wrapper flex min-h-screen items-center justify-center px-6 text-center">
-      <div className="max-w-md">
-        <h2 className="mb-4 text-3xl font-black tracking-tight dark:text-white text-morandi-slate">找不到這篇文章</h2>
-        <p className="mb-8 text-sm leading-7 dark:text-zinc-400 text-morandi-stone">文章可能已經移除，或目前無法從資料庫讀取。</p>
-        <Link to="/blog" className="inline-flex min-h-11 items-center justify-center gap-3 rounded-2xl bg-white px-5 text-[12px] font-bold tracking-[0.16em] text-zinc-950 transition hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/70">
-          <ArrowLeft size={16} /> 返回筆記
-        </Link>
+  if (!post) {
+    return (
+      <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black px-6 text-center">
+        <div className="liquid-glass max-w-md rounded-[1.25rem] p-10">
+          <h2 className="mb-4 font-heading italic text-3xl tracking-tight text-white">
+            找不到這篇文章
+          </h2>
+          <p className="mb-8 font-body text-sm font-light leading-7 text-white/60">
+            文章可能已經移除，或目前無法從資料庫讀取。
+          </p>
+          <Link
+            to="/blog"
+            className="liquid-glass-strong inline-flex min-h-11 items-center justify-center gap-3 rounded-full px-5 font-body text-sm font-medium text-white"
+          >
+            <ArrowLeft size={16} /> 返回筆記
+          </Link>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   const readingMinutes = getReadingMinutes(post.content || '');
 
   return (
-    <div className="blog-detail-wrapper">
+    <div className="blog-cinematic relative min-h-screen overflow-hidden bg-black">
       <SEOMeta
         title={post.title}
         description={post.excerpt?.replace(/^# /, '').slice(0, 160) || '技術筆記'}
@@ -514,202 +581,248 @@ const BlogDetailPage: React.FC = () => {
         datePublished={post.date}
         tags={post.category ? [post.category] : undefined}
       />
-      <BreadcrumbSchema items={[
-        { name: '首頁', path: '/' },
-        { name: '技術筆記', path: '/blog' },
-        { name: post.title.slice(0, 30), path: `/blog/${post.id}` },
-      ]} />
+      <BreadcrumbSchema
+        items={[
+          { name: '首頁', path: '/' },
+          { name: '技術筆記', path: '/blog' },
+          { name: post.title.slice(0, 30), path: `/blog/${post.id}` },
+        ]}
+      />
+
+      {/* Atmospheric video */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-25">
+        <FadingVideo
+          src={CAP_VIDEO}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/85 to-black" />
+      </div>
+
       <motion.div
-        className="fixed left-0 right-0 top-0 z-50 h-1 origin-left bg-emerald-500"
+        className="fixed left-0 right-0 top-0 z-50 h-[2px] origin-left bg-white/60"
         style={{ scaleX }}
       />
 
-      <header className="px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-32 lg:pb-16">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end lg:gap-12">
-          <div className="min-w-0">
-            <Link
-              to="/blog"
-              className="mb-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white/70 px-4 text-[12px] font-bold tracking-[0.12em] text-zinc-700 shadow-sm transition duration-200 hover:border-zinc-950 hover:text-zinc-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300 dark:hover:border-white/25 dark:hover:text-white"
-            >
-              <ArrowLeft size={16} /> 返回筆記
-            </Link>
+      <div className="relative z-10">
+        <header className="px-5 pb-10 pt-28 sm:px-8 sm:pb-14 sm:pt-32 lg:px-16 lg:pb-16">
+          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end lg:gap-12">
+            <div className="min-w-0">
+              <motion.div {...blurIn} transition={{ ...blurIn.transition, delay: 0.15 }}>
+                <Link
+                  to="/blog"
+                  className="liquid-glass mb-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 font-body text-[12px] font-medium tracking-wide text-white/90 transition hover:text-white"
+                >
+                  <ArrowLeft size={16} /> 返回筆記
+                </Link>
+              </motion.div>
 
-            <div className="mb-6 flex flex-wrap items-center gap-3 text-[12px] font-bold tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
-              <span className="rounded-full bg-zinc-950 px-3 py-1.5 text-white dark:bg-white dark:text-zinc-950">{post.category || '技術筆記'}</span>
-              <span>{post.date}</span>
-            </div>
-
-            <h1 className="max-w-5xl break-all text-[clamp(1.75rem,8.2vw,4.35rem)] font-black leading-[1.12] tracking-tight text-zinc-950 [overflow-wrap:anywhere] dark:text-white sm:break-words sm:leading-[1.08] sm:tracking-[-0.015em]">
-              {post.title}
-            </h1>
-          </div>
-
-          <div className="overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-200 shadow-[0_24px_80px_-50px_rgba(24,24,27,0.75)] dark:border-white/10 dark:bg-white/5">
-            <img
-              src={post.image}
-              alt={post.title}
-              className="aspect-[16/11] h-full w-full object-cover"
-              loading="eager"
-            />
-          </div>
-        </div>
-      </header>
-
-      <section className="border-y border-zinc-200 bg-white/65 px-5 py-6 backdrop-blur dark:border-white/10 dark:bg-white/[0.035] sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
-          <div className="max-w-3xl border-l-2 border-emerald-500 pl-5">
-            <div className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
-              <Info size={16} className="text-emerald-500" /> Summary
-            </div>
-            <p className="text-[1.08rem] leading-8 text-zinc-700 [overflow-wrap:anywhere] dark:text-zinc-300 sm:text-xl sm:leading-9">
-              {post.excerpt?.replace(/^# /, '')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
-            <MetaItem icon={<Calendar size={16} />} label="發布" value={post.date} />
-            <MetaItem icon={<Clock size={16} />} label="閱讀" value={`${readingMinutes} 分鐘`} />
-            <MetaItem icon={<Cpu size={16} />} label="難度" value="Expert" />
-          </div>
-        </div>
-      </section>
-
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-20 lg:py-20">
-        <article className="min-w-0">
-          <div className="content-rendered">
-            {renderContent(post.content || '')}
-          </div>
-
-          {/* ── Related posts ─────────────────────────────── */}
-          {related.length > 0 && (
-            <section className="mt-16 border-t border-zinc-200 pt-12 dark:border-white/10 sm:mt-20 sm:pt-14">
-              <div className="mb-6 flex items-center gap-3">
-                <span className="text-[10px] font-mono font-black uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400/70">
-                  // Related
+              <motion.div
+                {...blurIn}
+                transition={{ ...blurIn.transition, delay: 0.3 }}
+                className="mb-6 flex flex-wrap items-center gap-3"
+              >
+                <span className="liquid-glass-strong rounded-full px-3 py-1.5 font-body text-[11px] font-medium text-white">
+                  {post.category || '技術筆記'}
                 </span>
-                <span className="h-px flex-1 bg-zinc-200 dark:bg-white/10" />
-              </div>
-              <h2 className="mb-8 text-xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-2xl">
-                相關筆記
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {related.map((rp) => (
-                  <Link
-                    key={rp.id}
-                    to={`/blog/${rp.id}`}
-                    className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.05]"
-                  >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-black">
-                      <img
-                        src={rp.image}
-                        alt={rp.title}
-                        className="h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105 group-hover:opacity-65"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                      <span className="absolute left-3 top-3 rounded-lg border border-white/15 bg-black/50 px-2 py-1 text-[7px] font-black uppercase tracking-widest text-white/80 backdrop-blur-sm">
-                        {rp.category}
-                      </span>
-                    </div>
-                    <div className="p-4">
-                      <p className="mb-2 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-white/25">
-                        <Calendar size={10} className="text-emerald-500/50" />
-                        {rp.date}
-                      </p>
-                      <h3 className="mb-3 line-clamp-2 text-sm font-black leading-snug tracking-tight text-zinc-950 dark:text-white sm:text-base">
-                        {rp.title}
-                      </h3>
-                      <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400 transition-colors group-hover:text-emerald-500 dark:text-white/25">
-                        Read
-                        <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </article>
+                <span className="font-body text-[12px] font-light text-white/60">{post.date}</span>
+              </motion.div>
 
-        <aside className="lg:sticky lg:top-28 lg:h-fit space-y-5">
-          {/* ── TOC ───────────────────────────────────────── */}
-          {toc.length > 0 && (
-            <nav
-              aria-label="目錄"
-              className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]"
-            >
-              <div className="mb-4 flex items-center gap-3 border-b border-zinc-200 pb-4 dark:border-white/10">
-                <List size={17} className="text-emerald-500" />
-                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
-                  On This Page
-                </p>
+              <div className="max-w-5xl">
+                <BlurText
+                  text={post.title}
+                  align="start"
+                  className="font-heading italic text-[clamp(1.75rem,6.5vw,3.75rem)] leading-[0.95] tracking-[-2px] text-white"
+                  delay={0.25}
+                />
               </div>
-              <ul className="max-h-[min(50vh,360px)] space-y-1 overflow-y-auto pr-1">
-                {toc.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      onClick={() => scrollToHeading(item.id)}
-                      className={`
-                        w-full text-left rounded-xl px-2.5 py-2 text-[12px] leading-snug transition duration-200
-                        hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300
-                        focus:outline-none focus:ring-2 focus:ring-emerald-500/40
-                        ${item.level === 3
-                          ? 'pl-5 text-zinc-500 dark:text-zinc-400'
-                          : 'font-semibold text-zinc-700 dark:text-zinc-200'
-                        }
-                      `}
-                    >
-                      {item.text}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
-
-          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]">
-            <div className="mb-5 flex items-center gap-3 border-b border-zinc-200 pb-5 dark:border-white/10">
-              <Eye size={17} className="text-emerald-500" />
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">Article Tools</p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleShare}
-              className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950 px-4 text-[12px] font-bold tracking-[0.12em] text-white transition duration-200 hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/70 active:scale-[0.98] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+            <motion.div
+              {...blurIn}
+              transition={{ ...blurIn.transition, delay: 0.45 }}
+              className="liquid-glass overflow-hidden rounded-[1.25rem]"
             >
-              {shared ? <Check size={17} /> : <Share2 size={17} />}
-              {shared ? '已複製連結' : '分享文章'}
-            </button>
+              <img
+                src={post.image}
+                alt={post.title}
+                className="aspect-[16/11] h-full w-full object-cover opacity-80"
+                loading="eager"
+              />
+            </motion.div>
+          </div>
+        </header>
 
-            <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-              <div className="mb-2 flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                <Terminal size={16} />
-                <span className="text-[11px] font-black uppercase tracking-[0.16em]">Verified Note</span>
+        {/* Summary bar */}
+        <motion.section
+          {...blurIn}
+          transition={{ ...blurIn.transition, delay: 0.55 }}
+          className="px-5 py-6 sm:px-8 lg:px-16"
+        >
+          <div className="liquid-glass mx-auto grid max-w-7xl gap-6 rounded-[1.25rem] p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center">
+            <div className="max-w-3xl border-l border-white/20 pl-5">
+              <div className="mb-3 flex items-center gap-2 font-body text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
+                <Info size={14} className="text-white/50" /> Summary
               </div>
-              <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                內容以實務部署與可重現步驟為核心，建議依照自己的環境變數與版本差異調整。
+              <p className="font-body text-[1.05rem] font-light leading-8 text-white/90 [overflow-wrap:anywhere] sm:text-xl sm:leading-9">
+                {post.excerpt?.replace(/^# /, '')}
               </p>
             </div>
-          </div>
-        </aside>
-      </div>
 
-      <footer className="border-t border-zinc-200 px-5 py-14 text-center dark:border-white/10 sm:px-8">
-        <p className="text-[11px] font-black uppercase tracking-[0.35em] text-zinc-400 dark:text-zinc-600">Knowledge Core v3.1</p>
-      </footer>
+            <div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
+              <MetaItem icon={<Calendar size={16} />} label="發布" value={post.date} />
+              <MetaItem icon={<Clock size={16} />} label="閱讀" value={`${readingMinutes} 分鐘`} />
+              <MetaItem icon={<Cpu size={16} />} label="難度" value="Expert" />
+            </div>
+          </div>
+        </motion.section>
+
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-16 lg:px-16 lg:py-20">
+          <article className="min-w-0">
+            <div className="content-rendered">{renderContent(post.content || '')}</div>
+
+            {related.length > 0 && (
+              <section className="mt-16 border-t border-white/10 pt-12 sm:mt-20 sm:pt-14">
+                <p className="mb-4 font-body text-sm text-white/60">// Related</p>
+                <h2 className="mb-8 font-heading italic text-3xl tracking-[-1px] text-white sm:text-4xl">
+                  相關筆記
+                </h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {related.map((rp) => (
+                    <Link
+                      key={rp.id}
+                      to={`/blog/${rp.id}`}
+                      className="liquid-glass group block overflow-hidden rounded-[1.25rem] transition duration-500 hover:-translate-y-1"
+                    >
+                      <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                        <img
+                          src={rp.image}
+                          alt={rp.title}
+                          className="h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105 group-hover:opacity-65"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <span className="liquid-glass absolute left-3 top-3 rounded-full px-2.5 py-1 font-body text-[10px] font-medium text-white/90">
+                          {rp.category}
+                        </span>
+                      </div>
+                      <div className="relative z-10 p-4">
+                        <p className="mb-2 flex items-center gap-1.5 font-body text-[10px] font-medium text-white/50">
+                          <Calendar size={10} />
+                          {rp.date}
+                        </p>
+                        <h3 className="mb-3 line-clamp-2 font-heading italic text-lg leading-snug tracking-tight text-white">
+                          {rp.title}
+                        </h3>
+                        <span className="inline-flex items-center gap-1.5 font-body text-[11px] font-medium text-white/60 transition-colors group-hover:text-white">
+                          Read
+                          <ArrowUpRight size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </article>
+
+          <aside className="space-y-5 lg:sticky lg:top-28 lg:h-fit">
+            {toc.length > 0 && (
+              <nav
+                aria-label="目錄"
+                className="liquid-glass rounded-[1.25rem] p-5"
+              >
+                <div className="mb-4 flex items-center gap-3 border-b border-white/10 pb-4">
+                  <div className="liquid-glass flex h-9 w-9 items-center justify-center rounded-[0.75rem]">
+                    <List size={15} className="text-white/70" />
+                  </div>
+                  <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
+                    On This Page
+                  </p>
+                </div>
+                <ul className="max-h-[min(50vh,360px)] space-y-1 overflow-y-auto pr-1">
+                  {toc.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => scrollToHeading(item.id)}
+                        className={`
+                          w-full rounded-xl px-2.5 py-2 text-left font-body text-[12px] leading-snug transition duration-200
+                          hover:bg-white/5 hover:text-white focus:outline-none focus:ring-1 focus:ring-white/20
+                          ${
+                            item.level === 3
+                              ? 'pl-5 font-light text-white/50'
+                              : 'font-medium text-white/80'
+                          }
+                        `}
+                      >
+                        {item.text}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+
+            <div className="liquid-glass rounded-[1.25rem] p-5">
+              <div className="mb-5 flex items-center gap-3 border-b border-white/10 pb-5">
+                <div className="liquid-glass flex h-9 w-9 items-center justify-center rounded-[0.75rem]">
+                  <Eye size={15} className="text-white/70" />
+                </div>
+                <p className="font-body text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
+                  Article Tools
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="liquid-glass-strong inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-full px-4 font-body text-[12px] font-medium tracking-wide text-white transition active:scale-[0.98]"
+              >
+                {shared ? <Check size={17} /> : <Share2 size={17} />}
+                {shared ? '已複製連結' : '分享文章'}
+              </button>
+
+              <div className="liquid-glass mt-6 rounded-[1rem] p-4">
+                <div className="mb-2 flex items-center gap-2 text-white/70">
+                  <Terminal size={14} />
+                  <span className="font-body text-[11px] font-medium uppercase tracking-[0.14em]">
+                    Verified Note
+                  </span>
+                </div>
+                <p className="font-body text-sm font-light leading-6 text-white/70">
+                  內容以實務部署與可重現步驟為核心，建議依照自己的環境變數與版本差異調整。
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer className="border-t border-white/10 px-5 py-14 text-center sm:px-8">
+          <p className="font-heading italic text-xl tracking-tight text-white/40">
+            Knowledge Core
+          </p>
+          <p className="mt-2 font-body text-[11px] font-light tracking-[0.25em] uppercase text-white/25">
+            cinematic notes · liquid glass
+          </p>
+        </footer>
+      </div>
     </div>
   );
 };
 
-const MetaItem: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
-  <div className="rounded-2xl border border-zinc-200 bg-white px-3 py-4 dark:border-white/10 dark:bg-white/[0.04]">
-    <div className="mb-2 flex items-center justify-center gap-2 text-zinc-400 lg:justify-start">
+const MetaItem: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({
+  icon,
+  label,
+  value,
+}) => (
+  <div className="liquid-glass rounded-[1rem] px-3 py-4">
+    <div className="mb-2 flex items-center justify-center gap-2 text-white/50 lg:justify-start">
       {icon}
-      <span className="text-[10px] font-black tracking-[0.18em]">{label}</span>
+      <span className="font-body text-[10px] font-medium tracking-[0.14em]">{label}</span>
     </div>
-    <p className="truncate text-sm font-bold text-zinc-950 dark:text-white">{value}</p>
+    <p className="truncate font-heading italic text-lg tracking-tight text-white lg:text-xl">
+      {value}
+    </p>
   </div>
 );
 
