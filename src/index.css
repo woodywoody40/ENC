@@ -217,23 +217,6 @@ html.light .homepage-wrapper .border-white\/20 { border-color: rgba(45,52,54,0.2
 
 /* --- amber text kept as-is (works in both modes) --- */
 
-/* --- Keep hero section dark in light mode (editorial accent) --- */
-html.light .homepage-wrapper .hero-section,
-html.light .homepage-wrapper .hero-section .text-white { color: #fff; }
-html.light .homepage-wrapper .hero-section .text-white\/90 { color: rgba(255,255,255,0.9); }
-html.light .homepage-wrapper .hero-section .text-white\/80 { color: rgba(255,255,255,0.8); }
-html.light .homepage-wrapper .hero-section .text-white\/70 { color: rgba(255,255,255,0.7); }
-html.light .homepage-wrapper .hero-section .text-white\/60 { color: rgba(255,255,255,0.6); }
-html.light .homepage-wrapper .hero-section .text-white\/40 { color: rgba(255,255,255,0.4); }
-html.light .homepage-wrapper .hero-section .text-white\/30 { color: rgba(255,255,255,0.3); }
-html.light .homepage-wrapper .hero-section .text-white\/25 { color: rgba(255,255,255,0.25); }
-html.light .homepage-wrapper .hero-section .text-white\/15 { color: rgba(255,255,255,0.15); }
-html.light .homepage-wrapper .hero-section .text-white\/10 { color: rgba(255,255,255,0.1); }
-html.light .homepage-wrapper .hero-section .border-white\/15 { border-color: rgba(255,255,255,0.15); }
-html.light .homepage-wrapper .hero-section .border-white\/20 { border-color: rgba(255,255,255,0.2); }
-html.light .homepage-wrapper .hero-section .bg-white\/\[0\.06\] { background: rgba(255,255,255,0.06); }
-html.light .homepage-wrapper .hero-section .bg-white\/\[0\.008\] { background: rgba(255,255,255,0.008); }
-
 /* ==============================
    Navbar — Light mode support
    ============================== */

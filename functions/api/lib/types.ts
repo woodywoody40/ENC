@@ -98,13 +98,33 @@ export const rowToBlog = (r: BlogRow): ApiBlogPost => ({
   image: r.image ?? '',
 });
 
-export const json = (data: unknown, status = 200): Response =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-  });
+/** Public read cache: short browser TTL, longer edge, allow stale while revalidate */
+export const PUBLIC_CACHE = 'public, max-age=60, s-maxage=300, stale-while-revalidate=600';
+
+export const json = (
+  data: unknown,
+  status = 200,
+  cacheControl?: string,
+): Response => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json; charset=utf-8',
+  };
+  if (cacheControl) headers['Cache-Control'] = cacheControl;
+  return new Response(JSON.stringify(data), { status, headers });
+};
 
 export const errorJson = (message: string, status = 400): Response =>
   json({ error: message }, status);
 
 export const randomId = (): string => crypto.randomUUID();
+
+/** List endpoint: omit full markdown body to keep payloads small */
+export const rowToBlogSummary = (r: BlogRow): Omit<ApiBlogPost, 'content'> & { content?: string } => ({
+  id: r.id,
+  title: r.title,
+  excerpt: r.excerpt ?? '',
+  date: r.date ?? '',
+  category: r.category ?? '',
+  image: r.image ?? '',
+  content: '',
+});

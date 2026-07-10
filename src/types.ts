@@ -24,7 +24,8 @@ export interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
-  content: string;
+  /** Full markdown body; may be omitted/empty on list endpoints */
+  content?: string;
   date: string;
   category: string;
   image: string;

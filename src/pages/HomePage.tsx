@@ -79,41 +79,41 @@ function parseExperience(md: string): { title: string; date: string; bullets: st
 /*  HomePage                                                           */
 /* ================================================================== */
 const HomePage: React.FC = () => {
-  const [configs, setConfigs] = useState<any>({});
+  const [configs, setConfigs] = useState<Record<string, string>>({});
   const [projects, setProjects] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingSecondary, setLoadingSecondary] = useState(true);
 
   useEffect(() => {
-    const fetchAll = async () => {
+    // Prefer configs first so hero can paint immediately with real name/title
+    let cancelled = false;
+    (async () => {
       try {
-        const [cfg, proj, blog] = await Promise.all([
-          ConfigAPI.all(),
-          ProjectsAPI.list(),
-          BlogAPI.list(),
-        ]);
-        setConfigs(cfg || {});
-        setProjects(proj || []);
-        setPosts(blog || []);
+        const cfg = await ConfigAPI.all();
+        if (!cancelled) setConfigs(cfg || {});
       } catch (err) {
-        console.error('HomePage fetch error:', err);
-      } finally {
-        setLoading(false);
+        console.error('HomePage config fetch error:', err);
       }
-    };
-    fetchAll();
+    })();
+
+    (async () => {
+      try {
+        const [proj, blog] = await Promise.all([ProjectsAPI.list(), BlogAPI.list()]);
+        if (!cancelled) {
+          setProjects(proj || []);
+          setPosts(blog || []);
+        }
+      } catch (err) {
+        console.error('HomePage list fetch error:', err);
+      } finally {
+        if (!cancelled) setLoadingSecondary(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="homepage-wrapper min-h-[100dvh] flex flex-col items-center justify-center bg-[#08090c]">
-        <div className="w-4 h-4 rounded-full border border-white/[0.08] border-t-amber-400/50 animate-spin mb-4" />
-        <span className="text-[9px] font-semibold uppercase tracking-[0.4em] text-white/15">Loading</span>
-      </div>
-    );
-  }
-
-  /* ─── Real data from backend ─── */
+  /* ─── Real data from backend (defaults for instant first paint) ─── */
   const name = configs.resume_name || 'Woody Wu';
   const jobTitle = configs.resume_title || '系統維運工程師';
   const heroIntro = configs.hero_intro || '專注基礎架構、自動化部署與雲端維運，把複雜系統整理成可靠、可擴充的服務。';
@@ -122,8 +122,8 @@ const HomePage: React.FC = () => {
   const email = configs.resume_email || '';
   const github = configs.resume_github || '';
   const linkedin = configs.resume_linkedin || '';
-  const skills = parseSkills(configs.resume_skills);
-  const experiences = parseExperience(configs.resume_experience);
+  const skills = parseSkills(configs.resume_skills || '');
+  const experiences = parseExperience(configs.resume_experience || '');
   const statVm = configs.stat_vm || '';
   const statDefense = configs.stat_defense || '';
   const statUptime = configs.stat_uptime || '';
@@ -147,13 +147,24 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* ===== HERO ===== */}
-        <section className="relative min-h-[85dvh] flex items-center pt-24 pb-12 z-10">
-          <div className="absolute inset-0 z-0 overflow-hidden">
+        <section className="relative min-h-[85dvh] flex items-center pt-24 pb-12 z-10 overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            {/* Hero accent image — right side */}
+            <img
+              src="/hero-accent.webp"
+              alt=""
+              className="absolute right-0 top-1/2 -translate-y-1/2 h-[90%] w-auto max-w-[55%] object-contain opacity-15 dark:opacity-25 pointer-events-none select-none"
+            />
+            {/* Left-to-right gradient: matches page bg → transparent, revealing image on right */}
             <div
-              className="absolute inset-0 opacity-20"
+              className="absolute inset-0 z-[1]"
+              style={{ background: 'linear-gradient(to right, var(--bg-base, #08090c) 0%, color-mix(in srgb, var(--bg-base, #08090c), transparent 35%) 40%, transparent 75%)' }}
+            />
+            {/* Ambient amber/sky glow overlay */}
+            <div
+              className="absolute inset-0 opacity-20 z-[2]"
               style={{ background: 'linear-gradient(270deg, rgba(245,158,11,0.10) 0%, rgba(56,189,248,0.03) 25%, transparent 45%)' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-[1]" />
           </div>
 
           <div className="relative w-full max-w-7xl mx-auto px-6 md:px-8 z-10">
@@ -239,7 +250,11 @@ const HomePage: React.FC = () => {
                   <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <Briefcase size={16} className="text-amber-400" />
                   </div>
-                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">{projects.length}</div>
+                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                    {loadingSecondary && projects.length === 0 ? (
+                      <span className="inline-block h-8 w-10 rounded bg-white/10 animate-pulse" />
+                    ) : projects.length}
+                  </div>
                   <div className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.15em]">部署專案</div>
                   {projects.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-white/[0.04] text-[9px] text-white/25 font-medium truncate">
@@ -254,7 +269,11 @@ const HomePage: React.FC = () => {
                   <div className="w-9 h-9 rounded-xl bg-violet-500/10 border border-violet-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <BookOpen size={16} className="text-violet-400" />
                   </div>
-                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">{posts.length}</div>
+                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                    {loadingSecondary && posts.length === 0 ? (
+                      <span className="inline-block h-8 w-10 rounded bg-white/10 animate-pulse" />
+                    ) : posts.length}
+                  </div>
                   <div className="text-[10px] font-semibold text-white/40 uppercase tracking-[0.15em]">技術文章</div>
                   {posts.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-white/[0.04] text-[9px] text-white/25 font-medium truncate">
@@ -397,15 +416,22 @@ const HomePage: React.FC = () => {
                     <Briefcase size={11} /> 最近專案
                   </h3>
                 </Reveal>
+                {loadingSecondary && projects.length === 0 && (
+                  <div className="space-y-2">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="h-[72px] rounded-xl bg-white/[0.03] border border-white/[0.04] animate-pulse" />
+                    ))}
+                  </div>
+                )}
                 {projects.slice(0, 3).map((proj, i) => (
                   <Reveal key={proj.id} delay={80 + i * 60}>
                     <Link
-                      to={`/project/${proj.id}`}
+                      to={`/portfolio/${proj.id}`}
                       className="flex items-center gap-4 bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 hover:bg-white/[0.05] hover:border-white/10 transition-all duration-200 group"
                     >
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/[0.06] shrink-0">
                         {proj.image ? (
-                          <img src={proj.image} alt={proj.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" />
+                          <img src={proj.image} alt={proj.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"><Briefcase size={16} className="text-white/10" /></div>
                         )}
@@ -420,7 +446,7 @@ const HomePage: React.FC = () => {
                     </Link>
                   </Reveal>
                 ))}
-                {projects.length === 0 && (
+                {!loadingSecondary && projects.length === 0 && (
                   <div className="text-center py-8 text-white/15 text-xs font-medium">尚無專案</div>
                 )}
               </div>
@@ -432,6 +458,13 @@ const HomePage: React.FC = () => {
                     <BookOpen size={11} /> 最近文章
                   </h3>
                 </Reveal>
+                {loadingSecondary && posts.length === 0 && (
+                  <div className="space-y-2">
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="h-[72px] rounded-xl bg-white/[0.03] border border-white/[0.04] animate-pulse" />
+                    ))}
+                  </div>
+                )}
                 {posts.slice(0, 3).map((post, i) => (
                   <Reveal key={post.id} delay={80 + i * 60}>
                     <Link
@@ -440,7 +473,7 @@ const HomePage: React.FC = () => {
                     >
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-black/40 border border-white/[0.06] shrink-0">
                         {post.image ? (
-                          <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" />
+                          <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400" loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"><BookOpen size={16} className="text-white/10" /></div>
                         )}
@@ -455,7 +488,7 @@ const HomePage: React.FC = () => {
                     </Link>
                   </Reveal>
                 ))}
-                {posts.length === 0 && (
+                {!loadingSecondary && posts.length === 0 && (
                   <div className="text-center py-8 text-white/15 text-xs font-medium">尚無文章</div>
                 )}
               </div>

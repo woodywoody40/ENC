@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { BlogAPI } from '../services/apiClient';
-import { Calendar, ArrowRight, Loader2, Hash, Zap, Sparkles, BookOpen, Search } from 'lucide-react';
+import type { BlogPost } from '../types';
+import { Calendar, ArrowRight, Loader2, Zap, Sparkles, BookOpen, Search, X } from 'lucide-react';
 import { SEOMeta, BreadcrumbSchema } from '../lib/seo';
 
 const ALL_POSTS = '全部';
@@ -19,9 +20,19 @@ const itemVariants = {
 
 // ═════════════════════════════════════════════════════════════
 const BlogPage: React.FC = () => {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState(ALL_POSTS);
+
+  const qParam = searchParams.get('q') ?? '';
+  const categoryParam = searchParams.get('category');
+  const filter = categoryParam && categoryParam.trim() ? categoryParam : ALL_POSTS;
+  const [searchInput, setSearchInput] = useState(qParam);
+
+  // Keep local input in sync when URL q changes (e.g. browser back)
+  useEffect(() => {
+    setSearchInput(qParam);
+  }, [qParam]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -37,11 +48,61 @@ const BlogPage: React.FC = () => {
     fetchPosts();
   }, []);
 
-  const categories = [ALL_POSTS, ...Array.from(new Set(posts.map((p) => p.category || '未分類')))];
-  const filteredPosts = filter === ALL_POSTS ? posts : posts.filter((p) => p.category === filter);
+  const updateParams = useCallback(
+    (next: { q?: string; category?: string | null }) => {
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          if (next.q !== undefined) {
+            const trimmed = next.q.trim();
+            if (trimmed) params.set('q', trimmed);
+            else params.delete('q');
+          }
+          if (next.category !== undefined) {
+            if (next.category && next.category !== ALL_POSTS) params.set('category', next.category);
+            else params.delete('category');
+          }
+          return params;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
-  // Featured = first post when viewing ALL
-  const featuredPost = filter === ALL_POSTS && filteredPosts.length > 0 ? filteredPosts[0] : null;
+  // Debounce search → URL
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      if (searchInput.trim() === qParam.trim()) return;
+      updateParams({ q: searchInput });
+    }, 280);
+    return () => window.clearTimeout(t);
+  }, [searchInput, qParam, updateParams]);
+
+  const setFilter = (cat: string) => {
+    updateParams({ category: cat === ALL_POSTS ? null : cat });
+  };
+
+  const categories = useMemo(
+    () => [ALL_POSTS, ...Array.from(new Set(posts.map((p) => p.category || '未分類')))],
+    [posts]
+  );
+
+  const query = qParam.trim().toLowerCase();
+
+  const filteredPosts = useMemo(() => {
+    return posts.filter((p) => {
+      const catOk = filter === ALL_POSTS || p.category === filter;
+      if (!catOk) return false;
+      if (!query) return true;
+      const hay = `${p.title || ''} ${p.excerpt || ''} ${p.category || ''}`.toLowerCase();
+      return hay.includes(query);
+    });
+  }, [posts, filter, query]);
+
+  // Featured = first post when viewing ALL and no active search
+  const featuredPost =
+    filter === ALL_POSTS && !query && filteredPosts.length > 0 ? filteredPosts[0] : null;
   const gridPosts = featuredPost ? filteredPosts.slice(1) : filteredPosts;
 
   // ── Loading ──────────────────────────────────────────────
@@ -140,7 +201,69 @@ const BlogPage: React.FC = () => {
             >
               KNOWLEDGE BASE
             </motion.span>
+            <span className="w-px h-3 dark:bg-white/8 bg-black/8" />
+            <a
+              href="/rss.xml"
+              className="text-[9px] sm:text-[10px] font-mono tracking-[0.15em] dark:text-emerald-400/40 text-emerald-700/50 hover:dark:text-emerald-300 hover:text-emerald-700 transition-colors whitespace-nowrap"
+            >
+              RSS
+            </a>
           </div>
+
+          {/* ── Search ───────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-6 sm:mt-8"
+          >
+            <label className="relative block group">
+              <span className="sr-only">搜尋筆記</span>
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 dark:text-emerald-400/40 text-emerald-600/50 transition-colors group-focus-within:dark:text-emerald-400/80 group-focus-within:text-emerald-600"
+              />
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="搜尋標題、摘要、分類…"
+                className="
+                  w-full sm:max-w-xl
+                  pl-11 pr-11 py-3.5
+                  rounded-2xl
+                  text-sm font-medium tracking-wide
+                  dark:text-white text-morandi-slate
+                  dark:placeholder:text-white/20 placeholder:text-morandi-stone/35
+                  dark:bg-white/[0.03] bg-white/70
+                  border dark:border-white/[0.08] border-black/[0.06]
+                  dark:focus:border-emerald-500/40 focus:border-emerald-500/50
+                  dark:focus:bg-white/[0.05] focus:bg-white/90
+                  focus:outline-none focus:ring-2 focus:ring-emerald-500/20
+                  transition-all duration-300
+                  shadow-[0_12px_40px_-28px_rgba(16,185,129,0.35)]
+                "
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('');
+                    updateParams({ q: '' });
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg dark:text-white/30 text-morandi-stone/40 hover:dark:text-white/60 hover:text-morandi-slate dark:hover:bg-white/5 hover:bg-black/5 transition-colors"
+                  aria-label="清除搜尋"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </label>
+            {query && (
+              <p className="mt-3 text-[9px] font-mono tracking-[0.18em] dark:text-white/20 text-morandi-stone/35 uppercase">
+                QUERY :: <span className="dark:text-emerald-400/60 text-emerald-700/70">{query}</span>
+              </p>
+            )}
+          </motion.div>
 
           {/* ── Category filter ──────────────────────────── */}
           <motion.div
@@ -155,6 +278,7 @@ const BlogPage: React.FC = () => {
                   <span className="dark:text-white/8 text-morandi-stone/[0.07] mx-0.5 select-none text-xs font-extralight">/</span>
                 )}
                 <button
+                  type="button"
                   onClick={() => setFilter(cat)}
                   className={`
                     text-[10px] sm:text-[11px] font-mono font-black tracking-[0.2em] uppercase
@@ -182,11 +306,23 @@ const BlogPage: React.FC = () => {
             <div className="max-w-xs mx-auto">
               <BookOpen className="mx-auto mb-8 dark:text-white/5 text-morandi-slate/10" size={80} strokeWidth={0.8} />
               <p className="dark:text-white/20 text-morandi-stone/40 font-black uppercase tracking-[0.35em] text-[11px] mb-4">
-                此分類尚無任何筆記
+                {query ? '找不到符合的筆記' : '此分類尚無任何筆記'}
               </p>
               <p className="dark:text-white/10 text-morandi-stone/20 text-[9px] font-mono tracking-wider">
-                NO PROTOCOLS PUBLISHED
+                {query ? 'NO MATCHING PROTOCOLS' : 'NO PROTOCOLS PUBLISHED'}
               </p>
+              {(query || filter !== ALL_POSTS) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('');
+                    updateParams({ q: '', category: null });
+                  }}
+                  className="mt-8 text-[10px] font-mono font-black tracking-[0.2em] uppercase dark:text-emerald-400/70 text-emerald-700 hover:text-emerald-500 transition-colors"
+                >
+                  清除篩選
+                </button>
+              )}
             </div>
           </motion.div>
         ) : (
@@ -266,20 +402,14 @@ const BlogPage: React.FC = () => {
             {/* ── Grid Posts ──────────────────────────────── */}
             {gridPosts.length > 0 && (
               <motion.div
-                key={filter}
+                key={`${filter}::${query}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 relative z-10"
               >
                 <AnimatePresence mode="popLayout">
-                  {(featuredPost ? [featuredPost, ...gridPosts] : gridPosts).slice(featuredPost ? 0 : 0).map((post, idx) => {
-                    // Don't render featuredPost again in the grid - it's already shown above
-                    if (featuredPost && idx === 0 && filter === ALL_POSTS) return null;
-                    const actualIdx = featuredPost ? idx - 1 : idx;
-                    if (featuredPost && idx === 0) return null;
-
-                    return (
+                  {gridPosts.map((post) => (
                       <motion.article
                         key={post.id}
                         layout
@@ -337,8 +467,7 @@ const BlogPage: React.FC = () => {
                           </div>
                         </Link>
                       </motion.article>
-                    );
-                  })}
+                    ))}
                 </AnimatePresence>
               </motion.div>
             )}

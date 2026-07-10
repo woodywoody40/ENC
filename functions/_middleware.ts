@@ -19,7 +19,7 @@ interface MetaTags {
   };
 }
 
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=1200&h=630';
+const DEFAULT_IMAGE = `${SITE_URL}/hero-accent.webp`;
 
 const DEFAULT_META: MetaTags = {
   title: `${SITE_NAME}`,
@@ -30,21 +30,29 @@ const DEFAULT_META: MetaTags = {
 const STATIC_META: Record<string, MetaTags> = {
   '/blog': {
     title: `技術筆記 | ${SITE_NAME}`,
-    description: '開源專案深度分析、AI 開發者工具評測、系統維運經驗分享。每日更新 GitHub Trending 精選。',
+    description: 'Woody 的基礎架構與資安技術筆記 — Ubuntu 24.04、Netplan、VMware vSphere、Fortinet 防火牆、HPE 儲存架構調校。',
   },
   '/portfolio': {
     title: `作品集 | ${SITE_NAME}`,
-    description: 'Woody 的專案作品集 — Cloudflare Pages SPA、AI Agent 應用、系統維運工具、前端開發。',
+    description: 'Woody 的專案作品集 — 基礎架構、資安維運、自動化部署與雲端實戰。',
   },
   '/about': {
     title: `關於 | ${SITE_NAME}`,
-    description: '關於 Woody Wu — 網管工程師、基礎架構維運、AI 應用開發、開源技術愛好者。',
+    description: '關於 Woody Wu — 資深基礎架構與資安工程師，專注網管、維運與高可用架構。',
   },
   '/resume': {
     title: `履歷 | ${SITE_NAME}`,
     description: 'Woody Wu 的專業履歷 — 系統維運、網路架構設計、自動化部署與監控。',
   },
 };
+
+/** Safe blog/project id: slug or UUID (no path traversal) */
+const isSafeId = (id: string) =>
+  id.length > 0 &&
+  id.length <= 128 &&
+  !id.includes('/') &&
+  !id.includes('..') &&
+  /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(id);
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -114,7 +122,9 @@ function buildBreadcrumbLd(path: string, articleTitle?: string): string {
     else if (name === 'portfolio') name = '作品集';
     else if (name === 'about') name = '關於';
     else if (name === 'resume') name = '履歷';
-    else if (name.match(/^[0-9a-f-]{36}$/)) name = articleTitle || '(文章)';
+    else if (articleTitle && i === segments.length - 1) name = articleTitle;
+    else if (name.match(/^[0-9a-f-]{36}$/) || /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(name))
+      name = articleTitle || name;
     items.push({
       '@type': 'ListItem',
       position: i + 2,
@@ -208,9 +218,15 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
     path.startsWith('/media/') ||
     path.startsWith('/assets/') ||
     path === '/sitemap.xml' ||
+    path === '/rss.xml' ||
     path === '/manifest.json' ||
     path === '/robots.txt' ||
-    path === '/favicon.ico'
+    path === '/favicon.ico' ||
+    path === '/favicon.svg' ||
+    path === '/sw.js' ||
+    path.endsWith('.webp') ||
+    path.endsWith('.png') ||
+    path.endsWith('.jpg')
   ) {
     return next();
   }
@@ -231,8 +247,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
   let ssrContent: string | null = null;
 
   if (path.startsWith('/blog/') && path.length > '/blog/'.length) {
-    const postId = path.replace('/blog/', '');
-    if (/^[0-9a-f-]{36}$/.test(postId)) {
+    const postId = decodeURIComponent(path.slice('/blog/'.length).split('/')[0] || '');
+    if (isSafeId(postId)) {
       try {
         const result = await env.DB.prepare(
           'SELECT title, excerpt, image, date, category, content FROM blog_posts WHERE id = ?'
@@ -273,7 +289,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
               result.content || undefined,
             ),
           );
-          // SSR content for search engines (hidden div)
+          // Plain-text snapshot for non-JS crawlers (noscript, not display:none)
           if (result.content) {
             ssrContent = `# ${result.title}\n\n${result.excerpt ? result.excerpt + '\n\n' : ''}${result.content}`;
           }
@@ -289,6 +305,38 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
       meta = { ...(STATIC_META['/blog'] || DEFAULT_META), image: DEFAULT_IMAGE };
       ldScripts.push(buildBreadcrumbLd(path));
       ldScripts.push(buildCollectionPageLd(meta.description, `${SITE_URL}${path}`));
+    }
+  } else if (path.startsWith('/portfolio/') && path.length > '/portfolio/'.length) {
+    const projectId = decodeURIComponent(path.slice('/portfolio/'.length).split('/')[0] || '');
+    if (isSafeId(projectId)) {
+      try {
+        const result = await env.DB.prepare(
+          'SELECT title, description, image FROM projects WHERE id = ?'
+        ).bind(projectId).first<{
+          title: string;
+          description: string | null;
+          image: string | null;
+        }>();
+        if (result) {
+          meta = {
+            title: `${result.title} | ${SITE_NAME}`,
+            description: result.description || result.title,
+            image: result.image || DEFAULT_IMAGE,
+            ogType: 'website',
+          };
+          ldScripts.push(buildBreadcrumbLd(path, result.title));
+          ldScripts.push(buildWebPageLd(result.title, result.description || result.title, `${SITE_URL}${path}`));
+        } else {
+          meta = { ...DEFAULT_META, title: `專案未找到 | ${SITE_NAME}` };
+          ldScripts.push(buildBreadcrumbLd(path));
+        }
+      } catch {
+        meta = DEFAULT_META;
+        ldScripts.push(buildBreadcrumbLd(path));
+      }
+    } else {
+      meta = { ...(STATIC_META['/portfolio'] || DEFAULT_META), image: DEFAULT_IMAGE };
+      ldScripts.push(buildBreadcrumbLd(path));
     }
   } else if (path === '/blog') {
     meta = { ...(STATIC_META['/blog'] || DEFAULT_META), image: DEFAULT_IMAGE };
@@ -324,8 +372,8 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
     `<meta charset="UTF-8">\n    ${metaHtml}\n    ${jsonLdHtml}`,
   );
 
-  // Step 3.5: inject article content for search engines (SPA workaround)
-  // Googlebot sees full text without needing JS rendering
+  // Step 3.5: inject article text for non-JS crawlers via <noscript>
+  // Prefer noscript over display:none to avoid cloaking signals
   if (ssrContent) {
     const escaped = ssrContent
       .replace(/&/g, '&amp;')
@@ -335,7 +383,7 @@ export const onRequest: PagesFunction<Env> = async ({ request, next, env }) => {
       .replace(/'/g, '&#39;');
     modified = modified.replace(
       '</body>',
-      `<div style="display:none">${escaped}</div></body>`,
+      `<noscript><article class="ssr-article"><pre style="white-space:pre-wrap;font-family:inherit;max-width:72ch;margin:2rem auto;padding:1rem;line-height:1.6">${escaped}</pre></article></noscript></body>`,
     );
   }
 

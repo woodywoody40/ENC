@@ -92,7 +92,7 @@ ${blogPosts.map(p => urlTag(
   p.title,
 )).join('')}
 ${projects.map(p => urlTag(
-  `/projects/${p.id}`,
+  `/portfolio/${p.id}`,
   '0.8',
   'monthly',
   safeDate(p.created_at?.split(' ')[0]),

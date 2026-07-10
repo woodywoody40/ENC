@@ -12,13 +12,13 @@ import { ConfigAPI } from '../services/apiClient';
 
 // 證照圖片清單（位於 /media/certs/ 靜態目錄）
 const CERTIFICATE_IMAGES: { file: string; name: string; issuer: string }[] = [
-  { file: '/media/certs/ceh-certified-ethical-hacker.png',     name: 'Certified Ethical Hacker',        issuer: 'EC-Council' },
-  { file: '/media/certs/mikrotik-mtcna.png',                   name: 'MTCNA',                           issuer: 'MikroTik' },
-  { file: '/media/certs/erp-software-applications.png',        name: 'ERP 軟體應用師',                 issuer: '中華企業資源規劃學會' },
-  { file: '/media/certs/adobe-photoshop-certified.png',        name: 'Photoshop Certified',             issuer: 'Adobe' },
-  { file: '/media/certs/google-ads-measurement.png',           name: 'Google Ads Measurement',          issuer: 'Google' },
-  { file: '/media/certs/google-it-support.png',                name: 'IT Support Professional',         issuer: 'Google' },
-  { file: '/media/certs/ibm-program-manager.png',              name: 'Program Manager',                 issuer: 'IBM' },
+  { file: '/media/certs/ceh-certified-ethical-hacker.webp',     name: 'Certified Ethical Hacker',        issuer: 'EC-Council' },
+  { file: '/media/certs/mikrotik-mtcna.webp',                   name: 'MTCNA',                           issuer: 'MikroTik' },
+  { file: '/media/certs/erp-software-applications.webp',        name: 'ERP 軟體應用師',                 issuer: '中華企業資源規劃學會' },
+  { file: '/media/certs/adobe-photoshop-certified.webp',        name: 'Photoshop Certified',             issuer: 'Adobe' },
+  { file: '/media/certs/google-ads-measurement.webp',           name: 'Google Ads Measurement',          issuer: 'Google' },
+  { file: '/media/certs/google-it-support.webp',                name: 'IT Support Professional',         issuer: 'Google' },
+  { file: '/media/certs/ibm-program-manager.webp',              name: 'Program Manager',                 issuer: 'IBM' },
 ];
 
 const ResumePage: React.FC = () => {

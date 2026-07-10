@@ -1,4 +1,4 @@
-import { rowToBlog, json, errorJson, type Env, type BlogRow } from '../lib/types';
+import { rowToBlog, json, errorJson, PUBLIC_CACHE, type Env, type BlogRow } from '../lib/types';
 import { requireAuth } from '../lib/auth';
 
 export const onRequestGet: PagesFunction<Env> = async ({ env, params }) => {
@@ -6,7 +6,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, params }) => {
     .bind(params.id as string)
     .first<BlogRow>();
   if (!row) return errorJson('Blog post not found', 404);
-  return json(rowToBlog(row));
+  return json(rowToBlog(row), 200, PUBLIC_CACHE);
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {
@@ -19,16 +19,18 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
   await context.env.DB.prepare(
     `UPDATE blog_posts
         SET title=?, excerpt=?, content=?, date=?, category=?, image=?
-      WHERE id=?`
-  ).bind(
-    body.title || '',
-    body.excerpt || '',
-    body.content || '',
-    body.date || new Date().toISOString().split('T')[0],
-    body.category || '',
-    body.image || '',
-    id,
-  ).run();
+      WHERE id=?`,
+  )
+    .bind(
+      body.title || '',
+      body.excerpt || '',
+      body.content || '',
+      body.date || new Date().toISOString().split('T')[0],
+      body.category || '',
+      body.image || '',
+      id,
+    )
+    .run();
 
   const row = await context.env.DB.prepare('SELECT * FROM blog_posts WHERE id = ?')
     .bind(id)

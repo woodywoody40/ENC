@@ -3,7 +3,5 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Crawl-delay: 10
-
 # 主 Sitemap（由 Cloudflare Function 動態生成）
 Sitemap: https://xn--hrrs16bo6z.com/sitemap.xml

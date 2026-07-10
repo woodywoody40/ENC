@@ -1,4 +1,4 @@
-import { rowToProject, json, errorJson, type Env, type ProjectRow } from '../lib/types';
+import { rowToProject, json, errorJson, PUBLIC_CACHE, type Env, type ProjectRow } from '../lib/types';
 import { requireAuth } from '../lib/auth';
 
 // GET /api/projects/:id
@@ -9,7 +9,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env, params }) => {
     .bind(params.id as string)
     .first<ProjectRow>();
   if (!row) return errorJson('Project not found', 404);
-  return json(rowToProject(row));
+  return json(rowToProject(row), 200, PUBLIC_CACHE);
 };
 
 export const onRequestPut: PagesFunction<Env> = async (context) => {

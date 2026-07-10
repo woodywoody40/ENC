@@ -2,6 +2,8 @@
 // 專案改用 Cloudflare D1 + Pages Functions 後端；前端透過 fetch 與同源 /api 通訊。
 // GET 為公開公開讀取；寫入端點（POST/PUT/DELETE/upload）由 Cloudflare Access JWT 守護。
 
+import type { BlogPost, Project } from '../types';
+
 const BASE = '/api';
 
 const handleRes = async <T>(res: Response): Promise<T | undefined> => {
@@ -47,18 +49,18 @@ export const apiClient = {
 
 // ===== 便利方法 =====
 export const ProjectsAPI = {
-  list: () => apiClient.get<any[]>('/projects'),
-  get: (id: string) => apiClient.get<any>(`/projects/${id}`),
-  create: (data: any) => apiClient.post<any>('/projects', data),
-  update: (id: string, data: any) => apiClient.put<any>(`/projects/${id}`, data),
+  list: () => apiClient.get<Project[]>('/projects'),
+  get: (id: string) => apiClient.get<Project>(`/projects/${id}`),
+  create: (data: Partial<Project>) => apiClient.post<Project>('/projects', data),
+  update: (id: string, data: Partial<Project>) => apiClient.put<Project>(`/projects/${id}`, data),
   remove: (id: string) => apiClient.del(`/projects/${id}`),
 };
 
 export const BlogAPI = {
-  list: () => apiClient.get<any[]>('/blog'),
-  get: (id: string) => apiClient.get<any>(`/blog/${id}`),
-  create: (data: any) => apiClient.post<any>('/blog', data),
-  update: (id: string, data: any) => apiClient.put<any>(`/blog/${id}`, data),
+  list: () => apiClient.get<BlogPost[]>('/blog'),
+  get: (id: string) => apiClient.get<BlogPost>(`/blog/${id}`),
+  create: (data: Partial<BlogPost>) => apiClient.post<BlogPost>('/blog', data),
+  update: (id: string, data: Partial<BlogPost>) => apiClient.put<BlogPost>(`/blog/${id}`, data),
   remove: (id: string) => apiClient.del(`/blog/${id}`),
 };
 

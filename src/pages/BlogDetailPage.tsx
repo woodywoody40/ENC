@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { BlogAPI } from '../services/apiClient';
-import { BLOG_POSTS } from '../constants';
+import type { BlogPost } from '../types';
 import { SEOMeta, BlogPostSchema, BreadcrumbSchema } from '../lib/seo';
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
   Check,
   Clock,
@@ -13,10 +14,13 @@ import {
   Cpu,
   Eye,
   Info,
+  List,
   Loader2,
   Share2,
   Terminal,
 } from 'lucide-react';
+
+type TocItem = { id: string; text: string; level: 2 | 3 };
 
 const escapeHtml = (value: string) =>
   value
@@ -25,6 +29,79 @@ const escapeHtml = (value: string) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+
+const slugify = (text: string) => {
+  const base = text
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  return base || 'section';
+};
+
+/** Build unique slug ids for ## / ### headings (order-stable). */
+const buildHeadingSlugs = (content: string): Map<string, string> => {
+  const used = new Map<string, number>();
+  const byKey = new Map<string, string>(); // "level|index|text" → id
+
+  const lines = content.replace(/```[\s\S]*?```/g, (block) => block.replace(/[^\n]/g, ' ')).split('\n');
+  let headingIndex = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    let text: string | null = null;
+    let level: 2 | 3 | null = null;
+
+    if (trimmed.match(/^##\s+/) && !trimmed.match(/^###\s+/)) {
+      text = trimmed.replace(/^##\s+/, '');
+      level = 2;
+    } else if (trimmed.startsWith('### ')) {
+      text = trimmed.replace(/^###\s+/, '');
+      level = 3;
+    }
+
+    if (text !== null && level !== null) {
+      let id = slugify(text);
+      const count = used.get(id) ?? 0;
+      used.set(id, count + 1);
+      if (count > 0) id = `${id}-${count + 1}`;
+      byKey.set(`${level}|${headingIndex}|${text}`, id);
+      headingIndex++;
+    }
+  }
+
+  return byKey;
+};
+
+const extractToc = (content: string, slugMap: Map<string, string>): TocItem[] => {
+  const items: TocItem[] = [];
+  const lines = content.replace(/```[\s\S]*?```/g, (block) => block.replace(/[^\n]/g, ' ')).split('\n');
+  let headingIndex = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    let text: string | null = null;
+    let level: 2 | 3 | null = null;
+
+    if (trimmed.match(/^##\s+/) && !trimmed.match(/^###\s+/)) {
+      text = trimmed.replace(/^##\s+/, '');
+      level = 2;
+    } else if (trimmed.startsWith('### ')) {
+      text = trimmed.replace(/^###\s+/, '');
+      level = 3;
+    }
+
+    if (text !== null && level !== null) {
+      const id = slugMap.get(`${level}|${headingIndex}|${text}`) || slugify(text);
+      items.push({ id, text, level });
+      headingIndex++;
+    }
+  }
+
+  return items;
+};
 
 const renderInline = (text: string) =>
   text.split(/(\*\*.*?\*\*)/g).map((part, idx) => (
@@ -43,7 +120,8 @@ const getReadingMinutes = (content = '') => {
 
 const BlogDetailPage: React.FC = () => {
   const { id } = useParams();
-  const [post, setPost] = useState<any>(null);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [related, setRelated] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedBlock, setCopiedBlock] = useState<number | null>(null);
   const [shared, setShared] = useState(false);
@@ -57,16 +135,12 @@ const BlogDetailPage: React.FC = () => {
 
   useEffect(() => {
     const fetchPost = async () => {
-      const staticPost = BLOG_POSTS.find((p) => p.id === id);
-      if (staticPost) {
-        setPost(staticPost);
-        setLoading(false);
-        return;
-      }
-
+      setLoading(true);
+      setPost(null);
+      setRelated([]);
       try {
         const data = await BlogAPI.get(id as string);
-        setPost(data);
+        setPost(data ?? null);
       } catch (err) {
         console.error('Fetch blog post error:', err);
       } finally {
@@ -76,6 +150,44 @@ const BlogDetailPage: React.FC = () => {
 
     fetchPost();
   }, [id]);
+
+  useEffect(() => {
+    if (!post?.id) return;
+
+    const fetchRelated = async () => {
+      try {
+        const list = (await BlogAPI.list()) || [];
+        const same = list
+          .filter((p) => p.id !== post.id && p.category && p.category === post.category)
+          .slice(0, 3);
+        // Fallback: other posts if not enough in same category
+        const filled =
+          same.length >= 2
+            ? same
+            : [
+                ...same,
+                ...list.filter((p) => p.id !== post.id && !same.some((s) => s.id === p.id)).slice(0, 3 - same.length),
+              ].slice(0, 3);
+        setRelated(filled);
+      } catch (err) {
+        console.error('Fetch related posts error:', err);
+      }
+    };
+
+    fetchRelated();
+  }, [post?.id, post?.category]);
+
+  const slugMap = useMemo(() => buildHeadingSlugs(post?.content || ''), [post?.content]);
+  const toc = useMemo(() => extractToc(post?.content || '', slugMap), [post?.content, slugMap]);
+
+  const scrollToHeading = (headingId: string) => {
+    const el = document.getElementById(headingId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Update hash without jump
+      window.history.replaceState(null, '', `#${headingId}`);
+    }
+  };
 
   const highlightCode = (code: string) => {
     const lines = code.trim().split('\n');
@@ -96,7 +208,7 @@ const BlogDetailPage: React.FC = () => {
 
       while (pos < line.length) {
         let nearestMatch: RegExpExecArray | null = null;
-        let nearestToken: any = null;
+        let nearestToken: (typeof tokens)[number] | null = null;
 
         for (const token of tokens) {
           token.regex.lastIndex = pos;
@@ -107,7 +219,7 @@ const BlogDetailPage: React.FC = () => {
           }
         }
 
-        if (nearestMatch && nearestMatch.index === pos) {
+        if (nearestMatch && nearestMatch.index === pos && nearestToken) {
           highlighted += `<span class="${nearestToken.cls}">${escapeHtml(nearestMatch[0])}</span>`;
           pos += nearestMatch[0].length;
         } else {
@@ -153,7 +265,7 @@ const BlogDetailPage: React.FC = () => {
     }
   };
 
-  const renderTextLines = (text: string, blockKey: string) => {
+  const renderTextLines = (text: string, blockKey: string, headingIds: string[], headingIndex: { i: number }) => {
     const lines = text.split('\n');
     const nodes: React.ReactNode[] = [];
     let listItems: React.ReactNode[] = [];
@@ -263,19 +375,31 @@ const BlogDetailPage: React.FC = () => {
         }
       }
 
-      if (trimmed.match(/^##\s+/)) {
+      if (trimmed.match(/^##\s+/) && !trimmed.match(/^###\s+/)) {
+        const headingText = trimmed.replace(/^##\s+/, '');
+        const headingId = headingIds[headingIndex.i++] || slugify(headingText);
         nodes.push(
-          <h2 key={`${blockKey}-h2-${index}`} className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]">
-            {trimmed.replace('## ', '')}
+          <h2
+            key={`${blockKey}-h2-${index}`}
+            id={headingId}
+            className="mt-16 scroll-mt-28 border-t border-zinc-200 pt-10 text-[1.75rem] font-black leading-tight tracking-tight text-zinc-950 dark:border-white/10 dark:text-white sm:mt-20 sm:text-[2.25rem]"
+          >
+            {headingText}
           </h2>
         );
         return;
       }
 
       if (trimmed.startsWith('### ')) {
+        const headingText = trimmed.replace(/^###\s+/, '');
+        const headingId = headingIds[headingIndex.i++] || slugify(headingText);
         nodes.push(
-          <h3 key={`${blockKey}-h3-${index}`} className="mt-10 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]">
-            {trimmed.replace('### ', '')}
+          <h3
+            key={`${blockKey}-h3-${index}`}
+            id={headingId}
+            className="mt-10 scroll-mt-28 text-[1.2rem] font-bold leading-snug text-zinc-950 dark:text-white sm:text-[1.45rem]"
+          >
+            {headingText}
           </h3>
         );
         return;
@@ -296,11 +420,17 @@ const BlogDetailPage: React.FC = () => {
 
   const renderContent = (content: string) => {
     if (!content) return null;
+    const headingIds = toc.map((t) => t.id);
+    const headingIndex = { i: 0 };
     const parts = content.split(/(```[\s\S]*?```)/g);
 
     return parts.map((part, index) => {
       if (!part.startsWith('```')) {
-        return <React.Fragment key={`text-${index}`}>{renderTextLines(part, `text-${index}`)}</React.Fragment>;
+        return (
+          <React.Fragment key={`text-${index}`}>
+            {renderTextLines(part, `text-${index}`, headingIds, headingIndex)}
+          </React.Fragment>
+        );
       }
 
       const match = part.match(/```(\w+)?\n?([\s\S]*?)```/);
@@ -362,7 +492,7 @@ const BlogDetailPage: React.FC = () => {
     </div>
   );
 
-  const readingMinutes = getReadingMinutes(post.content);
+  const readingMinutes = getReadingMinutes(post.content || '');
 
   return (
     <div className="blog-detail-wrapper">
@@ -447,11 +577,97 @@ const BlogDetailPage: React.FC = () => {
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,76ch)_300px] lg:gap-20 lg:py-20">
         <article className="min-w-0">
           <div className="content-rendered">
-            {renderContent(post.content)}
+            {renderContent(post.content || '')}
           </div>
+
+          {/* ── Related posts ─────────────────────────────── */}
+          {related.length > 0 && (
+            <section className="mt-16 border-t border-zinc-200 pt-12 dark:border-white/10 sm:mt-20 sm:pt-14">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="text-[10px] font-mono font-black uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400/70">
+                  // Related
+                </span>
+                <span className="h-px flex-1 bg-zinc-200 dark:bg-white/10" />
+              </div>
+              <h2 className="mb-8 text-xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-2xl">
+                相關筆記
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((rp) => (
+                  <Link
+                    key={rp.id}
+                    to={`/blog/${rp.id}`}
+                    className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 transition duration-300 hover:-translate-y-1 hover:border-emerald-500/30 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.05]"
+                  >
+                    <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                      <img
+                        src={rp.image}
+                        alt={rp.title}
+                        className="h-full w-full object-cover opacity-45 transition duration-700 group-hover:scale-105 group-hover:opacity-65"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <span className="absolute left-3 top-3 rounded-lg border border-white/15 bg-black/50 px-2 py-1 text-[7px] font-black uppercase tracking-widest text-white/80 backdrop-blur-sm">
+                        {rp.category}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <p className="mb-2 flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-white/25">
+                        <Calendar size={10} className="text-emerald-500/50" />
+                        {rp.date}
+                      </p>
+                      <h3 className="mb-3 line-clamp-2 text-sm font-black leading-snug tracking-tight text-zinc-950 dark:text-white sm:text-base">
+                        {rp.title}
+                      </h3>
+                      <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400 transition-colors group-hover:text-emerald-500 dark:text-white/25">
+                        Read
+                        <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </article>
 
-        <aside className="lg:sticky lg:top-28 lg:h-fit">
+        <aside className="lg:sticky lg:top-28 lg:h-fit space-y-5">
+          {/* ── TOC ───────────────────────────────────────── */}
+          {toc.length > 0 && (
+            <nav
+              aria-label="目錄"
+              className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]"
+            >
+              <div className="mb-4 flex items-center gap-3 border-b border-zinc-200 pb-4 dark:border-white/10">
+                <List size={17} className="text-emerald-500" />
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
+                  On This Page
+                </p>
+              </div>
+              <ul className="max-h-[min(50vh,360px)] space-y-1 overflow-y-auto pr-1">
+                {toc.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => scrollToHeading(item.id)}
+                      className={`
+                        w-full text-left rounded-xl px-2.5 py-2 text-[12px] leading-snug transition duration-200
+                        hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300
+                        focus:outline-none focus:ring-2 focus:ring-emerald-500/40
+                        ${item.level === 3
+                          ? 'pl-5 text-zinc-500 dark:text-zinc-400'
+                          : 'font-semibold text-zinc-700 dark:text-zinc-200'
+                        }
+                      `}
+                    >
+                      {item.text}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+
           <div className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-[0_18px_60px_-45px_rgba(24,24,27,0.7)] dark:border-white/10 dark:bg-white/[0.04]">
             <div className="mb-5 flex items-center gap-3 border-b border-zinc-200 pb-5 dark:border-white/10">
               <Eye size={17} className="text-emerald-500" />

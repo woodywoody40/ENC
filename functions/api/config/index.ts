@@ -1,5 +1,4 @@
-import { json, type Env, type ConfigRow } from '../lib/types';
-import { requireAuth } from '../lib/auth';
+import { json, PUBLIC_CACHE, type Env, type ConfigRow } from '../lib/types';
 
 // GET /api/config -> 回傳 { key: value } 物件
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
@@ -8,5 +7,5 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   for (const row of result.results || []) {
     map[row.key] = row.value ?? '';
   }
-  return json(map);
+  return json(map, 200, PUBLIC_CACHE);
 };

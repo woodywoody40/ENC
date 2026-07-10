@@ -1,11 +1,11 @@
-import { rowToProject, json, errorJson, randomId, type Env, type ProjectRow } from '../lib/types';
+import { rowToProject, json, errorJson, randomId, PUBLIC_CACHE, type Env, type ProjectRow } from '../lib/types';
 import { requireAuth } from '../lib/auth';
 
 // GET /api/projects          -> 列出全部（依 created_at desc）
 // POST /api/projects         -> 新增（需 Access 認證）
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   const result = await env.DB.prepare('SELECT * FROM projects ORDER BY created_at DESC').all<ProjectRow>();
-  return json((result.results || []).map(rowToProject));
+  return json((result.results || []).map(rowToProject), 200, PUBLIC_CACHE);
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {

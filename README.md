@@ -1,23 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Woody 維運實踐
 
-# Run and deploy your AI Studio app
+個人技術站：網管 / 資安 / 基礎架構維運筆記、作品集與履歷。
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/10FT_brxD4yyVi7cvp6YtqKs0DyIR2fmI
+**Production:** https://xn--hrrs16bo6z.com/
 
 ## Architecture
 
-雲端架構已由 Supabase 全面遷移至 Cloudflare 全家桶：
-
-- **Frontend**: React + Vite SPA（HashRouter）
-- **Backend**: Cloudflare Pages Functions（`functions/api/*`）
-- **Database**: Cloudflare D1（SQLite），三張表：`projects` / `blog_posts` / `site_configs`
-- **Storage**: Cloudflare R2（`MEDIA` binding），透過 `/media/<key>` 公開提供
-- **Auth**: Cloudflare Access。後端以 `jose` 驗證 `Cf-Access-Jwt-Assertion` JWT。
-  讀取 API 公開；寫入 API（POST/PUT/DELETE/upload）需通過 Access。
+| Layer | Stack |
+|-------|--------|
+| Frontend | React 19 + Vite SPA（`BrowserRouter`） |
+| Backend | Cloudflare Pages Functions（`functions/api/*`） |
+| Database | Cloudflare D1（`projects` / `blog_posts` / `site_configs`） |
+| Storage | Cloudflare R2（`MEDIA`），公開路徑 `/media/<key>` |
+| Auth | Cloudflare Access + `jose` 驗 JWT（寫入 API） |
+| SEO | Edge HTML meta 注入、動態 `/sitemap.xml`、`/rss.xml` |
 
 ```
 Browser ──> /api/*  ─>  Pages Function ─> D1 / R2
@@ -25,48 +21,76 @@ Browser ──> /api/*  ─>  Pages Function ─> D1 / R2
                 └─> /admin (Cloudflare Access policy)
 ```
 
+公開 **GET** 讀取；**POST/PUT/DELETE/upload** 需通過 Access。
+
 ## Run Locally
 
-**Prerequisites:** Node.js, Cloudflare 帳號（已安裝 `wrangler` 並完成 `wrangler login`）
+**Prerequisites:** Node.js、`wrangler login`
 
-1. 安裝依賴：
-   `npm install`
-2. 設定 `VITE_GEMINI_API_KEY` 在 `.env.local` 以使用 AI 助理（前端使用）
-3. 建立 D1 資料庫與 R2 bucket 並更新 `wrangler.jsonc` 的 `database_id`：
+1. `npm install`
+2. （可選）`.env.local` 設定 `VITE_GEMINI_API_KEY`（若使用前端 AI 功能）
+3. 建立 D1 / R2 並更新 `wrangler.jsonc` 的 `database_id`：
    ```bash
    wrangler d1 create woody-portfolio
    wrangler r2 bucket create woody-media
    ```
-4. 初始化資料庫（含預設種子資料）：
+4. 初始化 schema：
    ```bash
    npm run db:init          # 本地
-   npm run db:init:remote   # 遠端（部署後執行）
+   npm run db:init:remote   # 遠端
    ```
-5. 同時執行 Vite 與 Pages Functions（含 D1/R2 本地模擬）：
-   `npm run pages:dev`
-6. 開啟 `http://localhost:8788`
+5. 同時跑 Vite + Pages Functions：
+   ```bash
+   npm run pages:dev
+   ```
+6. 開啟 http://localhost:8788
 
-> 若只需前端開發，仍可使用 `npm run dev`；但所有 `/api/*` 請求需有 Pages Functions 才能運作。
+僅前端 UI 可用 `npm run dev`（`/api/*` 需 Pages Functions 才會通）。
 
-## Cloudflare Access 設定
+## Scripts
 
-1. 在 Cloudflare Zero Trust 後台建立 Application
-2. Path 設為 `/admin*`（即只保護管理介面）
-3. 取得 **Application AUD** 並填入 `wrangler.jsonc` 的 `CF_ACCESS_AUD`
-4. 填入 `CF_ACCESS_TEAM`（例：`acme.cloudflareaccess.com`）
-5. 建 Access Policy（限制 email 或 email domain）
-6. 完成 Access Application 後，前往 `/admin` 會自動轉至 SSO 登入頁
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Vite 開發伺服器 |
+| `npm run build` | `tsc` + 生產建置 → `dist/` |
+| `npm run preview` | 預覽建置結果 |
+| `npm run pages:dev` | Wrangler Pages + Vite（含 D1/R2） |
+| `npm run db:init` | 本地 D1 schema |
+| `npm run db:init:remote` | 遠端 D1 schema |
 
-> 後端如何驗證 `/api/*` 的寫入請求？
-> Access 登入成功後 Cloudflare 會在該 domain 寫入 `CF_AU` cookie（內容即 JWT）。
-> 此 cookie 會隨所有同源 fetch 請求自動攜帶；後端 `functions/api/lib/auth.ts`
-> 會從 `Cf-Access-Jwt-Assertion` header 或 `CF_AU` cookie 兩處擇一驗簽，
-> 故只需保護 `/admin*` 即可，公開讀取 API 不受影響。
+## SEO / Feeds
 
-## Deploy to Cloudflare Pages
+- Sitemap: `/sitemap.xml`（靜態頁 + 文章 + `/portfolio/:id`）
+- RSS: `/rss.xml`
+- robots: 允許全站，Disallow `/admin`、`/api/`
+- 文章 slug 與 UUID 皆支援 edge meta / JSON-LD
 
-1. `npm run build`
-2. `wrangler pages deploy dist --project-name=woody-portfolio`
-3. 部署後再執行 `npm run db:init:remote` 啟用資料表與種子資料
-4. 在 Pages 專案設定中確認 `wrangler.jsonc` 的 bindings 已生效
-5. 在 Cloudflare Zero Trust 中將 Pages domain 加入 Access 應用，並保護 `/admin*` 與 `/api/projects*`（write methods）等敏感路由
+## Cloudflare Access
+
+1. Zero Trust 建立 Application，Path：`/admin*`
+2. 將 **AUD**、**Team** 填入 `wrangler.jsonc` 的 `CF_ACCESS_AUD` / `CF_ACCESS_TEAM`
+3. Policy 限制 email / domain
+4. 寫入 API 會讀 `Cf-Access-Jwt-Assertion` 或 `CF_AU` cookie
+
+## Deploy
+
+```bash
+npm run build
+wrangler pages deploy dist --project-name=woody-portfolio
+# 首次或 schema 變更後：
+npm run db:init:remote
+```
+
+確認 Pages 專案 bindings（D1 / R2）與 Access 規則生效。
+
+## Project layout
+
+```
+pages/           # 路由頁面
+components/      # Navbar、Admin 編輯器等
+functions/api/   # REST API
+functions/       # sitemap.xml.ts、rss.xml.ts、edge SEO middleware
+lib/seo.tsx      # Helmet + JSON-LD
+services/        # apiClient、gemini
+public/          # 靜態資產、SW、favicon
+```
