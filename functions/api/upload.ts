@@ -11,9 +11,10 @@ const EXT: Record<string, string> = {
   'video/webm': '.webm',
 };
 
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30 MB
+
 // POST /api/upload  (multipart/form-data with field "file")
-// -> { url } : 回傳 R2 物件的公開 URL（透過 /media/ 路由或 R2 custom domain）
-//   這裡回傳 /media/<key>（需要 R2 bucket public access 或 custom domain 設定）
+// -> { url, key } : 回傳 R2 物件的公開 URL
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const auth = await requireAuth(context.request, context.env);
   if (auth instanceof Response) return auth;
@@ -22,11 +23,20 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const file = formData.get('file');
   if (!(file instanceof File)) return errorJson('file 欄位為必填', 400);
 
-  const ext = EXT[file.type] || '.' + (file.name.split('.').pop() || 'bin');
+  if (file.size > MAX_FILE_SIZE) {
+    return errorJson('檔案大小超過上限 (30MB)', 400);
+  }
+
+  const mimeType = file.type?.toLowerCase() || '';
+  const ext = EXT[mimeType];
+  if (!ext) {
+    return errorJson(`不支援的檔案格式: ${file.type || 'unknown'}。僅支援常見圖片與影片格式`, 400);
+  }
+
   const key = `${crypto.randomUUID()}${ext}`;
 
   await context.env.MEDIA.put(key, file.stream(), {
-    httpMetadata: { contentType: file.type || 'application/octet-stream' },
+    httpMetadata: { contentType: mimeType || 'application/octet-stream' },
   });
 
   return json({ url: `/media/${key}`, key });

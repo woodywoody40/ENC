@@ -258,7 +258,7 @@ const ResumePage: React.FC = () => {
 
   </div>
 
-  <div class="footer">enc.moe22.com \u00B7 ${new Date().toLocaleDateString('zh-TW')}</div>
+  <div class="footer">${window.location.host || '東謙.com'} \u00B7 ${new Date().toLocaleDateString('zh-TW')}</div>
 </div>
 </body></html>`;
 

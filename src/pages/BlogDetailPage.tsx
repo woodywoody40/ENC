@@ -21,11 +21,9 @@ import {
   Share2,
   Terminal,
 } from 'lucide-react';
+import { CAP_VIDEO } from '../constants';
 
 type TocItem = { id: string; text: string; level: 2 | 3 };
-
-const CAP_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4';
 
 const blurIn = {
   initial: { filter: 'blur(10px)', opacity: 0, y: 20 },

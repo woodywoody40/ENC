@@ -66,13 +66,7 @@ export async function requireAuth(request: Request, env: Env): Promise<Response 
     return { email: 'api-cli@system' };
   }
 
-  // 2. Service Token 認證（Cloudflare Access 驗證通過後會注入此 header）
-  const serviceAuthEmail = request.headers.get('Cf-Access-Authenticated-User-Email');
-  if (serviceAuthEmail) {
-    return { email: serviceAuthEmail };
-  }
-
-  // 3. Cloudflare Access JWT 驗證（瀏覽器登入後使用）
+  // 2. Cloudflare Access JWT 簽章驗證（瀏覽器登入 / Service Token）
   const result = await verifyAccess(request, env);
   if (!result) {
     return errorJsonResponse('Unauthorized: Cloudflare Access 驗證失敗', 401);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface BlurTextProps {
@@ -10,8 +10,8 @@ interface BlurTextProps {
 }
 
 /**
- * Word-by-word staggered blur-in animation (IntersectionObserver).
- * Mirrors the cinematic agency landing pattern.
+ * Word-by-word / Segment-by-segment staggered blur-in animation (IntersectionObserver).
+ * Uses Intl.Segmenter to accurately segment both CJK (Traditional Chinese) and Latin words.
  */
 const BlurText: React.FC<BlurTextProps> = ({
   text,
@@ -21,7 +21,26 @@ const BlurText: React.FC<BlurTextProps> = ({
 }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);
-  const words = text.split(' ').filter(Boolean);
+
+  const words = useMemo(() => {
+    if (!text) return [];
+    if (typeof Intl !== 'undefined' && (Intl as any).Segmenter) {
+      try {
+        const segmenter = new (Intl as any).Segmenter('zh-TW', { granularity: 'word' });
+        const segments: string[] = [];
+        for (const { segment } of segmenter.segment(text)) {
+          if (segment.trim().length > 0) {
+            segments.push(segment);
+          }
+        }
+        if (segments.length > 0) return segments;
+      } catch {
+        /* fallback to regex */
+      }
+    }
+    // Fallback: split by whitespace or CJK boundary
+    return text.split(/(\s+|[，、。！？；：])/).filter((s) => s.trim().length > 0);
+  }, [text]);
 
   useEffect(() => {
     const el = ref.current;
@@ -33,13 +52,13 @@ const BlurText: React.FC<BlurTextProps> = ({
           io.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
-  const justify =
+  const justifyContent =
     align === 'start' ? 'flex-start' : align === 'end' ? 'flex-end' : 'center';
 
   return (
@@ -49,7 +68,7 @@ const BlurText: React.FC<BlurTextProps> = ({
       style={{
         display: 'flex',
         flexWrap: 'wrap',
-        justifyContent: justify,
+        justifyContent,
         rowGap: '0.1em',
       }}
       aria-label={text}
@@ -67,7 +86,7 @@ const BlurText: React.FC<BlurTextProps> = ({
           }
           transition={{
             duration: 0.7,
-            delay: delay + i * 0.1,
+            delay: delay + Math.min(i * 0.05, 1.2),
             ease: 'easeOut',
           }}
         >

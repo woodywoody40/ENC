@@ -8,9 +8,7 @@ import {
 import { ConfigAPI } from '../services/apiClient';
 import BlurText from '../components/BlurText';
 import FadingVideo from '../components/FadingVideo';
-
-const CAP_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4';
+import { CAP_VIDEO } from '../constants';
 
 const blurIn = {
   initial: { filter: 'blur(10px)', opacity: 0, y: 20 },

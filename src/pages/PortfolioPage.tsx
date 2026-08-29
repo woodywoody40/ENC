@@ -15,9 +15,7 @@ import {
   Map, Image, Calculator, Cog, Monitor,
   TrendingUp, Code, MapPin, Crosshair,
 } from 'lucide-react';
-
-const HERO_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4';
+import { HERO_VIDEO } from '../constants';
 
 const tagVisuals: Record<string, { icon: React.ReactNode }> = {
   VMware: { icon: <Server size={11} /> },

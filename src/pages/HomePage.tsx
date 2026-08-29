@@ -9,11 +9,7 @@ import { Link } from 'react-router-dom';
 import { ConfigAPI, ProjectsAPI, BlogAPI } from '../services/apiClient';
 import BlurText from '../components/BlurText';
 import FadingVideo from '../components/FadingVideo';
-
-const HERO_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4';
-const CAP_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260622_093722_ccfc7ebf-182f-419f-8a62-2dc02db7dd9d.mp4';
+import { HERO_VIDEO, CAP_VIDEO } from '../constants';
 
 const blurIn = {
   initial: { filter: 'blur(10px)', opacity: 0, y: 20 },
