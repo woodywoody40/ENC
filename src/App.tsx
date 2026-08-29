@@ -114,14 +114,17 @@ const App: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
       localStorage.setItem('theme', 'dark');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#000000');
     } else {
       document.documentElement.classList.add('light');
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
+      if (metaThemeColor) metaThemeColor.setAttribute('content', '#f6f4f0');
     }
   }, [isDarkMode]);
 
@@ -136,9 +139,9 @@ const App: React.FC = () => {
       <PersonSchema />
       <OrganizationSchema />
       <WebSiteSchema />
-      <div className="relative min-h-screen bg-black text-white transition-colors duration-700">
-        {/* Cinematic black canvas — pages own their atmospheric layers */}
-        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-black" />
+      <div className="relative min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] transition-colors duration-500">
+        {/* Canvas — adaptive base background */}
+        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-[var(--bg-base)] transition-colors duration-500" />
 
         <Navbar isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 

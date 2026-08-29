@@ -31,25 +31,27 @@
   --font-body: 'Barlow', 'Noto Sans TC', sans-serif;
 }
 
+/* ==============================
+   Design Tokens (Dark & Light)
+   ============================== */
 :root {
-  --bg-base: #0a0b10;
+  --bg-base: #000000;
   --text-main: #ffffff;
   --text-sub: #cbd5e1;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.12);
   --accent-primary: #ffffff;
   --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 html.light {
-  --bg-base: #f0eae6;
-  --text-main: #2D3436;
-  --text-sub: #434C5E;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(45, 52, 54, 0.2);
-  --accent-primary: #2D3436;
-  --card-shadow: 0 10px 40px -10px rgba(45, 52, 54, 0.15);
+  --bg-base: #f6f4f0;
+  --text-main: #1e2428;
+  --text-sub: #4b5563;
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(45, 52, 54, 0.08);
+  --accent-primary: #1e2428;
+  --card-shadow: 0 12px 36px -8px rgba(45, 52, 54, 0.07), 0 2px 6px rgba(45, 52, 54, 0.04);
 }
 
 html {
@@ -59,12 +61,12 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background: #000;
-  color: #fff;
+  background-color: var(--bg-base);
+  color: var(--text-main);
   font-family: 'Barlow', 'Noto Sans TC', 'Outfit', sans-serif;
   overflow-x: hidden;
-  /* 禁止手機端下拉重新整理（若需要 PWA 感更強烈） */
   overscroll-behavior-y: contain;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .glass-panel {
@@ -78,7 +80,7 @@ body {
 }
 
 /* ==============================
-   Homepage — editorial premium system
+   Homepage & Animation Utilities
    ============================== */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -127,16 +129,16 @@ body {
 .font-mono-tech { font-family: 'JetBrains Mono', monospace; }
 
 /* ==============================
-   Liquid Glass morphism
+   Liquid Glass (Dark: Obsidian, Light: Alabaster)
    ============================== */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .liquid-glass::before {
@@ -163,8 +165,7 @@ body {
 }
 
 .liquid-glass-strong {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
+  background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(50px);
   -webkit-backdrop-filter: blur(50px);
   box-shadow:
@@ -172,6 +173,7 @@ body {
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .liquid-glass-strong::before {
@@ -197,11 +199,43 @@ body {
   pointer-events: none;
 }
 
-/* Blog cinematic shell — pure black + glass */
+/* Light Mode Liquid Glass - Alabaster Polish */
+html.light .liquid-glass {
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(45, 52, 54, 0.09);
+  box-shadow:
+    0 10px 30px -5px rgba(45, 52, 54, 0.06),
+    0 1px 2px rgba(45, 52, 54, 0.04);
+}
+
+html.light .liquid-glass::before {
+  display: none;
+}
+
+html.light .liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 1px solid rgba(45, 52, 54, 0.12);
+  box-shadow:
+    0 16px 40px -8px rgba(45, 52, 54, 0.09),
+    0 2px 4px rgba(45, 52, 54, 0.05);
+}
+
+html.light .liquid-glass-strong::before {
+  display: none;
+}
+
+/* ==============================
+   Cinematic & Grid Atmosphere
+   ============================== */
 .blog-cinematic {
-  background: #000;
-  color: #fff;
+  background-color: var(--bg-base);
+  color: var(--text-main);
   font-family: var(--font-body);
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .blog-cinematic ::selection {
@@ -209,7 +243,6 @@ body {
   color: #fff;
 }
 
-/* Premium grid background */
 .bg-grid {
   background-image:
     linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
@@ -217,18 +250,23 @@ body {
   background-size: 64px 64px;
 }
 
-/* Noise texture overlay */
 .bg-noise {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
 }
 
-/* Shimmer text */
 .text-shimmer {
   background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.3) 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 8s linear infinite;
+}
+
+html.light .text-shimmer {
+  background: linear-gradient(90deg, rgba(30,36,40,0.4) 0%, rgba(30,36,40,0.95) 50%, rgba(30,36,40,0.4) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Marquee */
@@ -252,16 +290,12 @@ body {
   transition: transform 75ms ease-out;
 }
 
-/* Perspective depth effect for hero parallax */
-.perspective-container {
-  perspective: 1200px;
-}
-
+/* Perspective depth effect */
+.perspective-container { perspective: 1200px; }
 .parallax-layer-slow { will-change: transform; }
 .parallax-layer-medium { will-change: transform; }
 .parallax-layer-fast { will-change: transform; }
 
-/* Hero accent image entrance */
 @keyframes image-enter {
   0% { opacity: 0; transform: scale(1.08); }
   100% { opacity: 1; transform: scale(1); }
@@ -271,54 +305,48 @@ body {
 }
 
 /* ==============================
-   HomePage — Light mode support
-   Override hardcoded dark colors when html.light
+   Comprehensive Light Mode Overrides
    ============================== */
-html.light .homepage-wrapper {
-  background: #f0eae6;
-}
+
+/* --- HomePage --- */
+html.light .homepage-wrapper { background: #f6f4f0; }
 html.light .homepage-wrapper .bg-grid {
   background-image:
-    linear-gradient(rgba(45,52,54,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45,52,54,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(45,52,54,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,52,54,0.035) 1px, transparent 1px);
 }
-
-/* --- text-white opacity overrides --- */
-html.light .homepage-wrapper .text-white { color: #2D3436; }
-html.light .homepage-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
-html.light .homepage-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
-html.light .homepage-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
-html.light .homepage-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
-html.light .homepage-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
-html.light .homepage-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
-html.light .homepage-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .homepage-wrapper .text-white\/25 { color: rgba(45,52,54,0.25); }
-html.light .homepage-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .homepage-wrapper .text-white\/15 { color: rgba(45,52,54,0.15); }
-html.light .homepage-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
-
-/* --- border-white opacity overrides --- */
+html.light .homepage-wrapper .text-white { color: #1e2428; }
+html.light .homepage-wrapper .text-white\/90 { color: rgba(30,36,40,0.9); }
+html.light .homepage-wrapper .text-white\/80 { color: rgba(30,36,40,0.8); }
+html.light .homepage-wrapper .text-white\/70 { color: rgba(30,36,40,0.7); }
+html.light .homepage-wrapper .text-white\/60 { color: rgba(30,36,40,0.6); }
+html.light .homepage-wrapper .text-white\/50 { color: rgba(30,36,40,0.5); }
+html.light .homepage-wrapper .text-white\/40 { color: rgba(30,36,40,0.4); }
+html.light .homepage-wrapper .text-white\/30 { color: rgba(30,36,40,0.3); }
+html.light .homepage-wrapper .text-white\/25 { color: rgba(30,36,40,0.25); }
+html.light .homepage-wrapper .text-white\/20 { color: rgba(30,36,40,0.2); }
+html.light .homepage-wrapper .text-white\/15 { color: rgba(30,36,40,0.15); }
+html.light .homepage-wrapper .text-white\/10 { color: rgba(30,36,40,0.1); }
 html.light .homepage-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.08); }
+html.light .homepage-wrapper .border-white\/10 { border-color: rgba(45,52,54,0.1); }
 html.light .homepage-wrapper .border-white\/15 { border-color: rgba(45,52,54,0.15); }
 html.light .homepage-wrapper .border-white\/20 { border-color: rgba(45,52,54,0.2); }
+html.light .homepage-wrapper .bg-white\/5 { background: rgba(45,52,54,0.04); }
+html.light .homepage-wrapper .bg-white\/10 { background: rgba(45,52,54,0.07); }
+html.light .homepage-wrapper .bg-black\/50 { background: rgba(246,244,240,0.8); }
 
-/* --- amber text kept as-is (works in both modes) --- */
-
-/* ==============================
-   Navbar — Light mode support
-   ============================== */
+/* --- Navbar --- */
 html.light .navbar-wrapper {
-  --navbar-bg: rgba(255,255,255,0.7);
+  --navbar-bg: rgba(255,255,255,0.8);
   --navbar-border: rgba(45,52,54,0.1);
-  --navbar-text: #2D3436;
-  --navbar-text-dim: rgba(45,52,54,0.5);
-  --navbar-text-dimmer: rgba(45,52,54,0.3);
-  --navbar-text-faint: rgba(45,52,54,0.15);
-  --navbar-icon-bg: rgba(45,52,54,0.08);
+  --navbar-text: #1e2428;
+  --navbar-text-dim: rgba(30,36,40,0.6);
+  --navbar-text-dimmer: rgba(30,36,40,0.35);
+  --navbar-text-faint: rgba(30,36,40,0.18);
+  --navbar-icon-bg: rgba(45,52,54,0.06);
 }
-
-/* Override Navbar light mode colors */
 html.light .navbar-wrapper .text-white { color: var(--navbar-text); }
+html.light .navbar-wrapper .text-white\/90 { color: var(--navbar-text); }
 html.light .navbar-wrapper .text-white\/60 { color: var(--navbar-text-dim); }
 html.light .navbar-wrapper .text-white\/50 { color: var(--navbar-text-dim); }
 html.light .navbar-wrapper .text-white\/40 { color: var(--navbar-text-dim); }
@@ -339,83 +367,115 @@ html.light .navbar-wrapper .bg-black\/90 {
   backdrop-filter: blur(32px);
 }
 html.light .navbar-mobile-overlay {
-  background: rgba(255,255,255,0.95) !important;
+  background: rgba(255,255,255,0.96) !important;
   backdrop-filter: blur(32px);
 }
-html.light .navbar-mobile-overlay .text-white { color: #2D3436; }
-html.light .navbar-mobile-overlay .text-white\/25 { color: rgba(45,52,54,0.25); }
-html.light .navbar-mobile-overlay .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .navbar-mobile-overlay .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .navbar-mobile-overlay .bg-white\/10 { background: rgba(45,52,54,0.08); }
+html.light .navbar-mobile-overlay .text-white { color: #1e2428; }
+html.light .navbar-mobile-overlay .text-white\/50 { color: rgba(30,36,40,0.6); }
+html.light .navbar-mobile-overlay .text-white\/30 { color: rgba(30,36,40,0.35); }
+html.light .navbar-mobile-overlay .text-white\/20 { color: rgba(30,36,40,0.2); }
+html.light .navbar-mobile-overlay .bg-white\/10 { background: rgba(45,52,54,0.06); }
 
-/* ==============================
-   AdminPage — Light mode support
-   ============================== */
-html.light .admin-wrapper { background: #f0eae6; }
-html.light .admin-wrapper .text-white { color: #2D3436; }
-html.light .admin-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
-html.light .admin-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
-html.light .admin-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
-html.light .admin-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .admin-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .admin-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
-html.light .admin-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.12); }
+/* --- Blog, Resume, About & All blog-cinematic Pages (Unlocked Light Mode) --- */
+html.light .blog-cinematic {
+  background-color: #f6f4f0;
+  color: #1e2428;
+}
+html.light .blog-cinematic ::selection {
+  background: rgba(45, 52, 54, 0.15);
+  color: #1e2428;
+}
+html.light .blog-cinematic .bg-black { background-color: #f6f4f0; }
+html.light .blog-cinematic .bg-black\/95 { background-color: rgba(246, 244, 240, 0.95); }
+html.light .blog-cinematic .bg-black\/90 { background-color: rgba(246, 244, 240, 0.9); }
+html.light .blog-cinematic .bg-black\/80 { background-color: rgba(246, 244, 240, 0.85); }
+html.light .blog-cinematic .bg-black\/70 { background-color: rgba(246, 244, 240, 0.75); }
+html.light .blog-cinematic .bg-black\/50 { background-color: rgba(246, 244, 240, 0.6); }
+html.light .blog-cinematic .bg-black\/40 { background-color: rgba(246, 244, 240, 0.5); }
+html.light .blog-cinematic .text-white { color: #1e2428; }
+html.light .blog-cinematic .text-white\/95 { color: rgba(30, 36, 40, 0.95); }
+html.light .blog-cinematic .text-white\/90 { color: rgba(30, 36, 40, 0.9); }
+html.light .blog-cinematic .text-white\/85 { color: rgba(30, 36, 40, 0.85); }
+html.light .blog-cinematic .text-white\/80 { color: rgba(30, 36, 40, 0.8); }
+html.light .blog-cinematic .text-white\/70 { color: rgba(30, 36, 40, 0.7); }
+html.light .blog-cinematic .text-white\/60 { color: rgba(30, 36, 40, 0.6); }
+html.light .blog-cinematic .text-white\/50 { color: rgba(30, 36, 40, 0.5); }
+html.light .blog-cinematic .text-white\/40 { color: rgba(30, 36, 40, 0.4); }
+html.light .blog-cinematic .text-white\/35 { color: rgba(30, 36, 40, 0.35); }
+html.light .blog-cinematic .text-white\/30 { color: rgba(30, 36, 40, 0.3); }
+html.light .blog-cinematic .text-white\/25 { color: rgba(30, 36, 40, 0.25); }
+html.light .blog-cinematic .text-white\/20 { color: rgba(30, 36, 40, 0.2); }
+html.light .blog-cinematic .text-white\/15 { color: rgba(30, 36, 40, 0.15); }
+html.light .blog-cinematic .text-white\/10 { color: rgba(30, 36, 40, 0.1); }
+html.light .blog-cinematic .border-white\/10 { border-color: rgba(45, 52, 54, 0.1); }
+html.light .blog-cinematic .border-white\/15 { border-color: rgba(45, 52, 54, 0.15); }
+html.light .blog-cinematic .border-white\/20 { border-color: rgba(45, 52, 54, 0.2); }
+html.light .blog-cinematic .border-white\/5 { border-color: rgba(45, 52, 54, 0.06); }
+html.light .blog-cinematic .border-white\/\[0\.06\] { border-color: rgba(45, 52, 54, 0.08); }
+html.light .blog-cinematic .bg-white\/5 { background: rgba(45, 52, 54, 0.04); }
+html.light .blog-cinematic .bg-white\/10 { background: rgba(45, 52, 54, 0.07); }
+html.light .blog-cinematic .bg-white\/\[0\.03\] { background: rgba(45, 52, 54, 0.03); }
+
+/* Code blocks in Light Mode: Preserve sharp contrast with sleek slate container */
+html.light .blog-cinematic .bg-\[\#0a0c10\] {
+  background-color: #181c22 !important;
+  color: #f1f5f9;
+}
+html.light .blog-cinematic .bg-\[\#0a0c10\] .text-white\/85 {
+  color: rgba(241, 245, 249, 0.9) !important;
+}
+html.light .blog-cinematic .bg-\[\#0a0c10\] .text-white\/70 {
+  color: rgba(241, 245, 249, 0.75) !important;
+}
+html.light .blog-cinematic .bg-\[\#0a0c10\] .text-white\/40 {
+  color: rgba(241, 245, 249, 0.45) !important;
+}
+html.light .blog-cinematic .bg-\[\#0a0c10\] .text-white\/20 {
+  color: rgba(241, 245, 249, 0.25) !important;
+}
+
+/* --- AdminPage --- */
+html.light .admin-wrapper { background: #f6f4f0; }
+html.light .admin-wrapper .text-white { color: #1e2428; }
+html.light .admin-wrapper .text-white\/90 { color: rgba(30,36,40,0.9); }
+html.light .admin-wrapper .text-white\/80 { color: rgba(30,36,40,0.8); }
+html.light .admin-wrapper .text-white\/40 { color: rgba(30,36,40,0.4); }
+html.light .admin-wrapper .text-white\/30 { color: rgba(30,36,40,0.3); }
+html.light .admin-wrapper .text-white\/20 { color: rgba(30,36,40,0.2); }
+html.light .admin-wrapper .text-white\/10 { color: rgba(30,36,40,0.1); }
+html.light .admin-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.1); }
 html.light .admin-wrapper .border-white\/10 { border-color: rgba(45,52,54,0.12); }
-html.light .admin-wrapper .bg-white\/5 { background: rgba(45,52,54,0.05); }
-html.light .admin-wrapper .bg-white\/10 { background: rgba(45,52,54,0.08); }
-html.light .admin-wrapper .bg-black\/60 { background: rgba(255,255,255,0.7); backdrop-filter: blur(24px); }
+html.light .admin-wrapper .bg-white\/5 { background: rgba(45,52,54,0.04); }
+html.light .admin-wrapper .bg-white\/10 { background: rgba(45,52,54,0.07); }
+html.light .admin-wrapper .bg-black\/60 { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); }
 
-/* ==============================
-   ProjectDetailPage — Light mode support
-   ============================== */
-html.light .project-detail-wrapper { background: #f0eae6; }
-html.light .project-detail-wrapper .text-white { color: #2D3436; }
-html.light .project-detail-wrapper .text-white\/90 { color: rgba(45,52,54,0.9); }
-html.light .project-detail-wrapper .text-white\/80 { color: rgba(45,52,54,0.8); }
-html.light .project-detail-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
-html.light .project-detail-wrapper .text-white\/60 { color: rgba(45,52,54,0.6); }
-html.light .project-detail-wrapper .text-white\/50 { color: rgba(45,52,54,0.5); }
-html.light .project-detail-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
-html.light .project-detail-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .project-detail-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .project-detail-wrapper .text-white\/15 { color: rgba(45,52,54,0.15); }
-html.light .project-detail-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
+/* --- ProjectDetailPage --- */
+html.light .project-detail-wrapper { background: #f6f4f0; }
+html.light .project-detail-wrapper .text-white { color: #1e2428; }
+html.light .project-detail-wrapper .text-white\/90 { color: rgba(30,36,40,0.9); }
+html.light .project-detail-wrapper .text-white\/80 { color: rgba(30,36,40,0.8); }
+html.light .project-detail-wrapper .text-white\/70 { color: rgba(30,36,40,0.7); }
+html.light .project-detail-wrapper .text-white\/60 { color: rgba(30,36,40,0.6); }
+html.light .project-detail-wrapper .text-white\/50 { color: rgba(30,36,40,0.5); }
+html.light .project-detail-wrapper .text-white\/40 { color: rgba(30,36,40,0.4); }
+html.light .project-detail-wrapper .text-white\/30 { color: rgba(30,36,40,0.3); }
+html.light .project-detail-wrapper .text-white\/20 { color: rgba(30,36,40,0.2); }
+html.light .project-detail-wrapper .text-white\/15 { color: rgba(30,36,40,0.15); }
+html.light .project-detail-wrapper .text-white\/10 { color: rgba(30,36,40,0.1); }
 html.light .project-detail-wrapper .border-white\/\[0\.06\] { border-color: rgba(45,52,54,0.08); }
 html.light .project-detail-wrapper .border-white\/10 { border-color: rgba(45,52,54,0.12); }
 html.light .project-detail-wrapper .border-white\/5 { border-color: rgba(45,52,54,0.06); }
-html.light .project-detail-wrapper .bg-white\/5 { background: rgba(45,52,54,0.05); }
-html.light .project-detail-wrapper .bg-white\/10 { background: rgba(45,52,54,0.08); }
-/* Project detail hero banner — keep header text white + selection fix */
+html.light .project-detail-wrapper .bg-white\/5 { background: rgba(45,52,54,0.04); }
+html.light .project-detail-wrapper .bg-white\/10 { background: rgba(45,52,54,0.07); }
 html.light .project-detail-wrapper section:first-of-type .text-white { color: #fff; }
 html.light .project-detail-wrapper section:first-of-type .text-white\/70 { color: rgba(255,255,255,0.7); }
-html.light .project-detail-wrapper ::selection { background: rgba(45,52,54,0.15); color: #2D3436; }
+html.light .project-detail-wrapper ::selection { background: rgba(45,52,54,0.15); color: #1e2428; }
 
-/* ==============================
-   NotFoundPage — Light mode support
-   ============================== */
-html.light .not-found-wrapper { background: #f0eae6; }
-html.light .not-found-wrapper .text-white { color: #2D3436; }
-html.light .not-found-wrapper .text-white\/70 { color: rgba(45,52,54,0.7); }
-html.light .not-found-wrapper .text-white\/40 { color: rgba(45,52,54,0.4); }
-html.light .not-found-wrapper .text-white\/30 { color: rgba(45,52,54,0.3); }
-html.light .not-found-wrapper .text-white\/20 { color: rgba(45,52,54,0.2); }
-html.light .not-found-wrapper .text-white\/10 { color: rgba(45,52,54,0.1); }
-
-/* ==============================
-   Blog cinematic — always dark liquid-glass
-   (design intent: pure black + white glass)
-   ============================== */
-html.light .blog-cinematic {
-  background: #000 !important;
-  color: #fff !important;
-}
-html.light .blog-cinematic .text-white { color: #fff; }
-html.light .blog-cinematic .text-white\/90 { color: rgba(255,255,255,0.9); }
-html.light .blog-cinematic .text-white\/80 { color: rgba(255,255,255,0.8); }
-html.light .blog-cinematic .text-white\/70 { color: rgba(255,255,255,0.7); }
-html.light .blog-cinematic .text-white\/60 { color: rgba(255,255,255,0.6); }
-html.light .blog-cinematic .text-white\/50 { color: rgba(255,255,255,0.5); }
-html.light .blog-cinematic .text-white\/40 { color: rgba(255,255,255,0.4); }
-html.light .blog-cinematic .text-white\/30 { color: rgba(255,255,255,0.3); }
-html.light .blog-cinematic .text-white\/25 { color: rgba(255,255,255,0.25); }
-html.light .blog-cinematic .text-white\/20 { color: rgba(255,255,255,0.2); }
+/* --- NotFoundPage --- */
+html.light .not-found-wrapper { background: #f6f4f0; }
+html.light .not-found-wrapper .text-white { color: #1e2428; }
+html.light .not-found-wrapper .text-white\/70 { color: rgba(30,36,40,0.7); }
+html.light .not-found-wrapper .text-white\/40 { color: rgba(30,36,40,0.4); }
+html.light .not-found-wrapper .text-white\/30 { color: rgba(30,36,40,0.3); }
+html.light .not-found-wrapper .text-white\/20 { color: rgba(30,36,40,0.2); }
+html.light .not-found-wrapper .text-white\/10 { color: rgba(30,36,40,0.1); }
