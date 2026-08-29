@@ -695,17 +695,46 @@ const AdminPage: React.FC = () => {
               dirty={configDirty}
               keys={['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense']}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {['hero_title', 'hero_intro', 'stat_vm', 'stat_uptime', 'stat_defense'].map(key => (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ConfigField
-                    key={key}
-                    label={key.replace(/_/g, ' ')}
-                    value={getConfig(key)}
-                    onChange={v => handleConfigChange(key, v)}
-                    placeholder={`輸入 ${key}...`}
-                    large={key === 'hero_intro'}
+                    label="首頁主標題 (Hero Title)"
+                    value={getConfig('hero_title')}
+                    onChange={v => handleConfigChange('hero_title', v)}
+                    placeholder="例如：Woody Wu"
+                    hint="首頁頂部超大標題文字"
                   />
-                ))}
+                  <ConfigField
+                    label="首頁核心簡介 (Hero Intro)"
+                    value={getConfig('hero_intro')}
+                    onChange={v => handleConfigChange('hero_intro', v)}
+                    placeholder="專注基礎架構、自動化部署與雲端維運..."
+                    large
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/10">
+                  <ConfigField
+                    label="虛擬主機數據 (Stat VM)"
+                    value={getConfig('stat_vm')}
+                    onChange={v => handleConfigChange('stat_vm', v)}
+                    placeholder="151+ Nodes"
+                    hint="首頁與關於頁節點統計"
+                  />
+                  <ConfigField
+                    label="系統可用率 (Stat Uptime)"
+                    value={getConfig('stat_uptime')}
+                    onChange={v => handleConfigChange('stat_uptime', v)}
+                    placeholder="99.9%"
+                    hint="首頁與關於頁可用率"
+                  />
+                  <ConfigField
+                    label="防禦標註 (Stat Defense)"
+                    value={getConfig('stat_defense')}
+                    onChange={v => handleConfigChange('stat_defense', v)}
+                    placeholder="Forti HA"
+                    hint="可用率卡片後綴補充說明"
+                  />
+                </div>
               </div>
             </AccordionSection>
 

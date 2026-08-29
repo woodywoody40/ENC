@@ -237,6 +237,7 @@ const ResumePage: React.FC = () => {
       ${location ? '<span>\u25CB ' + location + '</span>' : ''}
       ${github ? '<span>\u25C6 ' + github.replace('https://', '') + '</span>' : ''}
       ${linkedin ? '<span>\u25A3 ' + linkedin.replace('https://', '') + '</span>' : ''}
+      ${extraLinks.map((l: any) => '<span>\u25C7 ' + l.label + ': ' + l.url.replace('https://', '') + '</span>').join('')}
     </div>
   </div>
 

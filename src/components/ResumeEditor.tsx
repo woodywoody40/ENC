@@ -315,6 +315,11 @@ const ResumeEditor: React.FC<ResumeEditorProps> = ({ siteConfigs, addToast, onSa
     if (!data || saveStatus === 'saving') return;
     setSaveStatus('saving');
     try {
+      const educationMarkdown = data.education
+        .filter(e => e.school || e.degree)
+        .map(e => `### ${e.school}\n${e.year}\n${e.degree}`)
+        .join('\n\n');
+
       const updates: Record<string, string> = {
         resume_name: data.basic.name,
         resume_title: data.basic.title,
@@ -326,6 +331,7 @@ const ResumeEditor: React.FC<ResumeEditorProps> = ({ siteConfigs, addToast, onSa
         resume_experience: serializeExperience(data.experience),
         resume_skills: serializeSkills(data.skills),
         resume_education_list: serializeJSONArray(data.education),
+        resume_education: educationMarkdown,
         resume_extra_links: serializeJSONArray(data.extraLinks),
       };
       for (const [key, value] of Object.entries(updates)) {

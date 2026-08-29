@@ -108,6 +108,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   const name = configs.resume_name || 'Woody Wu';
+  const heroTitle = configs.hero_title || name;
   const jobTitle = configs.resume_title || '系統維運工程師';
   const heroIntro =
     configs.hero_intro ||
@@ -117,11 +118,39 @@ const HomePage: React.FC = () => {
   const email = configs.resume_email || '';
   const github = configs.resume_github || '';
   const linkedin = configs.resume_linkedin || '';
+  const extraLinks: { label: string; url: string }[] = (() => {
+    try {
+      return JSON.parse(configs.resume_extra_links || '[]');
+    } catch {
+      return [];
+    }
+  })();
   const skills = parseSkills(configs.resume_skills || '');
   const experiences = parseExperience(configs.resume_experience || '');
   const statVm = configs.stat_vm || '151+';
   const statDefense = configs.stat_defense || '';
   const statUptime = configs.stat_uptime || '99.9%';
+
+  const capabilities = [
+    {
+      title: configs.about_skill1_title || 'Infrastructure',
+      icon: Server,
+      tags: ['VMware', 'vSphere', 'Linux', 'Storage'],
+      body: configs.about_skill1_desc || '虛擬化叢集、儲存調度與標準化部署流程 — 從機房到雲端的可重現基礎架構。',
+    },
+    {
+      title: configs.about_skill2_title || 'Security',
+      icon: Shield,
+      tags: ['TANet', 'CEH', 'Firewall', 'Hardening'],
+      body: configs.about_skill2_desc || '學術網路資安監控、弱點掃描與事件應處 — 把防禦寫進日常維運節奏。',
+    },
+    {
+      title: configs.about_skill3_title || 'Automation',
+      icon: Terminal,
+      tags: ['Backup', 'SOP', 'Scripting', 'Observability'],
+      body: configs.about_skill3_desc || '備份策略、修補 SOP 與可觀測性 — 讓系統在半夜也能自己站穩。',
+    },
+  ];
 
   return (
     <>
@@ -164,7 +193,7 @@ const HomePage: React.FC = () => {
 
               <div className="mt-2 max-w-4xl">
                 <BlurText
-                  text={name}
+                  text={heroTitle}
                   className="font-heading italic text-6xl leading-[0.8] tracking-[-3px] text-white md:text-7xl md:tracking-[-4px] lg:text-[5.5rem]"
                   delay={0.2}
                 />
@@ -250,6 +279,17 @@ const HomePage: React.FC = () => {
                     <Globe size={12} /> LinkedIn
                   </a>
                 )}
+                {extraLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="liquid-glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-body text-[11px] font-light text-white/70 transition hover:text-white"
+                  >
+                    <Globe size={12} /> {link.label}
+                  </a>
+                ))}
               </motion.div>
 
               {/* Stats */}
@@ -332,7 +372,7 @@ const HomePage: React.FC = () => {
             </div>
 
             <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {CAPABILITIES.map((cap, i) => {
+              {capabilities.map((cap, i) => {
                 const Icon = cap.icon;
                 return (
                   <motion.div
