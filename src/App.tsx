@@ -102,33 +102,11 @@ class ErrorBoundary extends React.Component<
 }
 
 const App: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : true;
-  });
-  
   const location = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-
-  useEffect(() => {
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-      localStorage.setItem('theme', 'dark');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#000000');
-    } else {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      if (metaThemeColor) metaThemeColor.setAttribute('content', '#f6f4f0');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
     <ErrorBoundary>
@@ -139,11 +117,11 @@ const App: React.FC = () => {
       <PersonSchema />
       <OrganizationSchema />
       <WebSiteSchema />
-      <div className="relative min-h-screen bg-[var(--bg-base)] text-[var(--text-main)] transition-colors duration-500">
-        {/* Canvas — adaptive base background */}
-        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-[var(--bg-base)] transition-colors duration-500" />
+      <div className="relative min-h-screen bg-black text-white">
+        {/* Cinematic black canvas */}
+        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-black" />
 
-        <Navbar isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+        <Navbar />
 
         <Suspense fallback={<PageLoader />}>
           <AnimatePresence mode="wait">

@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Sun, Moon, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-
-interface NavbarProps {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
-}
 
 const navItems = [
   { name: '作品集', path: '/portfolio' },
@@ -14,7 +9,7 @@ const navItems = [
   { name: '履歷', path: '/resume' },
 ];
 
-const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleTheme }) => {
+const Navbar: React.FC = () => {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,31 +79,10 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleTheme }) => {
         </div>
 
         {/* Right controls */}
-        <div className="flex h-12 w-12 items-center justify-end gap-1 md:w-auto md:gap-2">
-          <button
-            onClick={toggleTheme}
-            aria-label={isDarkMode ? '切換淺色模式' : '切換深色模式'}
-            className="liquid-glass hidden h-10 w-10 items-center justify-center rounded-full text-white/50 transition hover:text-white md:flex"
-            title={isDarkMode ? '切換為淺色模式' : '切換為深色模式'}
-          >
-            <div className="relative flex h-4 w-4 items-center justify-center">
-              <Sun
-                size={14}
-                className={`absolute transition-all duration-500 ${
-                  isDarkMode ? 'scale-100 rotate-0 opacity-100' : 'scale-75 rotate-90 opacity-0'
-                }`}
-              />
-              <Moon
-                size={14}
-                className={`absolute transition-all duration-500 ${
-                  !isDarkMode ? 'scale-100 rotate-0 opacity-100' : 'scale-75 -rotate-90 opacity-0'
-                }`}
-              />
-            </div>
-          </button>
+        <div className="flex h-12 w-12 items-center justify-end gap-2 md:w-auto">
           <Link
             to="/admin"
-            className="liquid-glass hidden rounded-full px-3 py-2 font-body text-[11px] font-medium text-white/50 transition hover:text-white/80 md:inline-flex"
+            className="liquid-glass hidden rounded-full px-3.5 py-2 font-body text-[11px] font-medium text-white/60 transition hover:text-white md:inline-flex"
           >
             Admin
           </Link>
@@ -151,22 +125,12 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkMode, toggleTheme }) => {
               );
             })}
             <div className="my-3 h-px w-12 bg-white/10" />
-            <button
-              onClick={() => {
-                toggleTheme();
-                document.body.style.overflow = 'auto';
-              }}
-              className="liquid-glass flex items-center gap-3 rounded-full px-5 py-2.5 font-body text-sm text-white/50"
-            >
-              {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
-              {isDarkMode ? '淺色模式' : '深色模式'}
-            </button>
             <Link
               to="/admin"
               onClick={() => {
                 document.body.style.overflow = 'auto';
               }}
-              className="mt-2 font-body text-sm text-white/30 transition hover:text-white/50"
+              className="mt-2 font-body text-sm text-white/40 transition hover:text-white/70"
             >
               管理後台
             </Link>
