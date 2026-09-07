@@ -35,10 +35,10 @@ export default function ProjectDetailPage() {
             {project.link && <a className="enc-solid-link" href={project.link} target="_blank" rel="noreferrer">開啟專案 <ArrowUpRight size={16} /></a>}
           </header>
 
-          {project.image && <figure className="enc-detail-cover"><img src={project.image} alt={`${project.title} 專案畫面`} width={1600} height={1000} fetchPriority="high" /><figcaption>{project.title} / Selected interface</figcaption></figure>}
+          {project.image && <figure className="enc-detail-cover"><img src={project.image} alt={`${project.title} 專案畫面`} width={1600} height={1000} fetchPriority="high" /><figcaption><span>{project.title}</span><span>{year} / 案例畫面</span></figcaption></figure>}
 
           <div className="enc-article-layout">
-            <aside><p className="enc-eyebrow"><i />Case notes</p><dl><div><dt>類型</dt><dd>{project.type || '專案案例'}</dd></div><div><dt>年份</dt><dd>{year}</dd></div><div><dt>技術</dt><dd>{project.tags?.slice(0, 4).join(' / ')}</dd></div></dl></aside>
+            <aside aria-label="案例資訊"><dl><div><dt>類型</dt><dd>{project.type || '專案案例'}</dd></div><div><dt>年份</dt><dd>{year}</dd></div><div><dt>技術</dt><dd>{project.tags?.slice(0, 4).join(' · ')}</dd></div></dl></aside>
             <article>{project.details ? <MarkdownArticle content={project.details} /> : <p className="enc-lead-copy">這個案例的完整紀錄正在整理中。</p>}</article>
           </div>
 

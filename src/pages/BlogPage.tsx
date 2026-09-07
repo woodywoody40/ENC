@@ -65,7 +65,7 @@ export default function BlogPage() {
       <BreadcrumbSchema items={[{ name: '首頁', path: '/' }, { name: '技術筆記', path: '/blog' }]} />
       <main id="main-content" tabIndex={-1} className="enc-page">
         <div className="enc-shell">
-          <PageIntro eyebrow="Technical notes / Field log" title={<>把踩過的坑，<em>整理成路。</em></>} description="寫給下一次遇到同樣問題的自己，也寫給正在找答案的人。" aside={<span className="enc-count">{String(visible.length).padStart(2, '0')} notes</span>} />
+          <PageIntro eyebrow="Technical notes / Field log" title={<>把踩過的坑，<em>整理成路。</em></>} description="寫給下一次遇到同樣問題的自己，也寫給正在找答案的人。" aside={<span className="enc-count">共 {visible.length} 篇筆記</span>} />
 
           <search className="enc-search">
             <form onSubmit={submitSearch}>
@@ -79,10 +79,10 @@ export default function BlogPage() {
           {error ? <EmptyState title="筆記資料暫時離線" description={error} /> : visible.length === 0 ? <EmptyState title="找不到符合的筆記" description="換個關鍵字，或切回全部分類再試一次。" /> : (
             <>
               {featured && <article className="enc-featured-note">
-                <Link className="enc-featured-note-media" to={`/blog/${featured.id}`} aria-label={`閱讀 ${featured.title}`}><img src={featured.image} alt="" width={1400} height={800} /></Link>
-                <div><p className="enc-eyebrow"><i />Featured note</p><div className="enc-note-meta"><span>{featured.category}</span><time dateTime={featured.date}>{formatDate(featured.date)}</time></div><h2><Link to={`/blog/${featured.id}`}>{featured.title}</Link></h2><p>{featured.excerpt}</p><Link className="enc-arrow-link" to={`/blog/${featured.id}`}>開始閱讀 <ArrowRight size={16} /></Link></div>
+                <div><p className="enc-eyebrow"><i />精選筆記</p><div className="enc-note-meta"><span>{featured.category}</span><time dateTime={featured.date}>{formatDate(featured.date)}</time></div><h2><Link to={`/blog/${featured.id}`}>{featured.title}</Link></h2><p>{featured.excerpt}</p><Link className="enc-arrow-link" to={`/blog/${featured.id}`}>開始閱讀 <ArrowRight size={15} /></Link></div>
+                <Link className="enc-featured-note-media" to={`/blog/${featured.id}`} aria-label={`閱讀 ${featured.title}`} tabIndex={-1}>{featured.image ? <img src={featured.image} alt="" width={800} height={600} loading="lazy" /> : <div className="enc-media-placeholder"><span>{featured.category || 'NOTE'}</span></div>}</Link>
               </article>}
-              <ol className="enc-note-archive">{remaining.map((post, index) => <li key={post.id}><article><span>{String(index + (featured ? 2 : 1)).padStart(2, '0')}</span><div><div className="enc-note-meta"><span>{post.category}</span><time dateTime={post.date}>{formatDate(post.date)}</time></div><h2><Link to={`/blog/${post.id}`}>{post.title}</Link></h2><p>{post.excerpt}</p></div><Link to={`/blog/${post.id}`} aria-label={`閱讀 ${post.title}`}><ArrowRight size={18} /></Link></article></li>)}</ol>
+              <ol className="enc-note-archive">{remaining.map((post, index) => <li key={post.id}><article><div><div className="enc-note-meta"><span>{String(index + (featured ? 2 : 1)).padStart(2, '0')} / {post.category}</span><time dateTime={post.date}>{formatDate(post.date)}</time></div><h2><Link to={`/blog/${post.id}`}>{post.title}</Link></h2><p>{post.excerpt}</p></div><Link to={`/blog/${post.id}`} aria-label={`閱讀 ${post.title}`}><ArrowRight size={17} /></Link></article></li>)}</ol>
             </>
           )}
         </div>

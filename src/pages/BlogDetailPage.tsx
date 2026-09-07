@@ -63,7 +63,7 @@ export default function BlogDetailPage() {
           {post.image && <figure className="enc-detail-cover enc-detail-cover--article"><img src={post.image} alt="" width={1600} height={900} fetchPriority="high" /><figcaption>{post.category} / {formatDate(post.date)}</figcaption></figure>}
 
           <div className="enc-article-layout enc-article-layout--post">
-            <aside><p className="enc-eyebrow"><i />Field note</p><dl><div><dt>作者</dt><dd>Woody Wu</dd></div><div><dt>分類</dt><dd>{post.category}</dd></div><div><dt>閱讀</dt><dd>約 {minutes} 分鐘</dd></div></dl></aside>
+            <aside aria-label="文章資訊"><dl><div><dt>作者</dt><dd>Woody Wu</dd></div><div><dt>分類</dt><dd>{post.category}</dd></div><div><dt>閱讀</dt><dd>約 {minutes} 分鐘</dd></div><div><dt>日期</dt><dd>{formatDate(post.date)}</dd></div></dl></aside>
             <article>{post.content ? <MarkdownArticle content={post.content} skipImageSrc={post.image} /> : <p className="enc-lead-copy">{post.excerpt}</p>}</article>
           </div>
 

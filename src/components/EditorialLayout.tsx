@@ -15,12 +15,10 @@ export const PageIntro = ({
 }) => (
   <header className="enc-page-intro enc-reveal">
     <p className="enc-eyebrow"><i />{eyebrow}</p>
-    <div className="enc-page-intro-grid">
-      <h1>{title}</h1>
-      <div className="enc-page-intro-copy">
-        <p>{description}</p>
-        {aside}
-      </div>
+    <h1>{title}</h1>
+    <div className="enc-page-intro-meta">
+      <p>{description}</p>
+      {aside}
     </div>
   </header>
 );

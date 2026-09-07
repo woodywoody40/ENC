@@ -44,7 +44,7 @@ export default function PortfolioPage() {
             eyebrow="Selected work / Archive"
             title={<>做得穩，<em>也說得清楚。</em></>}
             description="從日常工具、內容平台到教育網路基礎架構；每個案例都記錄問題、取捨與實際成果。"
-            aside={<span className="enc-count">{String(visible.length).padStart(2, '0')} projects</span>}
+            aside={<span className="enc-count">共 {visible.length} 篇案例</span>}
           />
 
           <div className="enc-filter-bar" aria-label="作品分類">
@@ -62,16 +62,14 @@ export default function PortfolioPage() {
               {visible.map((project, index) => (
                 <li key={project.id} className="enc-archive-item">
                   <article>
-                    <div className="enc-archive-index">{String(index + 1).padStart(2, '0')}</div>
                     <div className="enc-archive-copy">
-                      <div className="enc-archive-meta"><span>{project.type || 'Case study'}</span><span>{project.created_at?.slice(0, 4) || '2026'}</span></div>
+                      <div className="enc-archive-meta"><span>{String(index + 1).padStart(2, '0')} / {project.type || 'Case study'}</span><span>{project.created_at?.slice(0, 4) || '2026'}</span></div>
                       <h2><Link to={`/portfolio/${project.id}`}>{project.title}</Link></h2>
                       <p>{project.description}</p>
-                      <div className="enc-tag-list" aria-label="使用技術">{project.tags?.slice(0, 6).map((tag) => <span key={tag}>{tag}</span>)}</div>
-                      <Link className="enc-arrow-link" to={`/portfolio/${project.id}`}>閱讀案例 <ArrowRight aria-hidden="true" size={16} /></Link>
+                      <div className="enc-doc-foot"><span className="enc-doc-tags">{project.tags?.slice(0, 6).join(' · ')}</span><Link className="enc-arrow-link" to={`/portfolio/${project.id}`}>閱讀案例 <ArrowRight aria-hidden="true" size={15} /></Link></div>
                     </div>
-                    <Link className="enc-archive-media" to={`/portfolio/${project.id}`} aria-label={`查看 ${project.title}`}>
-                      {project.image ? <img src={project.image} alt="" width={1200} height={800} loading="lazy" /> : <div className="enc-media-placeholder"><span>{project.tags?.[0] || 'SYSTEM'}</span><i /></div>}
+                    <Link className="enc-archive-media" to={`/portfolio/${project.id}`} aria-label={`查看 ${project.title}`} tabIndex={-1}>
+                      {project.image ? <img src={project.image} alt="" width={800} height={600} loading="lazy" /> : <div className="enc-media-placeholder"><span>{project.tags?.[0] || 'SYSTEM'}</span></div>}
                     </Link>
                   </article>
                 </li>
