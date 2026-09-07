@@ -15,7 +15,7 @@ import { Card } from '@astryxdesign/core/Card';
 import { Section } from '@astryxdesign/core/Section';
 import { HStack, VStack, StackItem } from '@astryxdesign/core/Stack';
 import { Text, Heading } from '@astryxdesign/core/Text';
-import { ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
+import { apiClient, ProjectsAPI, BlogAPI, ConfigAPI, AuthAPI, uploadFile } from '../services/apiClient';
 import { SEOMeta } from '../lib/seo';
 import ResumeEditor from '../components/ResumeEditor';
 import { generateContentFromPrompt, rewriteTechnicalContent } from '../services/geminiService';
@@ -94,10 +94,13 @@ const AdminPage: React.FC = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
+      // 後台需要強一致：GET 列表帶 s-maxage=300 邊緣快取，
+      // mutation 後直接重讀會拿到舊名單，所以加 timestamp bust cache。
+      const bust = `?t=${Date.now()}`;
       const [projData, blogData, configMap] = await Promise.all([
-        ProjectsAPI.list(),
-        BlogAPI.list(),
-        ConfigAPI.all(),
+        apiClient.get(`/projects${bust}`),
+        apiClient.get(`/blog${bust}`),
+        apiClient.get(`/config${bust}`),
       ]);
       setProjects(projData || []);
       setPosts(blogData || []);
@@ -241,6 +244,9 @@ const AdminPage: React.FC = () => {
     try {
       const api = type === 'project' ? ProjectsAPI : BlogAPI;
       await api.remove(id);
+      // 樂觀更新：不等 refetch 先從畫面拿掉，避免快取回填造成「還在」的錯覺
+      if (type === 'project') setProjects(prev => prev.filter(p => p.id !== id));
+      else setPosts(prev => prev.filter(p => p.id !== id));
       addToast('success', `已刪除「${title}」`);
       fetchAllData();
     } catch (err: any) {

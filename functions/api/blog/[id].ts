@@ -43,9 +43,11 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
   const auth = await requireAuth(context.request, context.env);
   if (auth instanceof Response) return auth;
 
-  await context.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?')
+  const result = await context.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?')
     .bind(context.params.id as string)
     .run();
+
+  if ((result.meta as any)?.changes === 0) return errorJson('Blog post not found', 404);
 
   return json({ ok: true });
 };
