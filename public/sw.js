@@ -1,4 +1,4 @@
-const CACHE_NAME = 'woody-v5';
+const CACHE_NAME = 'woody-v6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -26,21 +26,30 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // 跳過 API 與管理後台
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin')) return;
+  // 跳過 API、管理後台、R2 媒體串流（Range 206 不能進 Cache API）
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin') || url.pathname.startsWith('/media/')) return;
 
-  // 1. 靜態資源 (帶 hash 的 /assets/、字體、圖片)：Cache-First 策略
+  // 跳過 Range 分段請求（影片快進會回 206，Cache.put 不支援會拋錯）
+  if (event.request.headers.has('range')) return;
+
+  // 跳過帶 hash 的 JS/CSS（讓瀏覽器 HTTP 快取處理，避免新部署後
+  // 舊 HTML preload 舊 hash 造成 cross-world mismatch）
   if (
     url.pathname.startsWith('/assets/') ||
+    /\.([cm]?js|css)(\.map)?$/i.test(url.pathname)
+  ) return;
+
+  // 1. 圖片/字體：Cache-First（只存 200，206/非 OK 不存，且吞掉 put 錯誤）
+  if (
     /\.(woff2?|ttf|eot|png|jpg|jpeg|webp|svg|ico)$/i.test(url.pathname)
   ) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
         return fetch(event.request).then((response) => {
-          if (response.ok) {
+          if (response.ok && response.status === 200) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone).catch(() => {}));
           }
           return response;
         });
@@ -57,9 +66,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          if (response.ok) {
+          if (response.ok && response.status === 200) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone).catch(() => {}));
           }
           return response;
         })
