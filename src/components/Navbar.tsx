@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
@@ -11,129 +11,59 @@ const navItems = [
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     setIsMenuOpen(false);
-    document.body.style.overflow = 'auto';
   }, [location.pathname]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen((open) => {
-      document.body.style.overflow = open ? 'auto' : 'hidden';
-      return !open;
-    });
-  };
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [isMenuOpen]);
 
   return (
     <>
-      <nav className="navbar-wrapper fixed top-4 left-0 right-0 z-50 flex items-center justify-between px-6 lg:px-16">
-        {/* Logo — liquid glass circle */}
-        <Link
-          to="/"
-          className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full transition hover:scale-105"
-          aria-label="首頁"
-        >
-          <span className="font-heading italic text-2xl text-white">W</span>
+      <nav className={`enc-site-nav ${isHome ? 'enc-site-nav--home' : 'enc-site-nav--dark'}`} aria-label="主要導覽">
+        <Link to="/" className="enc-nav-brand" aria-label="Woody Wu 首頁">
+          <span>W.</span><strong>Woody Wu</strong>
         </Link>
 
-        {/* Center pill nav */}
-        <div
-          className={`
-            hidden md:flex items-center
-            liquid-glass rounded-full px-1.5 py-1.5
-            transition-all duration-500
-            ${isScrolled ? 'shadow-[0_8px_32px_rgba(0,0,0,0.45)]' : ''}
-          `}
-        >
+        <div className="enc-nav-links">
           {navItems.map((item) => {
-            const active =
-              location.pathname === item.path ||
-              (item.path !== '/' && location.pathname.startsWith(item.path));
-            return (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`
-                  rounded-full px-3 py-2 font-body text-sm font-medium transition-colors
-                  ${active ? 'bg-white/10 text-white' : 'text-white/90 hover:text-white'}
-                `}
-              >
-                {item.name}
-              </Link>
-            );
+            const active = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+            return <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined}>{item.name}</Link>;
           })}
-          <Link
-            to="/portfolio"
-            className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 font-body text-sm font-medium text-black transition hover:bg-white/90"
-          >
-            Start <ArrowUpRight size={14} />
-          </Link>
         </div>
 
-        {/* Right controls */}
-        <div className="flex h-12 w-12 items-center justify-end gap-2 md:w-auto">
-          <Link
-            to="/admin"
-            className="liquid-glass hidden rounded-full px-3.5 py-2 font-body text-[11px] font-medium text-white/60 transition hover:text-white md:inline-flex"
-          >
-            Admin
-          </Link>
+        <div className="enc-nav-actions">
+          <Link to="/admin" className="enc-nav-admin">Admin</Link>
+          <Link to="/resume" className="enc-nav-cta">查看履歷 <ArrowUpRight size={14} /></Link>
           <button
-            onClick={toggleMenu}
-            aria-label="選單"
-            className="liquid-glass flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:text-white md:hidden"
+            type="button"
+            className="enc-nav-menu"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            aria-expanded={isMenuOpen}
+            aria-controls="enc-mobile-menu"
+            aria-label={isMenuOpen ? '關閉選單' : '開啟選單'}
           >
-            {isMenuOpen ? <X size={16} /> : <Menu size={16} />}
+            {isMenuOpen ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile overlay */}
       {isMenuOpen && (
-        <div
-          className="navbar-mobile-overlay fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/95 px-8 backdrop-blur-2xl md:hidden"
-          style={{ animation: 'fade-in-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
-        >
-          <div className="flex w-full max-w-sm flex-col items-center gap-3">
-            {navItems.map((item, i) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={() => {
-                    document.body.style.overflow = 'auto';
-                  }}
-                  className={`
-                    liquid-glass w-full rounded-full py-3.5 text-center font-heading italic text-2xl tracking-tight transition
-                    ${isActive ? 'text-white' : 'text-white/50 hover:text-white/80'}
-                  `}
-                  style={{
-                    animation: `fade-in-up 0.3s ${i * 0.06}s cubic-bezier(0.16, 1, 0.3, 1) both`,
-                  }}
-                >
-                  {item.name}
-                </Link>
-              );
-            })}
-            <div className="my-3 h-px w-12 bg-white/10" />
-            <Link
-              to="/admin"
-              onClick={() => {
-                document.body.style.overflow = 'auto';
-              }}
-              className="mt-2 font-body text-sm text-white/40 transition hover:text-white/70"
-            >
-              管理後台
-            </Link>
+        <div id="enc-mobile-menu" className={`enc-mobile-menu ${isHome ? 'enc-mobile-menu--home' : ''}`}>
+          <div>
+            {navItems.map((item, index) => (
+              <Link key={item.path} to={item.path}>
+                <span>0{index + 1}</span><strong>{item.name}</strong><ArrowUpRight size={20} />
+              </Link>
+            ))}
+            <Link to="/admin" className="enc-mobile-admin">Admin</Link>
           </div>
         </div>
       )}
