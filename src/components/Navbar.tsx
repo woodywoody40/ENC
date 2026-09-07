@@ -12,7 +12,7 @@ const navItems = [
 const Navbar: React.FC = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isHome = location.pathname === '/';
+  const isPublic = !location.pathname.startsWith('/admin');
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -27,7 +27,8 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className={`enc-site-nav ${isHome ? 'enc-site-nav--home' : 'enc-site-nav--dark'}`} aria-label="主要導覽">
+      {isPublic && <a className="enc-skip-link" href="#main-content">跳到主要內容</a>}
+      <nav className={`enc-site-nav ${isPublic ? 'enc-site-nav--home' : 'enc-site-nav--dark'}`} aria-label="主要導覽">
         <Link to="/" className="enc-nav-brand" aria-label="Woody Wu 首頁">
           <span>W.</span><strong>Woody Wu</strong>
         </Link>
@@ -56,7 +57,7 @@ const Navbar: React.FC = () => {
       </nav>
 
       {isMenuOpen && (
-        <div id="enc-mobile-menu" className={`enc-mobile-menu ${isHome ? 'enc-mobile-menu--home' : ''}`}>
+        <div id="enc-mobile-menu" className={`enc-mobile-menu ${isPublic ? 'enc-mobile-menu--home' : ''}`}>
           <div>
             {navItems.map((item, index) => (
               <Link key={item.path} to={item.path}>

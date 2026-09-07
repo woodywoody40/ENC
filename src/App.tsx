@@ -20,20 +20,11 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // 全域載入指示器（含進度條視覺效果）
-const PageLoader: React.FC = () => (
-  <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black">
-    <div className="flex flex-col items-center gap-6">
-      <div className="liquid-glass flex h-14 w-14 items-center justify-center rounded-full">
-        <div className="relative h-6 w-6">
-          <div className="absolute inset-0 rounded-full border border-white/10" />
-          <div className="absolute inset-0 animate-spin rounded-full border border-transparent border-t-white/60" />
-        </div>
-      </div>
-      <span className="font-body text-[11px] font-light tracking-[0.3em] uppercase text-white/30">
-        Loading
-      </span>
-    </div>
-  </div>
+const PageLoader: React.FC<{ dark?: boolean }> = ({ dark = false }) => (
+  <main id="main-content" tabIndex={-1} className={`enc-route-loader ${dark ? 'enc-route-loader--dark' : ''}`}>
+    <span aria-hidden="true" />
+    <p>Loading</p>
+  </main>
 );
 
 // Error Boundary 元件（含重試機制）
@@ -61,40 +52,36 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black p-8">
-          <div className="liquid-glass w-full max-w-lg rounded-[1.25rem] p-10 text-center">
-            <div className="liquid-glass mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-[0.85rem]">
-              <span className="text-xl text-white/70">!</span>
-            </div>
-            <h2 className="mb-2 font-heading italic text-2xl tracking-tight text-white">
-              系統發生未預期錯誤
-            </h2>
-            <p className="mb-2 font-body text-sm font-light text-white/50">請稍後再試，或重新載入頁面</p>
+        <main id="main-content" tabIndex={-1} className="enc-error-page">
+          <div>
+            <span aria-hidden="true">!</span>
+            <h1>系統發生未預期錯誤</h1>
+            <p>請稍後再試，或重新載入頁面。</p>
             {this.state.error?.message && (
-              <div className="liquid-glass mb-6 rounded-[0.75rem] px-4 py-3">
-                <p className="break-all font-mono text-[11px] leading-relaxed text-white/30">
+              <div className="enc-error-detail">
+                <p>
                   {this.state.error.message}
                 </p>
               </div>
             )}
-            <div className="flex items-center justify-center gap-3">
+            <div className="enc-error-actions">
               <button
                 type="button"
                 onClick={this.handleRetry}
-                className="liquid-glass-strong rounded-full px-6 py-3 font-body text-sm font-medium text-white transition active:scale-95"
+                className="enc-solid-link"
               >
                 重試
               </button>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="liquid-glass rounded-full px-6 py-3 font-body text-sm font-medium text-white/70 transition hover:text-white active:scale-95"
+                className="enc-text-button"
               >
                 重新載入
               </button>
             </div>
           </div>
-        </div>
+        </main>
       );
     }
     return this.props.children;
@@ -103,6 +90,7 @@ class ErrorBoundary extends React.Component<
 
 const App: React.FC = () => {
   const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -117,13 +105,13 @@ const App: React.FC = () => {
       <PersonSchema />
       <OrganizationSchema />
       <WebSiteSchema />
-      <div className="relative min-h-screen bg-black text-white">
+      <div className={`relative min-h-screen ${isAdmin ? 'bg-black text-white' : 'enc-app--public'}`}>
         {/* Cinematic black canvas */}
-        <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-black" />
+        {isAdmin && <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-black" />}
 
         <Navbar />
 
-        <Suspense fallback={<PageLoader />}>
+        <Suspense fallback={<PageLoader dark={isAdmin} />}>
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<HomePage />} />

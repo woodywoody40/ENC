@@ -2,7 +2,7 @@ import React from 'react';
 import { Github, Linkedin, Mail, Twitter } from 'lucide-react';
 import type { Project, BlogPost } from './types';
 
-export const SITE_URL = 'https://xn--hrrs16bo6z.com';
+export const SITE_URL = 'https://woody-portfolio.pages.dev';
 
 export const HERO_VIDEO =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260619_191346_9d19d66e-86a4-47f7-8dc6-712c1788c3b2.mp4';

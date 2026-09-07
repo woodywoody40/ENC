@@ -1,57 +1,19 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Home } from 'lucide-react';
 import { SEOMeta } from '../lib/seo';
-import BlurText from '../components/BlurText';
+import { PublicFooter } from '../components/EditorialLayout';
 
-const NotFoundPage: React.FC = () => {
+export default function NotFoundPage() {
   return (
     <>
-      <SEOMeta
-        title="頁面不存在"
-        description="你尋找的路由不存在於目前的基礎架構中。"
-        path={window.location.pathname}
-        noindex
-      />
-      <div className="blog-cinematic flex min-h-screen items-center justify-center bg-black px-6">
-        <motion.div
-          initial={{ filter: 'blur(10px)', opacity: 0, y: 20 }}
-          animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="liquid-glass max-w-lg rounded-[1.5rem] p-10 text-center sm:p-14"
-        >
-          <BlurText
-            text="404"
-            className="font-heading italic text-[6rem] leading-none tracking-[-4px] text-white sm:text-[8rem]"
-          />
-          <h2 className="mt-4 font-heading italic text-2xl tracking-tight text-white sm:text-3xl">
-            Page Not Found
-          </h2>
-          <p className="mt-4 font-body text-sm font-light leading-relaxed text-white/60">
-            你尋找的路由不存在於目前的基礎架構中。
-            <br />
-            或許它已被遷移、退役，或從未被部署。
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              to="/"
-              className="liquid-glass-strong inline-flex items-center gap-2 rounded-full px-6 py-3 font-body text-sm font-medium text-white"
-            >
-              <Home size={16} /> 返回首頁
-            </Link>
-            <button
-              type="button"
-              onClick={() => window.history.back()}
-              className="liquid-glass inline-flex items-center gap-2 rounded-full px-6 py-3 font-body text-sm font-medium text-white/80 transition hover:text-white"
-            >
-              <ArrowLeft size={16} /> 回上一頁
-            </button>
-          </div>
-        </motion.div>
-      </div>
+      <SEOMeta title="頁面不存在" description="你尋找的頁面不存在。" path={window.location.pathname} noindex />
+      <main id="main-content" tabIndex={-1} className="enc-page enc-404">
+        <div className="enc-shell">
+          <p className="enc-eyebrow"><i />Error / 404</p>
+          <div><span>404</span><h1>這條路由，<em>沒有部署。</em></h1><p>頁面可能已經移動、退役，或網址輸入有誤。</p><div><Link className="enc-solid-link" to="/">返回首頁 <ArrowRight size={16} /></Link><button type="button" className="enc-text-button" onClick={() => window.history.back()}><ArrowLeft size={16} />回上一頁</button></div></div>
+        </div>
+      </main>
+      <PublicFooter />
     </>
   );
-};
-
-export default NotFoundPage;
+}

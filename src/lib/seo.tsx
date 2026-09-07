@@ -13,10 +13,10 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-const SITE_NAME = 'Woody 維運實踐';
-const SITE_URL = 'https://xn--hrrs16bo6z.com';
-const DEFAULT_OG_IMAGE = 'https://xn--hrrs16bo6z.com/hero-accent.webp';
-const DEFAULT_DESC = '網管與資安維運實踐 | Ubuntu、VMware vSphere、Fortinet 網路安全、HPE 儲存架構 — 從底層基礎設施到高可用架構的技術筆記與實戰記錄。';
+const SITE_NAME = 'Woody Wu Portfolio';
+const SITE_URL = 'https://woody-portfolio.pages.dev';
+const DEFAULT_OG_IMAGE = 'https://woody-portfolio.pages.dev/hero-accent.webp';
+const DEFAULT_DESC = 'Woody Wu 的網路、系統、資安維運與產品開發作品集。';
 
 export const OrganizationSchema: React.FC = () => (
   <Helmet>
@@ -186,7 +186,7 @@ export const BlogPostSchema: React.FC<{
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Woody 維運實踐",
+    "name": "${SITE_NAME}",
     "logo": {
       "@type": "ImageObject",
       "url": "${SITE_URL}/favicon.svg"
